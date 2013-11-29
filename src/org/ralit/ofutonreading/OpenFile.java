@@ -12,16 +12,17 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.util.Stack;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 
 class OpenFile implements OnClickListener{
 
-	private Context mParent = null;
+	private Context mParent;
 	private int mSelectedItemIndex = -1;
 	private File[] mFileList;
-	private String mCurDir = null;
+	private String mCurDir;
 	private Stack<String> mDirs = new Stack<String>();
 	private OpenFileListener mListener;
 	private File mLastSelectedItem;
@@ -35,12 +36,35 @@ class OpenFile implements OnClickListener{
 		mFileList = new File(dir).listFiles();
 		mCurDir = dir;
 		
+		String[] fileNameList = null;
+		int itemCount = 0;
 		
+		// "↑"をファイル一覧の先頭に表示する(ルートディレクトリ以外で)
+		if (0 < mDirs.size()) {
+			fileNameList = new String[mFileList.length + 1];
+			fileNameList[itemCount] = "↑";
+			++itemCount;
+		} else {
+			fileNameList = new String[mFileList.length];
+		}
+		
+		// ファイル一覧を表示する準備(ファイルとディレクトリの見た目を変えよう)
+		for (File file : mFileList) {
+			if (file.isDirectory()) {
+				fileNameList[itemCount] = file.getName() + "/";
+			} else {
+				fileNameList[itemCount] = file.getName();
+			}
+			++itemCount;
+		}
+		
+		// そして最後にファイル一覧をダイアログで表示
+		new AlertDialog.Builder(mParent).setTitle(dir).setItems(fileNameList, this);
 	}
 	
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
