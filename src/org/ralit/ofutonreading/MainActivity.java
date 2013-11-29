@@ -23,18 +23,7 @@ public class MainActivity extends Activity implements OpenFileListener {
 		setContentView(mImageView);
 //		setContentView(R.layout.activity_main);
 //		readPDF();
-		try {
-			MuPDFCore core = new MuPDFCore(this, Environment.getExternalStorageDirectory().getAbsolutePath() + "/imagemove/file.pdf");
-			core.countPages();
-			PointF size = core.getPageSize(1);
-//			Bitmap bmp = Bitmap.createBitmap((int)size.x, (int)size.y, android.graphics.Bitmap.Config.ARGB_8888);
-//			core.drawPage(bmp, 1, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y);
-//			mImageView.setImageBitmap(bmp);
-			mImageView.setImageBitmap(core.drawPage(1, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 	}
 	
 //	private void readPDF() {
