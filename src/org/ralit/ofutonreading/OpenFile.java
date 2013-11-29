@@ -64,8 +64,23 @@ class OpenFile implements OnClickListener{
 	
 	@Override
 	public void onClick(DialogInterface dialog, int which) {
+		mSelectedItemIndex = which;
+		if (mFileList == null) { return; }
+		int selectedItemIndex = mSelectedItemIndex;
 		
+		if (0 < mDirs.size()) { --selectedItemIndex; } // "↑"を表示した分インデックスがずれる
+		
+		if (selectedItemIndex < 0) { // "↑"をタップしたとき
+			openDir(mDirs.pop());
+		} else { // "↑"以外をタップしたとき
+			mLastSelectedItem = mFileList[selectedItemIndex];
+			if (mLastSelectedItem.isDirectory()) {
+				mDirs.push(mCurDir);
+				openDir(mLastSelectedItem.getAbsolutePath());
+			} else {
+				mListener.onFileSelected(mLastSelectedItem);
+			}
+		}
 		
 	}
-
 }
