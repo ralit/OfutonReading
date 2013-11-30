@@ -17,6 +17,7 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements OpenFileListener {
 
@@ -29,6 +30,9 @@ public class MainActivity extends Activity implements OpenFileListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		rootFrame = new FrameLayout(this);
+		TextView splash = new TextView(this);
+		splash.setText("おふとんリーディング");
+		rootFrame.addView(splash);
 		setContentView(rootFrame);
 //		mImageView = new ImageView(this);
 //		setContentView(mImageView);
