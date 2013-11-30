@@ -11,7 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-public class MainActivity extends Activity implements OpenFileListener {
+public class MainActivity extends Activity implements OpenFileListener, FileOpenDialogListener {
 
 	private ImageView mImageView;
 	
@@ -50,12 +50,12 @@ public class MainActivity extends Activity implements OpenFileListener {
 		}
 		
 */
-		PDF pdf = new PDF(getApplicationContext(), Environment.getExternalStorageDirectory().getAbsolutePath() + "/imagemove/file.pdf");
-		DocomoOld docomo = new DocomoOld(pdf.getBitmap(1));
-		ArrayList<ArrayList<Integer>> list = docomo.getPos(1.2f);
-		log(list.toString());
-		PageLayout pageLayout = new PageLayout("file", 1, list, pdf.getSize(1));
-		pageLayout.savePageLayout();
+//		PDF pdf = new PDF(getApplicationContext(), Environment.getExternalStorageDirectory().getAbsolutePath() + "/imagemove/file.pdf");
+//		DocomoOld docomo = new DocomoOld(pdf.getBitmap(1));
+//		ArrayList<ArrayList<Integer>> list = docomo.getPos(1.2f);
+//		log(list.toString());
+//		PageLayout pageLayout = new PageLayout("file", 1, list, pdf.getSize(1));
+//		pageLayout.savePageLayout();
 		
 
 //		mImageView.setImageBitmap(pdf.getBitmap(0));
@@ -90,7 +90,13 @@ public class MainActivity extends Activity implements OpenFileListener {
 
 	@Override
 	public void onFileSelected(File file) {
-		
+		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
+		manager.getFileType();
+		if (manager.isReading()) {
+			manager.getCurPage();
+			PDF pdf = new PDF(this, file.getAbsolutePath());
+
+		}
 	}
 	
 	private void log(String log) {

@@ -33,6 +33,7 @@ class OpenFile implements OnClickListener{
 	private File mLastSelectedItem;
 	
 	public OpenFile(final Context parent, final OpenFileListener listener) {
+		super();
 		mParent = parent;
 		mListener = listener;
 	}
@@ -64,7 +65,7 @@ class OpenFile implements OnClickListener{
 		}
 		
 		// そして最後にファイル一覧をダイアログで表示
-		new AlertDialog.Builder(mParent).setTitle(dir).setItems(fileNameList, this);
+		new AlertDialog.Builder(mParent).setTitle(dir).setItems(fileNameList, this).show();
 	}
 	
 	@Override
@@ -88,4 +89,78 @@ class OpenFile implements OnClickListener{
 		}
 		
 	}
+}
+
+
+
+interface FileOpenDialogListener {
+	void onFileSelected(final File file);
+}
+
+
+class FileOpenDialog implements DialogInterface.OnClickListener {
+
+	private Context parent = null;
+	private int selectedItemIndex = -1;
+	private File[] fileList;
+	private String cd = null;
+	private Stack<String> directories = new Stack<String>();
+	private FileOpenDialogListener listener;
+	private File lastSelectedItem;
+	
+	public FileOpenDialog(final Context parent, final FileOpenDialogListener listener) {
+		super();
+		this.parent = parent;
+		this.listener = listener;
+	}
+	
+	public void openDirectory(String dir) {
+		this.fileList = new File(dir).listFiles();
+		this.cd = dir;
+		
+		String[] fileNameList = null;
+		int itemCount = 0;
+		
+		// ルートディレクトリ以外では上の階層に移動できるようにする
+		if (0 < this.directories.size()) {
+			fileNameList = new String[this.fileList.length + 1];
+			fileNameList[itemCount] = "↑";
+			itemCount++;
+		} else {
+			fileNameList = new String[this.fileList.length];
+		}
+		
+		// ファイル名を表示
+		for (File file : this.fileList) {
+			if (file.isDirectory()) { fileNameList[itemCount] = file.getName() + "/"; }
+			else { fileNameList[itemCount] = file.getName(); }
+			itemCount++;
+		}
+		
+		// ダイアログ表示
+		new AlertDialog.Builder(this.parent).setTitle(dir).setItems(fileNameList, this).show();
+	}
+	
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		this.selectedItemIndex = which;
+		if (this.fileList == null) { return; }
+		
+		int selectedItemIndex = this.selectedItemIndex;
+		if (0 < this.directories.size()) { selectedItemIndex--; } // "↑"項目ぶんずれる。
+		
+		// ファイルをタップ
+		if (selectedItemIndex < 0) { // "↑"がタップされた
+			this.openDirectory(this.directories.pop());
+		} else {
+			this.lastSelectedItem = fileList[selectedItemIndex];
+			if (this.lastSelectedItem.isDirectory()) {
+				this.directories.push(cd);
+				this.openDirectory(this.lastSelectedItem.getAbsolutePath());
+			} else {
+				this.listener.onFileSelected(this.lastSelectedItem);
+			}
+		}
+	}
+	
 }
