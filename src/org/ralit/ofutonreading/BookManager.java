@@ -36,9 +36,11 @@ public class BookManager {
 	}
 	
 	public boolean isReading() {
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		if (bookDir.exists()) { return true; }
-		return false;
+		if (getCurPage() == -1) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	public String getFileType() {
@@ -88,6 +90,85 @@ public class BookManager {
 		}
 	}
 
+	public void saveFilePath() {
+		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
+		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
+		String fileName = "filePath.txt";
+		try {
+			if (!rootDir.exists()) { rootDir.mkdir(); }
+			if (!bookDir.exists()) { bookDir.mkdir(); }
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(bookDir.getAbsolutePath() + "/" + fileName)));
+			writer.write(mFilePath);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String getFilePath() {
+		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
+		String fileName = "filePath.txt";
+		if (!bookDir.exists()) {
+			return null;
+		}
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(bookDir.getAbsolutePath() + "/" + fileName)));
+			String filePath = reader.readLine();
+			reader.close();
+			return filePath;
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(mContext, "本のファイルパスが読み込めなかったよ", Toast.LENGTH_SHORT).show();
+			return null;
+		}
+	}
+	
+	public void saveFileSize() {
+		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
+		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
+		String fileName = "fileSize.txt";
+		try {
+			if (!rootDir.exists()) { rootDir.mkdir(); }
+			if (!bookDir.exists()) { bookDir.mkdir(); }
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(bookDir.getAbsolutePath() + "/" + fileName)));
+			File file = new File(mFilePath);
+			writer.write(String.valueOf(file.length()));
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public long getFileSize() {
+		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
+		String fileName = "fileSize.txt";
+		if (!bookDir.exists()) {
+			return -1;
+		}
+		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(bookDir.getAbsolutePath() + "/" + fileName)));
+			String filePath = reader.readLine();
+			reader.close();
+			return Long.parseLong(filePath);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(mContext, "本のファイルサイズが読み込めなかったよ", Toast.LENGTH_SHORT).show();
+			return -1;
+		}
+	}
+	
 	public void saveCurPage(int curPage) {
 		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
 		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
@@ -112,7 +193,7 @@ public class BookManager {
 		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
 		String fileName = "currentPage.txt";
 		if (!bookDir.exists()) {
-			Toast.makeText(mContext, "isReading = true なのに bookDir がない なにかが おかしいよ", Toast.LENGTH_SHORT).show();
+			return -1;
 		}
 		
 		try {

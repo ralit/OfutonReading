@@ -91,7 +91,32 @@ public class MainActivity extends Activity implements OpenFileListener, FileOpen
 	@Override
 	public void onFileSelected(File file) {
 		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
-		manager.getFileType();
+		if (manager.getFileType() == "pdf") {
+			if (manager.isReading()) {
+				if (file.length() != manager.getFileSize()) {
+					// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
+				}
+				if (manager.getCurPage() == -1) {
+					// エラー！
+				}
+				PDF pdf = new PDF(this, manager.getFilePath());
+				if (pdf.getPageCount() < manager.getCurPage()) {
+					// なにかがおかしいよ
+				}
+				pdf.getBitmap(manager.getCurPage());
+			} else {
+				manager.saveFilePath();
+				manager.saveFileSize();
+				PDF pdf = new PDF(this, manager.getFilePath());
+				pdf.getBitmap(0);
+			}
+			
+			
+		} else if (manager.getFileType() == "zip") {
+		
+		} else if (manager.getFileType() == "jpg" || manager.getFileType() == "png") {
+			
+		}
 		if (manager.isReading()) {
 			manager.getCurPage();
 			PDF pdf = new PDF(this, file.getAbsolutePath());
