@@ -11,7 +11,7 @@
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/jp.recognize-api-1.6-javadoc.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/jp.recognize-api-1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/json-20080701.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4-javadoc.jar"/>
+	<classpathentry kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4-javadoc.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>

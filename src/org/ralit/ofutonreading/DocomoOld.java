@@ -42,7 +42,8 @@ class DocomoOld {
 		}
 	}
 	
-	public void getPos(ArrayList<ArrayList<Integer>> posList, float marginRatio) {
+	public ArrayList<ArrayList<Integer>> getPos(float marginRatio) {
+		ArrayList<ArrayList<Integer>> posList = new ArrayList<ArrayList<Integer>>();
 		for (LineLayout line : job) {
 			Rectangle bounds = line.getShape().getBounds();
 			ArrayList<Integer> internal = new ArrayList<Integer>();
@@ -51,9 +52,9 @@ class DocomoOld {
 			internal.add(bounds.getTop() - (int)margin);
 			internal.add(bounds.getRight() + (int)margin);
 			internal.add(bounds.getBottom() + (int)margin);
-			posList.add(internal);	
+			posList.add(internal);
 		}
-//		save_pos();
+		return posList;
 	}
 }
 

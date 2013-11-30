@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ImageView;
 
 public class MainActivity extends Activity implements OpenFileListener {
@@ -51,9 +52,10 @@ public class MainActivity extends Activity implements OpenFileListener {
 */
 		PDF pdf = new PDF(getApplicationContext(), Environment.getExternalStorageDirectory().getAbsolutePath() + "/imagemove/file.pdf");
 		DocomoOld docomo = new DocomoOld(pdf.getBitmap(1));
-		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
-		docomo.getPos(list, 1.2f);
+		ArrayList<ArrayList<Integer>> list = docomo.getPos(1.2f);
 		log(list.toString());
+		PageLayout pageLayout = new PageLayout("file", 1, list, pdf.getSize(1));
+		pageLayout.savePageLayout();
 		
 
 //		mImageView.setImageBitmap(pdf.getBitmap(0));
@@ -70,9 +72,20 @@ public class MainActivity extends Activity implements OpenFileListener {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.ofuton_open_file: {
+			OpenFile openFile = new OpenFile(this, this);
+			openFile.openDir(Environment.getExternalStorageDirectory().getAbsolutePath());
+			return true;
+		}
+		}
+		return false;
 	}
 
 	@Override
