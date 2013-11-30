@@ -17,6 +17,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 
+interface OpenFileListener {
+	void onFileSelected(final File file);
+}
+
+
 class OpenFile implements OnClickListener{
 
 	private Context mParent;
