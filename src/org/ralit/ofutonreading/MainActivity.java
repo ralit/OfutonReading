@@ -1,25 +1,74 @@
 package org.ralit.ofutonreading;
 
 import java.io.File;
-import java.util.ArrayList;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
-public class MainActivity extends Activity implements OpenFileListener, FileOpenDialogListener {
+public class MainActivity extends Activity implements OpenFileListener {
 
-	private ImageView mImageView;
+//	private ImageView mImageView;
+//	private LinearLayout layout;
+//	private RelativeLayout relative;
+	private FrameLayout rootFrame;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mImageView = new ImageView(this);
-		setContentView(mImageView);
+		rootFrame = new FrameLayout(this);
+		setContentView(rootFrame);
+//		mImageView = new ImageView(this);
+//		setContentView(mImageView);
+//		layout = new LinearLayout(this);
+//		layout.setOrientation(LinearLayout.VERTICAL);
+//		relative = new RelativeLayout(this);
+//		setContentView(layout);
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		ImageView image1 = new ImageView(this);
+//		image1.setImageResource(R.drawable.ofuton);
+//		image1.setAlpha(0f);
+//		layout.addView(image1);
+//		ObjectAnimator anim = ObjectAnimator.ofFloat(image1, "alpha", 1f);
+//		anim.setDuration(1000).start();
+//		layout.invalidate();
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		ImageView image2 = new ImageView(this);
+//		image2.setImageResource(R.drawable.ofuton);
+//		layout.addView(image2);
+//		layout.refreshDrawableState();
+//		try {
+//			Thread.sleep(1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		ImageView image3 = new ImageView(this);
+//		image3.setImageResource(R.drawable.ofuton);
+//		layout.addView(image3);
+		
 //		setContentView(R.layout.activity_main);
 //		readPDF();
 		
@@ -111,21 +160,28 @@ public class MainActivity extends Activity implements OpenFileListener, FileOpen
 				pdf.getBitmap(0);
 			}
 			
-			
 		} else if (manager.getFileType() == "zip") {
 		
 		} else if (manager.getFileType() == "jpg" || manager.getFileType() == "png") {
 			
-		}
-		if (manager.isReading()) {
-			manager.getCurPage();
-			PDF pdf = new PDF(this, file.getAbsolutePath());
-
 		}
 	}
 	
 	private void log(String log) {
 		Log.i("ralit", log);
 	}
+
+//	@Override
+//	public boolean onTouchEvent(MotionEvent ev) {
+//		// TODO Auto-generated method stub
+//		log("onTouch");
+//		ImageView image1 = new ImageView(this);
+//		image1.setImageResource(R.drawable.ofuton);
+//		image1.setAlpha(0f);
+//		layout.addView(image1);
+//		ObjectAnimator anim = ObjectAnimator.ofFloat(image1, "alpha", 1f);
+//		anim.setDuration(1000).start();
+//		return false;
+//	}
 
 }
