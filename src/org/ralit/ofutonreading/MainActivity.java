@@ -39,7 +39,7 @@ public class MainActivity extends Activity implements OpenFileListener {
 		switch (item.getItemId()) {
 		case R.id.ofuton_open_file: {
 			OpenFile openFile = new OpenFile(this, this);
-			openFile.openDir(Environment.getExternalStorageDirectory().getAbsolutePath());
+			openFile.openDir(Environment.getExternalStorageDirectory().getAbsolutePath() + "/imagemove");
 			return true;
 		}
 		}

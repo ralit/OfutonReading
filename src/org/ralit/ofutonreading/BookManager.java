@@ -15,6 +15,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -25,8 +26,8 @@ public class BookManager {
 	private String mBookName;
 	private String mFilePath;
 	private Context mContext;
-	private int mCurLine = 0;
-	private int mCurPage = 0;
+	private int mCurLine;
+	private int mCurPage;
 	private enum FileType { pdf, zip, png, jpg };
 	private FileType mType; 
 	private PDF mPDF;
@@ -47,9 +48,13 @@ public class BookManager {
 	}
 	
 	public Bitmap getBitmap() {
+		log("getBitmap()");
+		log("mType" + mType);
 		if (mType == FileType.pdf) {
+			log("FileType = pdf");
 			return mPDF.getBitmap(mCurPage);
 		}
+		log("return null");
 		return null;
 	}
 	
@@ -61,6 +66,9 @@ public class BookManager {
 	}
 	
 	private void check() {
+		log("check()");
+		mType = getFileType();
+		log("readCurPage()" + readCurPage());
 		// ファイルの種類に依存しない共通の処理
 		if (isReading()) {
 			if (new File(mFilePath).length() != readFileSize()) {
@@ -69,10 +77,12 @@ public class BookManager {
 			}
 			if ((mCurPage = readCurPage()) == -1) {
 				// エラー！
+				mCurPage = 0;
 				Toast.makeText(mContext, "currentPage が だめだ", Toast.LENGTH_LONG).show();
 			}
 			if ((mCurLine = readCurLine()) == -1) {
 				// エラー！
+				mCurLine = 0;
 				Toast.makeText(mContext, "currentLine が だめだ", Toast.LENGTH_LONG).show();
 			}
 			if ((mPosList = readPageLayout(mCurPage)).isEmpty()) {
@@ -104,21 +114,24 @@ public class BookManager {
 	}
 	
 	private FileType getFileType() {
-		if (match(mFilePath, "\\.pdf$", true)) { return FileType.pdf; }
+		log("getFileType()");
+		if (match(mFilePath, "pdf", true)) { return FileType.pdf; }
+		if (mFilePath.endsWith("pdf")) { return FileType.pdf; }
 		if (match(mFilePath, "\\.zip$", true)) { return FileType.zip; }
 		if (match(mFilePath, "\\.png$", true)) { return FileType.png; }
 		if (match(mFilePath, "\\.jpe?g$", true)) { return FileType.jpg; }
 		return null;
 	}
 	
-	private boolean match(String str, String regExp, boolean caseSensitive) {
+	private boolean match(String str, String regExp, boolean caseInsensitive) {
 		Pattern pattern;
-		if (caseSensitive) { 
+		if (caseInsensitive) { 
 			pattern = Pattern.compile(regExp, Pattern.CASE_INSENSITIVE);
 		} else {
 			pattern = Pattern.compile(regExp);
 		}
 		Matcher matcher = pattern.matcher(str);
+		log("matcher.matches(): " + matcher.matches());
 		return matcher.matches();
 	}
 	
@@ -252,6 +265,14 @@ public class BookManager {
 			e.printStackTrace();
 			Toast.makeText(mContext, "ファイルが よみこめない", Toast.LENGTH_SHORT).show();
 			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Toast.makeText(mContext, "read()中のエラー", Toast.LENGTH_SHORT).show();
+			return null;
 		}
+	}
+	
+	private void log(String log) {
+		Log.i("ralit", log);
 	}
 }
