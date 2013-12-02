@@ -146,6 +146,8 @@ public class Display implements AnimatorListener{
 		mAnimatingTicker.setScaleY(textZoom);
 		mAnimatingTicker.setX(mTickerFrame.getWidth() * textZoom / (float)2);
 		mAnimatingTicker.setY(0);
+		// アニメーション開始
+		animation(0);
 	}
 	
 	public void paintPosition() {

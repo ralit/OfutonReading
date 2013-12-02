@@ -25,8 +25,8 @@ public class BookManager {
 	private String mBookName;
 	private String mFilePath;
 	private Context mContext;
-	private int mCurLine;
-	private int mCurPage;
+	private int mCurLine = 0;
+	private int mCurPage = 0;
 	private enum FileType { pdf, zip, png, jpg };
 	private FileType mType; 
 	private PDF mPDF;
