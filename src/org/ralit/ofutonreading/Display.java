@@ -1,5 +1,6 @@
 package org.ralit.ofutonreading;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -42,6 +43,23 @@ public class Display {
 		mMarkerView = new ImageView(mContext);
 		mPageFrame.addView(mPageView);
 		mPageFrame.addView(mMarkerView);
+		
+//		mTicker1.setImageResource(R.drawable.ofuton);
+		mLinearLayout.setAlpha(0f);
+		
+		mRootFrame.addView(mLinearLayout);
+		
+		// 画像表示テスト
+		mPageView.setImageResource(R.drawable.usagi);
+		
+		// スプラッシュ画面に重ねてスプラッシュを消す(スプラッシュは後から表示されてもいいように、背景画像にしたらいいんじゃないかな。
+		ObjectAnimator animator = ObjectAnimator.ofFloat(mLinearLayout, "alpha", 1f);
+		animator.setDuration(500).start();
+		
+	}
+	
+	public void updateLayout() {
+		
 	}
 
 }

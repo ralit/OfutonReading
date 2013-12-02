@@ -28,12 +28,16 @@ public class MainActivity extends Activity implements OpenFileListener {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		log("onCreate()");
 		super.onCreate(savedInstanceState);
 		rootFrame = new FrameLayout(this);
 		TextView splash = new TextView(this);
 		splash.setText("おふとんリーディング");
 		rootFrame.addView(splash);
 		setContentView(rootFrame);
+		Display display = new Display(this, rootFrame);
+		ObjectAnimator animator = ObjectAnimator.ofFloat(display, "alpha", 0f);
+		animator.setDuration(500).start();
 //		mImageView = new ImageView(this);
 //		setContentView(mImageView);
 //		layout = new LinearLayout(this);
