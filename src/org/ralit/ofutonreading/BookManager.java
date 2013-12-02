@@ -30,6 +30,7 @@ public class BookManager {
 	private FileType mType; 
 	private PDF mPDF;
 	ArrayList<ArrayList<Integer>> mPosList;
+	boolean mRecognized = false;
 	
 	public BookManager(String bookName, String filePath, Context context) {
 		mBookName = bookName;
@@ -45,9 +46,22 @@ public class BookManager {
 				// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
 				Toast.makeText(mContext, "ファイル サイズ が ちがう", Toast.LENGTH_LONG).show();
 			}
-			if (readCurPage() == -1) {
+			if ((mCurPage = readCurPage()) == -1) {
 				// エラー！
 				Toast.makeText(mContext, "currentPage が だめだ", Toast.LENGTH_LONG).show();
+			}
+			if ((mCurLine = readCurLine()) == -1) {
+				// エラー！
+				Toast.makeText(mContext, "currentLine が だめだ", Toast.LENGTH_LONG).show();
+			}
+			if ((mPosList = readPageLayout(mCurPage)).isEmpty()) {
+				// エラー！
+				Toast.makeText(mContext, "layout が だめだ", Toast.LENGTH_LONG).show();
+			}
+			if (mPosList == null) {
+				mRecognized = false;
+			} else {
+				mRecognized = true;
 			}
 		}
 		mType = getFileType();
@@ -115,8 +129,11 @@ public class BookManager {
 			if (conflictName != null) {
 				// ページの大きさが合ってない
 				Toast.makeText(mContext, "レイアウトを 読もうとしたら サイズが違う らしい", Toast.LENGTH_LONG).show();
+				ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+				return list;
 			} else {
 				// まだ開いたことがないページ
+				return null;
 			}
 		}
 		Gson gson = new Gson();
