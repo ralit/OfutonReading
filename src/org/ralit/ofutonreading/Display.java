@@ -1,12 +1,12 @@
 package org.ralit.ofutonreading;
 
-import javax.net.ssl.ManagerFactoryParameters;
-
+import android.R.array;
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.LinearInterpolator;
@@ -20,7 +20,7 @@ public class Display implements AnimatorListener{
 	// コンストラクタ
 	private Context mContext;
 	private FrameLayout mRootFrame;
-	private BookManager mBookManager;
+	private BookManager mBook;
 	// レイアウトとビュー
 	private LinearLayout mLinearLayout;
 	private FrameLayout mTickerFrame;
@@ -31,16 +31,18 @@ public class Display implements AnimatorListener{
 	private ImageView mPageView;
 	private ImageView mMarkerView;
 	// その他
-	private AnimatorSet mCrossFade;
+	private AnimatorSet mAnimation;
 	private float mLineZoom;
 	private int mTickerWidth;
 	private int mTickerHeight;
 	private ImageView mAnimatingTicker; 
+	private Bitmap mPageBitmap;
+	private Bitmap mScaledPageBitmap;
 	
 	public Display(Context context, FrameLayout rootFrame, BookManager bookManager) {
 		mContext = context;
 		mRootFrame = rootFrame;
-		mBookManager = bookManager;
+		mBook = bookManager;
 		
 		// 2画面の基本となる一番下の枠を作る
 		mLinearLayout = new LinearLayout(mContext);
@@ -99,26 +101,64 @@ public class Display implements AnimatorListener{
 	}
 	
 	public void setImage() {
-		if(!mBookManager.isRecognized()) {
-			// レイアウト認識がまだだったらレイアウト認識を行う。レイアウト認識中は全画面でページを表示してあげる。
-			
+		if(!mBook.isRecognized()) {
+			// レイアウト認識がまだだったらレイアウト認識を行う。
+			// レイアウト認識中は全画面でページを表示してあげる。
+			mTickerFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 0));
+			mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, mLinearLayout.getHeight()));
+			// ページを表示
+			mPageBitmap = mBook.getBitmap();
+			float w = (float) mPageBitmap.getWidth();
+			float h = (float) mPageBitmap.getHeight();
+			float ratio = mPageFrame.getHeight() / h;
+			float small_w = w * ratio;
+			float scale_ratio = mPageFrame.getWidth() / small_w;
+			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mPageFrame.getWidth(), (int)(mPageFrame.getWidth() * (h/w)), false);
+			mPageView.setImageBitmap(mScaledPageBitmap);
+			// マーカーの処理
+//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
+//			markerview.setImageBitmap(markedPage);
+			mPageFrame.setScaleX(scale_ratio);
+			mPageFrame.setScaleY(scale_ratio);
+			float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).get(3) + mBook.getPageLayout().get(mBook.getCurLine()).get(1)) / 2;
+			float distance = h / 2 - linemid;
+			float i = distance * (mPageFrame.getWidth() / w);
+			mPageFrame.setY(i);
+			// Docomoによる認識を開始
+			mBook.recognize();
+			// 認識終了後
+			AnimatorSet set = new AnimatorSet();
+			ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mLinearLayout.getHeight() / 2);
+			ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mLinearLayout.getHeight() / 2);
+			set.playTogether(anim1, anim2);
+			set.setDuration(500);
+			set.start();
 		}
+		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+		else { mAnimatingTicker = mTicker1; }
+		int w = mBook.getPageLayout().get(mBook.getCurLine()).get(2) - mBook.getPageLayout().get(mBook.getCurLine()).get(0);
+		int h = mBook.getPageLayout().get(mBook.getCurLine()).get(3) - mBook.getPageLayout().get(mBook.getCurLine()).get(1);
+		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).get(0), mBook.getPageLayout().get(mBook.getCurLine()).get(1), w, h));
+		int cW = (mBook.getPageLayout().get(mBook.getCurLine()).get(2) - mBook.getPageLayout().get(mBook.getCurLine()).get(0));
+		int cH = (mBook.getPageLayout().get(mBook.getCurLine()).get(3) - mBook.getPageLayout().get(mBook.getCurLine()).get(1));
+		float textZoom = mTickerFrame.getHeight() / (cH * (mTickerFrame.getWidth()/cW));
+		mAnimatingTicker.setScaleX(textZoom);
+		mAnimatingTicker.setScaleY(textZoom);
+		mAnimatingTicker.setX(mTickerFrame.getWidth() * textZoom / (float)2);
+		mAnimatingTicker.setY(0);
 	}
 	
 	public void paintPosition() {
 		
 	}
 	
-	public void crossFade(long startDelay) {
-		mCrossFade = new AnimatorSet();
+	public void animation(long startDelay) {
+		mAnimation = new AnimatorSet();
 		ObjectAnimator move = null;
 		int duration = 530;
 		
-		if(mAnimatingTicker == mTicker1) {
-			mAnimatingTicker = mTicker2;
-		} else {
-			mAnimatingTicker = mTicker1;
-		}
+		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+		else { mAnimatingTicker = mTicker1; }
 
 		mTickerWidth = mAnimatingTicker.getWidth();
 		mTickerHeight = mAnimatingTicker.getHeight();
@@ -130,13 +170,13 @@ public class Display implements AnimatorListener{
 		}
 		move.setDuration(duration);
 		move.setInterpolator(new LinearInterpolator());
-		mCrossFade.addListener(this);
-		mCrossFade.setStartDelay(startDelay);
-		mCrossFade.start();
+		mAnimation.addListener(this);
+		mAnimation.setStartDelay(startDelay);
+		mAnimation.start();
 	}
 	
-	public void finishCrossFade() {
-		mCrossFade.end();
+	public void finishAnimation() {
+		mAnimation.end();
 	}
 	
 	public void mark() {
@@ -168,6 +208,6 @@ public class Display implements AnimatorListener{
 	@Override
 	public void onAnimationStart(Animator animation) {
 		// TODO Auto-generated method stub
-		crossFade((long)(animation.getDuration() * ((float)(mTickerWidth - mTickerFrame.getWidth()) / (float)mTickerWidth)));
+		animation((long)(animation.getDuration() * ((float)(mTickerWidth - mTickerFrame.getWidth()) / (float)mTickerWidth)));
 	}
 }

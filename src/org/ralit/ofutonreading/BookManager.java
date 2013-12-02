@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.Environment;
 import android.widget.Toast;
@@ -34,6 +35,22 @@ public class BookManager {
 	
 	public boolean isRecognized() {
 		return mRecognized;
+	}
+	
+	public void recognize() {
+		if (mType == FileType.pdf) {
+			Bitmap bmp = mPDF.getBitmap(mCurPage);
+			DocomoOld docomo = new DocomoOld(bmp);
+			mPosList = docomo.getPos();
+		}
+		savePageLayout();
+	}
+	
+	public Bitmap getBitmap() {
+		if (mType == FileType.pdf) {
+			return mPDF.getBitmap(mCurPage);
+		}
+		return null;
 	}
 	
 	public BookManager(String bookName, String filePath, Context context) {
@@ -73,6 +90,7 @@ public class BookManager {
 			mPDF = new PDF(mContext, mFilePath);
 			if (mPDF.getPageCount() < readCurPage()) {
 				// たぶんファイルが違うよ。またはページを一部削除したかな。
+				Toast.makeText(mContext, "PDFのページ数がおかしい", Toast.LENGTH_LONG).show();
 			}
 		}
 	}
@@ -102,6 +120,10 @@ public class BookManager {
 		}
 		Matcher matcher = pattern.matcher(str);
 		return matcher.matches();
+	}
+	
+	public ArrayList<ArrayList<Integer>> getPageLayout() {
+		return mPosList;
 	}
 	
 	private boolean savePageLayout() {

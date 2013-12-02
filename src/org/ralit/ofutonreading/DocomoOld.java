@@ -42,7 +42,8 @@ class DocomoOld {
 		}
 	}
 	
-	public ArrayList<ArrayList<Integer>> getPos(float marginRatio) {
+	public ArrayList<ArrayList<Integer>> getPos() {
+		float marginRatio = 0; // 余白はここではなく、最終的に切り出すときに設定すべきだ(おかしくなるので)
 		ArrayList<ArrayList<Integer>> posList = new ArrayList<ArrayList<Integer>>();
 		for (LineLayout line : job) {
 			Rectangle bounds = line.getShape().getBounds();
