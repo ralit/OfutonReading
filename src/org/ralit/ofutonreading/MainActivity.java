@@ -151,7 +151,7 @@ public class MainActivity extends Activity implements OpenFileListener {
 	public void onFileSelected(File file) {
 		manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
 		Display display = new Display(this, rootFrame, manager);
-		display.setTicker();
+		display.setImage();
 	}
 	
 	private void log(String log) {

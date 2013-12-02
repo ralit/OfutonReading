@@ -1,5 +1,7 @@
 package org.ralit.ofutonreading;
 
+import javax.net.ssl.ManagerFactoryParameters;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.Animator.AnimatorListener;
@@ -96,12 +98,11 @@ public class Display implements AnimatorListener{
 		mScrollView.setLayoutParams(new LayoutParams(mRootFrame.getWidth(), mRootFrame.getHeight() / 2));
 	}
 	
-	public void setTicker() {
-		
-	}
-	
-	public void setPage() {
-		
+	public void setImage() {
+		if(!mBookManager.isRecognized()) {
+			// レイアウト認識がまだだったらレイアウト認識を行う。レイアウト認識中は全画面でページを表示してあげる。
+			
+		}
 	}
 	
 	public void paintPosition() {

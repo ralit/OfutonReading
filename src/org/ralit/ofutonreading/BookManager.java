@@ -32,6 +32,10 @@ public class BookManager {
 	ArrayList<ArrayList<Integer>> mPosList;
 	boolean mRecognized = false;
 	
+	public boolean isRecognized() {
+		return mRecognized;
+	}
+	
 	public BookManager(String bookName, String filePath, Context context) {
 		mBookName = bookName;
 		mFilePath = filePath;
