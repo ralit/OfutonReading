@@ -150,31 +150,8 @@ public class MainActivity extends Activity implements OpenFileListener {
 	@Override
 	public void onFileSelected(File file) {
 		manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
-		if (manager.getFileType() == "pdf") {
-			if (manager.isReading()) {
-				if (file.length() != manager.getFileSize()) {
-					// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
-				}
-				if (manager.getCurPage() == -1) {
-					// エラー！
-				}
-				pdf = new PDF(this, manager.getFilePath());
-				if (pdf.getPageCount() < manager.getCurPage()) {
-					// なにかがおかしいよ
-				}
-			} else {
-				manager.saveFilePath();
-				manager.saveFileSize();
-				pdf = new PDF(this, manager.getFilePath());
-			}
-			Display display = new Display(this, rootFrame, manager);
-			display.setTicker();
-			
-		} else if (manager.getFileType() == "zip") {
-		
-		} else if (manager.getFileType() == "jpg" || manager.getFileType() == "png") {
-			
-		}
+		Display display = new Display(this, rootFrame, manager);
+		display.setTicker();
 	}
 	
 	private void log(String log) {

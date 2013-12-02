@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,23 +14,22 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.graphics.PointF;
 import android.os.Environment;
-import android.os.PatternMatcher;
-import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.stream.JsonWriter;
+import com.google.gson.reflect.TypeToken;
 
 public class BookManager {
 
 	private String mBookName;
 	private String mFilePath;
-	private int mPage;
-	private ArrayList<ArrayList<Integer>> mPosList;
-	private PointF mSize;
 	private Context mContext;
 	private int mCurLine;
+	private int mCurPage;
 	private enum FileType { pdf, zip, png, jpg };
+	private FileType mType; 
+	private PDF mPDF;
+	ArrayList<ArrayList<Integer>> mPosList;
 	
 	public BookManager(String bookName, String filePath, Context context) {
 		mBookName = bookName;
@@ -41,33 +41,33 @@ public class BookManager {
 	private void check() {
 		// ファイルの種類に依存しない共通の処理
 		if (isReading()) {
-			if (new File(mFilePath).length() != getFileSize()) {
+			if (new File(mFilePath).length() != readFileSize()) {
 				// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
+				Toast.makeText(mContext, "ファイル サイズ が ちがう", Toast.LENGTH_LONG).show();
 			}
-			if (getCurPage() == -1) {
+			if (readCurPage() == -1) {
 				// エラー！
+				Toast.makeText(mContext, "currentPage が だめだ", Toast.LENGTH_LONG).show();
 			}
 		}
-		getFileType();
+		mType = getFileType();
+		if (mType == FileType.pdf) {
+			mPDF = new PDF(mContext, mFilePath);
+			if (mPDF.getPageCount() < readCurPage()) {
+				// たぶんファイルが違うよ。またはページを一部削除したかな。
+			}
+		}
 	}
 	
-	public int getCurLine() {
-		return mCurLine;
-	}
-	
-	public void saveCurLine(int curLine) {
-		mCurLine = curLine;
-	}
-	
-	public boolean isReading() {
-		if (getCurPage() == -1) {
+	private boolean isReading() {
+		if (readCurPage() == -1) {
 			return false;
 		} else {
 			return true;
 		}
 	}
 	
-	public FileType getFileType() {
+	private FileType getFileType() {
 		if (match(mFilePath, "\\.pdf$", true)) { return FileType.pdf; }
 		if (match(mFilePath, "\\.zip$", true)) { return FileType.zip; }
 		if (match(mFilePath, "\\.png$", true)) { return FileType.png; }
@@ -75,7 +75,7 @@ public class BookManager {
 		return null;
 	}
 	
-	public boolean match(String str, String regExp, boolean caseSensitive) {
+	private boolean match(String str, String regExp, boolean caseSensitive) {
 		Pattern pattern;
 		if (caseSensitive) { 
 			pattern = Pattern.compile(regExp, Pattern.CASE_INSENSITIVE);
@@ -86,150 +86,94 @@ public class BookManager {
 		return matcher.matches();
 	}
 	
-	public void savePageLayout(int page, ArrayList<ArrayList<Integer>> posList, PointF size) {
-		mPage = page;
-		mPosList = posList;
-		mSize = size;
-		
-		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		File dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/");
-		String fileName = mPage + "_" + (int)mSize.x + "_" + (int)mSize.y;
-		try {
-			if (!rootDir.exists()) { rootDir.mkdir(); }
-			if (!bookDir.exists()) { bookDir.mkdir(); }
-			if (!dir.exists()) { dir.mkdir(); }
-		} catch (SecurityException e) {
-			e.printStackTrace();
+	private boolean savePageLayout() {
+		PointF size = null;
+		if (mType == FileType.pdf) { size = mPDF.getSize(mCurPage); }
+		if (size == null) {
+			Toast.makeText(mContext, "レイアウトが ほぞん できない 画像の サイズが わからないからだ", Toast.LENGTH_LONG).show();
+			return false;
 		}
-		
+		String fileName = mCurPage + "_" + (int)size.x + "_" + (int)size.y;
 		Gson gson = new Gson();
-		try {
-			JsonWriter writer = new JsonWriter(new BufferedWriter(new FileWriter(dir.getAbsolutePath() + "/" + fileName + ".json")));
-			gson.toJson(mPosList, mPosList.getClass(), writer);
-			writer.flush();
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		save(gson.toJson(mPosList, mPosList.getClass()), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/" + fileName);
+		return true;
+	}
+	
+	private ArrayList<ArrayList<Integer>> readPageLayout(int page) {
+		PointF size = null;
+		if (mType == FileType.pdf) { size = mPDF.getSize(page); }
+		String fileName = page + "_" + (int)size.x + "_" + (int)size.y;
+		// 処理を分ける！
+		if (!new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/" + fileName).exists()) {
+			File[] files = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/").listFiles();
+			ArrayList<String> names = new ArrayList<String>();
+			for (File file : files) { names.add(file.getName()); }
+			String conflictName = null;
+			for (String name : names) { 
+				if(match(name, page + "_[0-9]+?_[0-9]+?", false)) { conflictName = name; }
+			}
+			if (conflictName != null) {
+				// ページの大きさが合ってない
+				Toast.makeText(mContext, "レイアウトを 読もうとしたら サイズが違う らしい", Toast.LENGTH_LONG).show();
+			} else {
+				// まだ開いたことがないページ
+			}
 		}
+		Gson gson = new Gson();
+		String json = read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/" + fileName);
+		Type type = new TypeToken<ArrayList<ArrayList<Integer>>>(){}.getType();
+		return gson.fromJson(json, type);
 	}
 
-	public void saveFilePath() {
-		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "filePath.txt";
-		try {
-			if (!rootDir.exists()) { rootDir.mkdir(); }
-			if (!bookDir.exists()) { bookDir.mkdir(); }
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			writer.write(mFilePath);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void setCurLine(int curLine) {
+		mCurLine = curLine;
 	}
 	
-	public String getFilePath() {
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "filePath.txt";
-		if (!bookDir.exists()) {
-			return null;
-		}
-		
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			String filePath = reader.readLine();
-			reader.close();
-			return filePath;
-		} catch (IOException e) {
-			e.printStackTrace();
-			Toast.makeText(mContext, "本のファイルパスが読み込めなかったよ", Toast.LENGTH_SHORT).show();
-			return null;
-		}
+	public int getCurLine() {
+		return mCurLine;
 	}
 	
-	public void saveFileSize() {
-		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "fileSize.txt";
-		try {
-			if (!rootDir.exists()) { rootDir.mkdir(); }
-			if (!bookDir.exists()) { bookDir.mkdir(); }
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			File file = new File(mFilePath);
-			writer.write(String.valueOf(file.length()));
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void saveCurLine() {
+		save(String.valueOf(mCurLine), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentLine.txt");
 	}
 	
-	public long getFileSize() {
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "fileSize.txt";
-		if (!bookDir.exists()) {
-			return -1;
-		}
-		
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			String filePath = reader.readLine();
-			reader.close();
-			return Long.parseLong(filePath);
-		} catch (IOException e) {
-			e.printStackTrace();
-			Toast.makeText(mContext, "本のファイルサイズが読み込めなかったよ", Toast.LENGTH_SHORT).show();
-			return -1;
-		}
+	private int readCurLine() {
+		try { return Integer.parseInt(read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentLine.txt")); } 
+		catch (Exception e) { return -1; }
 	}
 	
-	public void saveCurPage(int curPage) {
-		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "currentPage.txt";
-		try {
-			if (!rootDir.exists()) { rootDir.mkdir(); }
-			if (!bookDir.exists()) { bookDir.mkdir(); }
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			writer.write(curPage);
-			writer.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private void saveFilePath() {
+		save(mFilePath, Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/filePath.txt");
+	}
+	
+	private String readFilePath() {
+		return read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/filePath.txt");
+	}
+	
+	private void saveFileSize() {
+		save(String.valueOf(new File(mFilePath).length()), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/fileSize.txt");
+	}
+	
+	private long readFileSize() {
+		try { return Long.parseLong(read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/fileSize.txt")); } 
+		catch (Exception e) { return -1; }
+	}
+	
+	public void setCurPage(int curPage) {
+		mCurPage = curPage;
 	}
 	
 	public int getCurPage() {
-		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
-		String fileName = "currentPage.txt";
-		if (!bookDir.exists()) {
-			return -1;
-		}
-		
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(new File(bookDir.getAbsolutePath() + "/" + fileName)));
-			String curPage = reader.readLine();
-			reader.close();
-			return Integer.parseInt(curPage);
-		} catch (IOException e) {
-			e.printStackTrace();
-			Toast.makeText(mContext, "とりあえず 最初の ページを 読み込むよ", Toast.LENGTH_SHORT).show();
-			return 0;
-		}
+		return mCurPage;
+	}
+	
+	private void saveCurPage(int curPage) {
+		save(String.valueOf(curPage), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentPage.txt");
+	}
+	
+	private int readCurPage() {
+		try { return Integer.parseInt(read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentPage.txt")); } 
+		catch (Exception e) { return -1; }
 	}
 	
 	private void save(String data, String filePath) {
