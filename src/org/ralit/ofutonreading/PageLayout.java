@@ -18,6 +18,7 @@ public class PageLayout {
 	private int mPage;
 	private ArrayList<ArrayList<Integer>> mPosList;
 	private PointF mSize;
+	private int mCurLine;
 	
 	public PageLayout(String bookName, int page, ArrayList<ArrayList<Integer>> posList, PointF size) {
 		mBookName = bookName;
@@ -49,6 +50,10 @@ public class PageLayout {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public int getCurLine() {
+		return mCurLine;
 	}
 
 }
