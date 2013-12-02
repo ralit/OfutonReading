@@ -25,6 +25,8 @@ public class MainActivity extends Activity implements OpenFileListener {
 //	private LinearLayout layout;
 //	private RelativeLayout relative;
 	private FrameLayout rootFrame;
+	private PDF pdf;
+	private BookManager manager;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +37,9 @@ public class MainActivity extends Activity implements OpenFileListener {
 		splash.setText("おふとんリーディング");
 		rootFrame.addView(splash);
 		setContentView(rootFrame);
-		Display display = new Display(this, rootFrame);
-		ObjectAnimator animator = ObjectAnimator.ofFloat(display, "alpha", 0f);
-		animator.setDuration(500).start();
+//		Display display = new Display(this, rootFrame);
+//		ObjectAnimator animator = ObjectAnimator.ofFloat(display, "alpha", 0f);
+//		animator.setDuration(500).start();
 //		mImageView = new ImageView(this);
 //		setContentView(mImageView);
 //		layout = new LinearLayout(this);
@@ -147,7 +149,7 @@ public class MainActivity extends Activity implements OpenFileListener {
 
 	@Override
 	public void onFileSelected(File file) {
-		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
+		manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
 		if (manager.getFileType() == "pdf") {
 			if (manager.isReading()) {
 				if (file.length() != manager.getFileSize()) {
@@ -156,17 +158,17 @@ public class MainActivity extends Activity implements OpenFileListener {
 				if (manager.getCurPage() == -1) {
 					// エラー！
 				}
-				PDF pdf = new PDF(this, manager.getFilePath());
+				pdf = new PDF(this, manager.getFilePath());
 				if (pdf.getPageCount() < manager.getCurPage()) {
 					// なにかがおかしいよ
 				}
-				pdf.getBitmap(manager.getCurPage());
 			} else {
 				manager.saveFilePath();
 				manager.saveFileSize();
-				PDF pdf = new PDF(this, manager.getFilePath());
-				pdf.getBitmap(0);
+				pdf = new PDF(this, manager.getFilePath());
 			}
+			Display display = new Display(this, rootFrame, manager);
+			display.setTicker();
 			
 		} else if (manager.getFileType() == "zip") {
 		

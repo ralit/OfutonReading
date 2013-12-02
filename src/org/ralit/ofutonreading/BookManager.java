@@ -28,11 +28,35 @@ public class BookManager {
 	private ArrayList<ArrayList<Integer>> mPosList;
 	private PointF mSize;
 	private Context mContext;
+	private int mCurLine;
+	private enum FileType { pdf, zip, png, jpg };
 	
 	public BookManager(String bookName, String filePath, Context context) {
 		mBookName = bookName;
 		mFilePath = filePath;
 		mContext = context;
+		check();
+	}
+	
+	private void check() {
+		// ファイルの種類に依存しない共通の処理
+		if (isReading()) {
+			if (new File(mFilePath).length() != getFileSize()) {
+				// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
+			}
+			if (getCurPage() == -1) {
+				// エラー！
+			}
+		}
+		getFileType();
+	}
+	
+	public int getCurLine() {
+		return mCurLine;
+	}
+	
+	public void saveCurLine(int curLine) {
+		mCurLine = curLine;
 	}
 	
 	public boolean isReading() {
@@ -43,11 +67,11 @@ public class BookManager {
 		}
 	}
 	
-	public String getFileType() {
-		if (match(mFilePath, "\\.pdf$", true)) { return "pdf"; }
-		if (match(mFilePath, "\\.zip$", true)) { return "zip"; }
-		if (match(mFilePath, "\\.png$", true)) { return "png"; }
-		if (match(mFilePath, "\\.jpe?g$", true)) { return "jpg"; }
+	public FileType getFileType() {
+		if (match(mFilePath, "\\.pdf$", true)) { return FileType.pdf; }
+		if (match(mFilePath, "\\.zip$", true)) { return FileType.zip; }
+		if (match(mFilePath, "\\.png$", true)) { return FileType.png; }
+		if (match(mFilePath, "\\.jpe?g$", true)) { return FileType.jpg; }
 		return null;
 	}
 	
@@ -205,6 +229,42 @@ public class BookManager {
 			e.printStackTrace();
 			Toast.makeText(mContext, "とりあえず 最初の ページを 読み込むよ", Toast.LENGTH_SHORT).show();
 			return 0;
+		}
+	}
+	
+	private void save(String data, String filePath) {
+		File rootDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/");
+		File bookDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName);
+		File layoutDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/");
+		File markerDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/marker/");
+		try {
+			if (!rootDir.exists()) { rootDir.mkdir(); }
+			if (!bookDir.exists()) { bookDir.mkdir(); }
+			if (!layoutDir.exists()) { layoutDir.mkdir(); }
+			if (!markerDir.exists()) { markerDir.mkdir(); }
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			BufferedWriter writer = new BufferedWriter(new FileWriter(new File(filePath)));
+			writer.write(data);
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private String read(String filePath) {		
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)));
+			String data = reader.readLine();
+			reader.close();
+			return data;
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(mContext, "ファイルが よみこめない", Toast.LENGTH_SHORT).show();
+			return null;
 		}
 	}
 }

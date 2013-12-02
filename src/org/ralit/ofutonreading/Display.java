@@ -18,6 +18,7 @@ public class Display implements AnimatorListener{
 	// コンストラクタ
 	private Context mContext;
 	private FrameLayout mRootFrame;
+	private BookManager mBookManager;
 	// レイアウトとビュー
 	private LinearLayout mLinearLayout;
 	private FrameLayout mTickerFrame;
@@ -34,9 +35,10 @@ public class Display implements AnimatorListener{
 	private int mTickerHeight;
 	private ImageView mAnimatingTicker; 
 	
-	public Display(Context context, FrameLayout rootFrame) {
+	public Display(Context context, FrameLayout rootFrame, BookManager bookManager) {
 		mContext = context;
 		mRootFrame = rootFrame;
+		mBookManager = bookManager;
 		
 		// 2画面の基本となる一番下の枠を作る
 		mLinearLayout = new LinearLayout(mContext);
@@ -82,6 +84,8 @@ public class Display implements AnimatorListener{
 		// スプラッシュ画面に重ねてスプラッシュを消す(スプラッシュは後から表示されてもいいように、背景画像にしたらいいんじゃないかな。
 		ObjectAnimator animator = ObjectAnimator.ofFloat(mLinearLayout, "alpha", 1f);
 		animator.setDuration(500).start();
+		
+		updateLayout();
 		
 	}
 	

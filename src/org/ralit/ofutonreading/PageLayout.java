@@ -1,5 +1,15 @@
 package org.ralit.ofutonreading;
 
+/**
+ * 
+ * やっぱりこのクラスは使いません。
+ * 
+ * BookManagerに全部突っ込みます。
+ * 
+ */
+
+
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
