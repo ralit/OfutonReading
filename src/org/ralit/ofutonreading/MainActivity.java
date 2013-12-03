@@ -54,6 +54,12 @@ public class MainActivity extends Activity implements OpenFileListener {
 	public void onFileSelected(File file) {
 		manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
 		Display display = new Display(this, rootFrame, manager);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		display.setImage();
 	}
 	

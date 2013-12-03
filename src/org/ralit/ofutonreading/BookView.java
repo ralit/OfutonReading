@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class Display implements AnimatorListener{
+public class BookView extends View implements AnimatorListener{
 
 	// コンストラクタ
 	private Context mContext;
@@ -47,8 +47,8 @@ public class Display implements AnimatorListener{
 	private enum AnimationFlag {layout, loop};
 	private AnimationFlag mAnimationFlag;
 	
-	public Display(Context context, FrameLayout rootFrame, BookManager bookManager) {
-//		super(context);
+	public BookView(Context context, FrameLayout rootFrame, BookManager bookManager) {
+		super(context);	
 		mContext = context;
 		mRootFrame = rootFrame;
 		mBook = bookManager;

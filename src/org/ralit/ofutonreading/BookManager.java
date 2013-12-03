@@ -141,6 +141,7 @@ public class BookManager {
 	}
 	
 	public ArrayList<ArrayList<Integer>> getPageLayout() {
+		log("getPageLayout()");
 		return mPosList;
 	}
 	
@@ -158,11 +159,13 @@ public class BookManager {
 	}
 	
 	private ArrayList<ArrayList<Integer>> readPageLayout(int page) {
+		log("readPageLayout");
 		PointF size = null;
 		if (mType == FileType.pdf) { size = mPDF.getSize(page); }
 		String fileName = page + "_" + (int)size.x + "_" + (int)size.y;
 		// 処理を分ける！
 		if (!new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/" + fileName).exists()) {
+			log("Layoutデータが存在しない");
 			File[] files = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/").listFiles();
 			ArrayList<String> names = new ArrayList<String>();
 			for (File file : files) { names.add(file.getName()); }
@@ -171,15 +174,18 @@ public class BookManager {
 				if(match(name, page + "_[0-9]+?_[0-9]+?", false)) { conflictName = name; }
 			}
 			if (conflictName != null) {
+				log("サイズが違うLayoutデータは存在する");
 				// ページの大きさが合ってない
 				Toast.makeText(mContext, "レイアウトを 読もうとしたら サイズが違う らしい", Toast.LENGTH_LONG).show();
 				ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
 				return list;
 			} else {
 				// まだ開いたことがないページ
+				log("まだ開いたことがないページ");
 				return null;
 			}
 		}
+		log("Layoutデータが存在する");
 		Gson gson = new Gson();
 		String json = read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/layout/" + fileName);
 		Type type = new TypeToken<ArrayList<ArrayList<Integer>>>(){}.getType();
