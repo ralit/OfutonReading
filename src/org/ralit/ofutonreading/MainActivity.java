@@ -3,11 +3,13 @@ package org.ralit.ofutonreading;
 import java.io.File;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -25,6 +27,8 @@ public class MainActivity extends Activity implements OpenFileListener {
 		
 		TextView splash = new TextView(this);
 		splash.setText("おふとんリーディング");
+		splash.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		splash.setBackgroundColor(Color.GREEN);
 		rootFrame.addView(splash);
 	}
 

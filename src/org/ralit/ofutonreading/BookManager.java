@@ -39,7 +39,9 @@ public class BookManager {
 	}
 	
 	public void recognize() {
+		log("recognize()");
 		if (mType == FileType.pdf) {
+			log("recognize(): FileType == pdf");
 			Bitmap bmp = mPDF.getBitmap(mCurPage);
 			DocomoOld docomo = new DocomoOld(bmp);
 			mPosList = docomo.getPos();
@@ -49,16 +51,16 @@ public class BookManager {
 	
 	public Bitmap getBitmap() {
 		log("getBitmap()");
-		log("mType" + mType);
 		if (mType == FileType.pdf) {
-			log("FileType = pdf");
+			log("getBitmap(): FileType == pdf");
 			return mPDF.getBitmap(mCurPage);
 		}
-		log("return null");
+		log("getBitmap(): return null");
 		return null;
 	}
 	
 	public BookManager(String bookName, String filePath, Context context) {
+		log("BookManager()");
 		mBookName = bookName;
 		mFilePath = filePath;
 		mContext = context;
@@ -73,21 +75,24 @@ public class BookManager {
 		if (isReading()) {
 			if (new File(mFilePath).length() != readFileSize()) {
 				// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
-				Toast.makeText(mContext, "ファイル サイズ が ちがう", Toast.LENGTH_LONG).show();
+				saveFileSize();
+				log("File(mFilePath).length() != readFileSize()");
 			}
 			if ((mCurPage = readCurPage()) == -1) {
 				// エラー！
 				mCurPage = 0;
-				Toast.makeText(mContext, "currentPage が だめだ", Toast.LENGTH_LONG).show();
+				saveCurPage();
+				log("readCurPage() == -1");
 			}
 			if ((mCurLine = readCurLine()) == -1) {
 				// エラー！
 				mCurLine = 0;
-				Toast.makeText(mContext, "currentLine が だめだ", Toast.LENGTH_LONG).show();
+				saveCurLine();
+				log("readCurLine() == -1");
 			}
 			if ((mPosList = readPageLayout(mCurPage)).isEmpty()) {
 				// エラー！
-				Toast.makeText(mContext, "layout が だめだ", Toast.LENGTH_LONG).show();
+				log("readPageLayout().isEmpty == true");
 			}
 			if (mPosList == null) {
 				mRecognized = false;
@@ -100,7 +105,7 @@ public class BookManager {
 			mPDF = new PDF(mContext, mFilePath);
 			if (mPDF.getPageCount() < readCurPage()) {
 				// たぶんファイルが違うよ。またはページを一部削除したかな。
-				Toast.makeText(mContext, "PDFのページ数がおかしい", Toast.LENGTH_LONG).show();
+				log("mPDF.getPageCount() < readCurPage()");
 			}
 		}
 	}
@@ -223,8 +228,8 @@ public class BookManager {
 		return mCurPage;
 	}
 	
-	private void saveCurPage(int curPage) {
-		save(String.valueOf(curPage), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentPage.txt");
+	private void saveCurPage() {
+		save(String.valueOf(mCurPage), Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentPage.txt");
 	}
 	
 	private int readCurPage() {
@@ -263,11 +268,11 @@ public class BookManager {
 			return data;
 		} catch (IOException e) {
 			e.printStackTrace();
-			Toast.makeText(mContext, "ファイルが よみこめない", Toast.LENGTH_SHORT).show();
+			log("read()中のIOException");
 			return null;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Toast.makeText(mContext, "read()中のエラー", Toast.LENGTH_SHORT).show();
+			log("read()中のエラー");
 			return null;
 		}
 	}

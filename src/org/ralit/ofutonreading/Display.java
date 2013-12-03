@@ -39,10 +39,11 @@ public class Display implements AnimatorListener{
 	private Bitmap mPageBitmap;
 	private Bitmap mScaledPageBitmap;
 	private int mDuration;
-	private int mW;
-	private int mH;
+	private int mLineW;
+	private int mLineH;
 	private float mRW;
 	private float mRH;
+	private boolean mPending = false;
 	
 	public Display(Context context, FrameLayout rootFrame, BookManager bookManager) {
 //		super(context);
@@ -102,31 +103,40 @@ public class Display implements AnimatorListener{
 	
 	public void updateLayout() {
 		log("updateLayout()");
-		log("mRootFrame.getWidth(): " + mRootFrame.getWidth() + ", mRootFrame.getHeight(): " + mRootFrame.getHeight());
 		mRW = mRootFrame.getWidth();
+		log("mRW:"+mRW);
 		mRH = mRootFrame.getHeight();
+		log("mRH:"+mRH);
 		mTickerFrame.setLayoutParams(new LayoutParams((int)mRW, (int)mRH / 2));
 		mScrollView.setLayoutParams(new LayoutParams((int)mRW, (int)mRH / 2));
 	}
 	
 	public void setImage() {
+		log("setImage()");
 		if(!mBook.isRecognized()) {
+			log("mBook.isRecognized() == false");
 			// レイアウト認識がまだだったらレイアウト認識を行う。
 			// レイアウト認識中は全画面でページを表示してあげる。
 			mTickerFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 0));
 			mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
 			mPageFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
 			mPageView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
-			mPageView.setImageResource(R.drawable.ofuton);
+			mPageView.setImageResource(R.drawable.ofuton); // 後で消す
 			// ページを表示
 			mPageBitmap = mBook.getBitmap();
-			float w = (float) mPageBitmap.getWidth();
-			float h = (float) mPageBitmap.getHeight();
-			float ratio = mRH / h;
-			float small_w = w * ratio;
+			
+			float pageW = (float) mPageBitmap.getWidth();
+			log("pageW:"+pageW);
+			float pageH = (float) mPageBitmap.getHeight();
+			log("pageH:"+pageH);
+			float ratio = mRH / pageH;
+			log("ratio:"+ratio);
+			float small_w = pageW * ratio;
+			log("small_w:"+small_w);
 			float scale_ratio = mRW / small_w;
-			log("mRW: " + mRW);
-			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (h/w)), false);
+			log("scale_ratio:"+scale_ratio);
+			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+			log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
 			mPageView.setImageBitmap(mScaledPageBitmap);
 			// マーカーの処理
 //			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
@@ -137,8 +147,11 @@ public class Display implements AnimatorListener{
 			mBook.recognize();
 			// 認識終了後
 			float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).get(3) + mBook.getPageLayout().get(mBook.getCurLine()).get(1)) / 2;
-			float distance = h / 2 - linemid;
-			float i = distance * (mRW / w);
+			log("linemid:"+linemid);
+			float distance = pageH / 2 - linemid;
+			log("distance:"+distance);
+			float i = distance * (mRW / pageW);
+			log("i:"+i);
 			mPageFrame.setY(i);
 			AnimatorSet set = new AnimatorSet();
 			ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
@@ -150,16 +163,23 @@ public class Display implements AnimatorListener{
 		}
 		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 		else { mAnimatingTicker = mTicker1; }
-		mW = mBook.getPageLayout().get(mBook.getCurLine()).get(2) - mBook.getPageLayout().get(mBook.getCurLine()).get(0);
-		mH = mBook.getPageLayout().get(mBook.getCurLine()).get(3) - mBook.getPageLayout().get(mBook.getCurLine()).get(1);
-		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).get(0), mBook.getPageLayout().get(mBook.getCurLine()).get(1), mW, mH));
-		mTextZoom = ((float)mRH / 2f) / ((float)mH * ((float)mRW / (float)mW));
+		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).get(2) - mBook.getPageLayout().get(mBook.getCurLine()).get(0);
+		log("mLineW:"+mLineW);
+		mLineH = mBook.getPageLayout().get(mBook.getCurLine()).get(3) - mBook.getPageLayout().get(mBook.getCurLine()).get(1);
+		log("mLineH:"+mLineH);
+		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).get(0), mBook.getPageLayout().get(mBook.getCurLine()).get(1), mLineW, mLineH));
+		mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
+		log("mTextZoom:"+mTextZoom);
 		mAnimatingTicker.setScaleX(mTextZoom);
 		mAnimatingTicker.setScaleY(mTextZoom);
-		mAnimatingTicker.setX(mRW * mTextZoom / (float)2);
+		mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
+		mTickerHeight = (int) (mRH / 2); // 修正
+		log("mTickerWidth: "+mTickerWidth);
+		log("mTickerHeight: "+mTickerHeight);
+		mAnimatingTicker.setX(mTickerWidth);
 		mAnimatingTicker.setY(0);
 		// アニメーション開始
-		animation(0);
+//		animation(0);
 	}
 	
 	public void paintPosition() {
@@ -167,24 +187,22 @@ public class Display implements AnimatorListener{
 	}
 	
 	public void animation(long startDelay) {
+		if(mPending) { return; }
 		mAnimation = new AnimatorSet();
 		ObjectAnimator move = null;
 		mDuration = 530;
+		log("mDuration:"+mDuration);
 		
 		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 		else { mAnimatingTicker = mTicker1; }
 
-		mTickerWidth = (int) (mRW * mTextZoom * ((float)mW/(float)mH));
-		mTickerHeight = (int) (mRH * mTextZoom / 2);
-		log("mTextZoom"+mTextZoom);
-		log("mTickerWidth: "+mTickerWidth);
-		log("mTickerHeight: "+mTickerHeight);
 		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
-		if (mAnimatingTicker.getWidth() > mAnimatingTicker.getHeight()) {
-			mDuration *= (int)((float)mTickerWidth / (float)mTickerHeight);
+		if (mTickerWidth > mTickerHeight) {
+			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
 		} else {
-			mDuration *= (int)((float)mTickerHeight / (float)mTickerWidth);
+			mDuration *= ((float)mTickerHeight / (float)mTickerWidth); // intへのキャストを削除
 		}
+		log("mDuration:"+mDuration);
 		move.setDuration(mDuration);
 		move.setInterpolator(new LinearInterpolator());
 		mAnimation.addListener(this);
@@ -213,7 +231,7 @@ public class Display implements AnimatorListener{
 	@Override
 	public void onAnimationEnd(Animator animation) {
 		// TODO Auto-generated method stub
-		
+		mPending = false;
 	}
 
 	@Override
@@ -225,9 +243,8 @@ public class Display implements AnimatorListener{
 	@Override
 	public void onAnimationStart(Animator animation) {
 		// TODO Auto-generated method stub
-		log("mTickerFrame.getWidth(): "+mTickerFrame.getWidth());
-		log("mDuration"+mDuration);
+		if(0 < animation.getStartDelay()) { mPending = true; } 
 		log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
-		animation((long)(animation.getDuration() * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
+		animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
 	}
 }
