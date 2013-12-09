@@ -1,4 +1,4 @@
-/*package org.ralit.ofutonreading;
+package org.ralit.ofutonreading;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -52,6 +52,7 @@ public class Docomo {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		bmp.compress(CompressFormat.JPEG, 80, bos);
 		param.setImageData(bos.toByteArray());
+		recognize();
 	}
 	
 	public void recognize() {
@@ -98,4 +99,3 @@ public class Docomo {
 		return wordList;
 	}
 }
-*/

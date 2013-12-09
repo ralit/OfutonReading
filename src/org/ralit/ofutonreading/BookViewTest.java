@@ -15,7 +15,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class BookView extends ViewGroup implements AnimatorListener{
+public class BookViewTest extends ViewGroup implements AnimatorListener{
 
 	// コンストラクタ
 	private Context mContext;
@@ -51,7 +51,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 //	private FrameLayout frame1;
 //	private FrameLayout frame2;
 	
-	public BookView(Context context) {
+	public BookViewTest(Context context) {
 		super(context);
 		log("BookView()");
 //		linear = new LinearLayout(context);

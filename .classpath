@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="gen"/>
-	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/commons-logging-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/httpclient-4.1.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/httpcore-4.1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/jp.recognize-api-1.6-javadoc.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/jp.recognize-api-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/old/json-20080701.jar"/>
 	<classpathentry kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4-javadoc.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="/Users/ralit/Downloads/google-gson-2.2.4/gson-2.2.4.jar"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/commons-codec-1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/commons-logging-1.1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/docomo-common-java-sdk-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/docomo-recognition-java-sdk-1.0.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/httpclient-4.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/httpcore-4.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/httpmime-4.2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/jackson-annotations-2.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/jackson-core-2.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="/Users/ralit/tokuen/docomodev/libs/jackson-databind-2.2.0.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

@@ -17,6 +17,7 @@ public class MainActivity extends Activity implements OpenFileListener {
 
 	private FrameLayout rootFrame;
 	private BookManager manager;
+	private BookView bookView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,8 +29,19 @@ public class MainActivity extends Activity implements OpenFileListener {
 		TextView splash = new TextView(this);
 		splash.setText("おふとんリーディング");
 		splash.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-		splash.setBackgroundColor(Color.GREEN);
+//		splash.setBackgroundColor(Color.GREEN);
 		rootFrame.addView(splash);
+//		BookView bookView = new BookView(this);
+//		bookView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+//		rootFrame.addView(bookView);
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		// TODO Auto-generated method stub
+		log("onWindowFocusChanged()");
+		super.onWindowFocusChanged(hasFocus);
+		
 	}
 
 	@Override
@@ -53,14 +65,13 @@ public class MainActivity extends Activity implements OpenFileListener {
 	@Override
 	public void onFileSelected(File file) {
 		manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
-		Display display = new Display(this, rootFrame, manager);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		display.setImage();
+//		Display display = new Display(this, rootFrame, manager);
+//		display.setImage();
+		bookView = new BookView(this);
+		bookView.setBookManager(manager);
+		rootFrame.addView(bookView);
+//		bookView.setImage();
+		
 	}
 	
 	private void log(String log) {

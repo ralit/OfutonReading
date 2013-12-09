@@ -27,7 +27,7 @@ public class BookManager {
 	private String mFilePath;
 	private Context mContext;
 	private int mCurLine;
-	private int mCurPage;
+	private int mCurPage = 0;
 	private enum FileType { pdf, zip, png, jpg };
 	private FileType mType; 
 	private PDF mPDF;
@@ -43,10 +43,11 @@ public class BookManager {
 		if (mType == FileType.pdf) {
 			log("recognize(): FileType == pdf");
 			Bitmap bmp = mPDF.getBitmap(mCurPage);
-			DocomoOld docomo = new DocomoOld(bmp);
-			mPosList = docomo.getPos();
+//			DocomoOld docomo = new DocomoOld(bmp);
+			Docomo docomo = new Docomo(bmp);
+//			mPosList = docomo.getPos();
 		}
-		savePageLayout();
+//		savePageLayout();
 	}
 	
 	public Bitmap getBitmap() {
@@ -73,6 +74,7 @@ public class BookManager {
 		log("readCurPage()" + readCurPage());
 		// ファイルの種類に依存しない共通の処理
 		if (isReading()) {
+			log("isReading == true");
 			if (new File(mFilePath).length() != readFileSize()) {
 				// ファイルが変更されたか、同じファイル名の別のファイルを開こうとしている！
 				saveFileSize();
@@ -205,6 +207,7 @@ public class BookManager {
 	}
 	
 	private int readCurLine() {
+		log("readCurLine");
 		try { return Integer.parseInt(read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentLine.txt")); } 
 		catch (Exception e) { return -1; }
 	}
@@ -239,8 +242,9 @@ public class BookManager {
 	}
 	
 	private int readCurPage() {
+		log("readCurPage");
 		try { return Integer.parseInt(read(Environment.getExternalStorageDirectory().getAbsolutePath() + "/OfutonReading/" + mBookName + "/currentPage.txt")); } 
-		catch (Exception e) { return -1; }
+		catch (Exception e) { log("catch in readCurPage()"); return -1; }
 	}
 	
 	private void save(String data, String filePath) {
