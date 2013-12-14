@@ -3,6 +3,8 @@ package org.ralit.ofutonreading;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Point;
 import android.os.Environment;
 import android.util.Log;
@@ -188,6 +192,19 @@ public class Fun {
 			size.x = display.getWidth();
 			size.y = display.getHeight();
 			return size;
+		}
+	}
+	
+	public static void cacheImageForDocomo(Bitmap bmp, int compress, String bookName) {
+		File file = new File(DIR + bookName + "/tmpImageForDocomo.jpg");
+		try {
+			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
+			bmp.compress(CompressFormat.JPEG, compress, out);
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }

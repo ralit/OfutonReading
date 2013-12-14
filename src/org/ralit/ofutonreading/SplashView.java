@@ -4,11 +4,13 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class SplashView extends ViewGroup{
+public class SplashView extends ViewGroup implements OnTouchListener{
 	
 	public SplashView(Context context) {
 		super(context);
@@ -58,5 +60,10 @@ public class SplashView extends ViewGroup{
 		for(int i = 0; i < count; i++) {
 			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
 		}
+	}
+
+	@Override
+	public boolean onTouch(View v, MotionEvent event) {
+		return true;
 	}
 }

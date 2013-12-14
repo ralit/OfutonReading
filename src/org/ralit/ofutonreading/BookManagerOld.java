@@ -3,7 +3,6 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -11,12 +10,11 @@ import com.google.gson.reflect.TypeToken;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
-import android.os.CountDownTimer;
 import android.os.Environment;
 import android.widget.Toast;
 
 
-public class BookManager {
+public class BookManagerOld {
 
 	private String mBookName;
 	private String mFilePath;
@@ -36,10 +34,8 @@ public class BookManager {
 	private Docomo docomo;
 	private ArrayList<Word> wordList;
 	
-	private CountDownTimer keyEventTimer;
-	
 
-	public BookManager(String bookName, String filePath, Context context) {
+	public BookManagerOld(String bookName, String filePath, Context context) {
 		Fun.log("BookManager()");
 		mBookName = bookName;
 		mFilePath = filePath;
@@ -70,7 +66,6 @@ public class BookManager {
 		saveFilePath();
 		saveFileSize();
 //		savePageLayout();
-		recognize();
 	}
 
 	public void setCurLine(int curLine) {
@@ -241,30 +236,12 @@ public class BookManager {
 //			DocomoOld docomo = new DocomoOld(bmp);
 			docomo = new Docomo(bmp, mBookName);
 			docomo.start();
-			keyEventTimer = new CountDownTimer(20000, 1000) {
-				@Override
-				public void onTick(long millisUntilFinished) {
-					Fun.log(String.valueOf(millisUntilFinished));
-					setPos();
-				}
-				@Override
-				public void onFinish() {
-					Fun.log("20秒待ったけど終わらなかった");
-				}
-			}.start();
 		}
 	}
 	
 	public void setPos() {
 		wordList = docomo.getWordList();
-		if(wordList == null) {
-			Fun.log("wordListはnull");
-		} else {
-			Fun.log("wordList取得!");
-			Fun.log(wordList.toString());
-			keyEventTimer.cancel();
-		}
-//		savePageLayout();
+		savePageLayout();
 	}
 	
 	public Bitmap getBitmap() {
