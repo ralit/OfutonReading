@@ -24,7 +24,12 @@ public class Fun {
 	public static final String MARKER = "/marker/";
 
 	public static void log(String log) {
-		Log.i("ralit", log);
+		if (log != null) {
+			Log.i("ralit", log);
+		} else {
+			Log.i("ralit", "☆null☆");
+		}
+		
 	}
 
 	public static void save(String data, String filePath, String bookName) {

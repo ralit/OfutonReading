@@ -58,15 +58,12 @@ public class FileListView extends ViewGroup{
 			Fun.log("equals(↑)");
 			ArrayList<ArrayList<String>> array = Fun.matchGroup(lastDir, "(^.+)(/.+$)", false);
 			File file = new File(array.get(0).get(0));
-			Fun.log(file.getAbsolutePath());
 			updateFileList(lastDir = file.getAbsolutePath());
 			Fun.saveRoot(file.getAbsolutePath(), "lastDir.txt");
 		} else {
 			Fun.log("!equals(↑)");
 			File file = new File(lastDir + "/" + item);
-			Fun.log(file.getAbsolutePath());
 			if (file.isDirectory()) {
-				Fun.log(file.getAbsolutePath());
 				updateFileList(lastDir = file.getAbsolutePath());
 				Fun.saveRoot(file.getAbsolutePath(), "lastDir.txt");
 			} else {
@@ -77,8 +74,6 @@ public class FileListView extends ViewGroup{
 				if ((recentList.size()) > 20) {
 					i = recentList.size() - 20;
 				}
-				Fun.log(String.valueOf(i));
-				Fun.log(String.valueOf(recentList.size()));
 				for( ; i < recentList.size(); i++) {
 					if(recentFiles == null) {
 						recentFiles = recentList.get(i) + "\n";
@@ -86,8 +81,6 @@ public class FileListView extends ViewGroup{
 					}
 					recentFiles = recentFiles + recentList.get(i) + "\n";
 				}
-				Fun.log(recentFiles);
-				Fun.saveRoot(recentFiles, "recentFiles.txt");
 			}
 		}
 	}

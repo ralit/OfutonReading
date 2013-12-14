@@ -11,7 +11,9 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 public class MainActivity extends Activity implements FileClickListener {
-	
+
+	private boolean isLaunch = true;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Fun.log("onCreate()");
@@ -20,25 +22,42 @@ public class MainActivity extends Activity implements FileClickListener {
 		setContentView(frameLayout);
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
-		SplashView splashView = new SplashView(this);
-		frameLayout.addView(splashView);
-		
-		AnimatorSet set = new AnimatorSet();
-		ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
-		ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
-		animator.setDuration(2000);
-		animator2.setDuration(500);
-		set.playSequentially(animator, animator2);
-		set.start();
-//		Configuration config = getResources().getConfiguration();
-//		config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+
+		if(isLaunch) {
+			SplashView splashView = new SplashView(this);
+			frameLayout.addView(splashView);
+
+			AnimatorSet set = new AnimatorSet();
+			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
+			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
+			animator.setDuration(2000);
+			animator2.setDuration(500);
+			set.playSequentially(animator, animator2);
+			set.start();
+		}
+		//		Configuration config = getResources().getConfiguration();
+		//		config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+		isLaunch = false;
 	}
 
-//	@Override
-//	public void onWindowFocusChanged(boolean hasFocus) {
-//		Fun.log("onWindowFocusChanged()");
-//		super.onWindowFocusChanged(hasFocus);
-//	}
+	//	@Override
+	//	public void onWindowFocusChanged(boolean hasFocus) {
+	//		Fun.log("onWindowFocusChanged()");
+	//		super.onWindowFocusChanged(hasFocus);
+	//	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onRestoreInstanceState(savedInstanceState);
+		isLaunch = savedInstanceState.getBoolean("isLaunch", true);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putBoolean("isLaunch", isLaunch);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -46,7 +65,7 @@ public class MainActivity extends Activity implements FileClickListener {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Fun.log("onOptionsItemSelected()");
@@ -57,7 +76,7 @@ public class MainActivity extends Activity implements FileClickListener {
 
 	@Override
 	public void onFileClicked(File file) {
-		Fun.log("open!");
-		
+		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
+
 	}
 }
