@@ -3,17 +3,14 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
 import android.os.CountDownTimer;
-import android.os.Environment;
-import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 
 public class BookManager {
@@ -30,7 +27,7 @@ public class BookManager {
 	private FileType mType; 
 
 	private PDF mPDF;
-	private ArrayList<ArrayList<Integer>> mPosList;
+	private ArrayList<Word> mPosList;
 	boolean mRecognized = false;
 	
 	private Docomo docomo;
@@ -147,7 +144,7 @@ public class BookManager {
 				mCurLine = 0;
 				saveCurLine();
 			}
-			if (mPosList.get(0).get(0) == -1) {
+			if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
 				Fun.log("サイズが違うレイアウトデータが存在する場合");
 			}
 			if (mPosList == null) { mRecognized = false; }
@@ -175,7 +172,7 @@ public class BookManager {
 		return null;
 	}
 
-	public ArrayList<ArrayList<Integer>> getPageLayout() {
+	public ArrayList<Word> getPageLayout() {
 		Fun.log("getPageLayout()");
 		return mPosList;
 	}
@@ -193,7 +190,7 @@ public class BookManager {
 		return true;
 	}
 
-	private ArrayList<ArrayList<Integer>> readPageLayout(int page) {
+	private ArrayList<Word> readPageLayout(int page) {
 		Fun.log("readPageLayout");
 		PointF size = null;
 		if (mType == FileType.pdf) { size = mPDF.getSize(page); }
@@ -211,10 +208,10 @@ public class BookManager {
 			}
 			if (conflictName != null) {
 				Fun.log("サイズが違うLayoutデータは存在する");
-				ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
-				ArrayList<Integer> inner = new ArrayList<Integer>();
-				inner.add(-1);
-				list.add(inner);
+				ArrayList<Word> list = new ArrayList<Word>();
+				Word word = new Word();
+				word.setPoint(-1, -1, -1, -1);
+				list.add(word);
 				return list;
 			} else {
 				Fun.log("まだ開いたことがないページ");
@@ -225,7 +222,7 @@ public class BookManager {
 		Fun.log("同じファイル名のLayoutデータが存在する");
 		Gson gson = new Gson();
 		String json = Fun.read(Fun.DIR + mBookName + "/layout/" + fileName);
-		Type type = new TypeToken<ArrayList<ArrayList<Integer>>>(){}.getType();
+		Type type = new TypeToken<ArrayList<Word>>(){}.getType();
 		return gson.fromJson(json, type);
 	}
 	
@@ -262,7 +259,8 @@ public class BookManager {
 		} else {
 			Fun.log("wordList取得!");
 			Fun.log(wordList.toString());
-			keyEventTimer.cancel();
+//			keyEventTimer.cancel();
+			keyEventTimer.onFinish();
 		}
 //		savePageLayout();
 	}
