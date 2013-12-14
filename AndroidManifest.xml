@@ -21,7 +21,8 @@
         
         <activity
             android:name="org.ralit.ofutonreading.MainActivity"
-            android:label="@string/ofuton_app_name" >
+            android:label="@string/ofuton_app_name"
+            android:configChanges="orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
