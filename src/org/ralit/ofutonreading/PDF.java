@@ -16,8 +16,8 @@ package org.ralit.ofutonreading;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PointF;
-import android.os.AsyncTask;
 
 import com.artifex.mupdfdemo.MuPDFCore;
 
@@ -44,11 +44,15 @@ public class PDF {
 	}
 	
 	public Bitmap getBitmap(int page, PointF size) {
-		return mCore.drawPage(page, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y);
+		Bitmap bitmap = Bitmap.createBitmap((int)size.x, (int)size.y, Bitmap.Config.ARGB_8888);
+		mCore.drawPage(bitmap, page, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y);
+		return bitmap;
 	}
 	
 	public Bitmap getBitmap(int page) { // サイズを指定しなければ等倍で読み込む
 		PointF size = getSize(page);
-		return mCore.drawPage(page, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y);
+		Bitmap bitmap = Bitmap.createBitmap((int)size.x, (int)size.y, Bitmap.Config.ARGB_8888);
+		mCore.drawPage(bitmap, page, (int)size.x, (int)size.y, 0, 0, (int)size.x, (int)size.y);
+		return bitmap;
 	}
 }
