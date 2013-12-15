@@ -57,6 +57,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mBook = manager;
 		initialize();
 //		setImage(mBook.getBitmap(mBook.getCurPage()));
+		
 	}
 
 	//	public BookView(Context context, AttributeSet attrs) {
@@ -81,7 +82,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mTicker2 = new ImageView(mContext);
 		mTickerFrame.addView(mTicker1);
 		mTickerFrame.addView(mTicker2);
-		//		mTicker1.setBackgroundColor(Color.DKGRAY);
+				mTicker1.setBackgroundColor(Color.DKGRAY);
 		//		mTicker2.setBackgroundColor(Color.GRAY);
 		// 下画面にFrameLayoutを入れる(ページとマーカーを重ねるため)
 		mPageFrame = new FrameLayout(mContext);
@@ -93,7 +94,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mMarkerView = new ImageView(mContext);
 		mPageFrame.addView(mPageView);
 		mPageFrame.addView(mMarkerView);
-		//		mPageView.setBackgroundColor(Color.LTGRAY);
+				mPageView.setBackgroundColor(Color.LTGRAY);
 		//		mMarkerView.setBackgroundColor(Color.MAGENTA);
 		//		// スプラッシュ表示のため
 		//		mLinearLayout.setAlpha(0f);

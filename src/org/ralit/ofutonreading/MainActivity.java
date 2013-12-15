@@ -29,19 +29,38 @@ public class MainActivity extends Activity implements FileClickListener {
 		setContentView(frameLayout);
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
+		
+		
 
-		if(isLaunch) {
-			SplashView splashView = new SplashView(this);
-			frameLayout.addView(splashView);
-
-			AnimatorSet set = new AnimatorSet();
-			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
-			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
-			animator.setDuration(1500);
-			animator2.setDuration(500);
-			set.playSequentially(animator, animator2);
-			set.start();
-		}
+//		if(isLaunch) {
+//			SplashView splashView = new SplashView(this);
+//			frameLayout.addView(splashView);
+//
+//			AnimatorSet set = new AnimatorSet();
+//			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
+//			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
+//			animator.setDuration(1500);
+//			animator2.setDuration(500);
+//			set.playSequentially(animator, animator2);
+//			set.start();
+//		}
+		CountDownTimer timer = new CountDownTimer(3000, 1000) {
+			
+			@Override
+			public void onTick(long millisUntilFinished) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onFinish() {
+				// TODO Auto-generated method stub
+				BookView bookView = new BookView(getApplicationContext(), null);
+				frameLayout.addView(bookView);
+//				bookView.setAlpha(1f);
+			}
+		}.start();
+		
 		//		Configuration config = getResources().getConfiguration();
 		//		config.orientation = Configuration.ORIENTATION_LANDSCAPE;
 		
@@ -89,8 +108,6 @@ public class MainActivity extends Activity implements FileClickListener {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		Fun.log("onOptionsItemSelected()");
-		switch (item.getItemId()) {
-		}
 		return false;
 	}
 
