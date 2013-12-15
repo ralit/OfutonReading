@@ -19,12 +19,13 @@ public class MainActivity extends Activity implements FileClickListener {
 	private boolean isLaunch = true;
 	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
 	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
+	private FrameLayout frameLayout;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Fun.log("onCreate()");
 		super.onCreate(savedInstanceState);
-		FrameLayout frameLayout = new FrameLayout(this);
+		frameLayout = new FrameLayout(this);
 		setContentView(frameLayout);
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
@@ -96,6 +97,8 @@ public class MainActivity extends Activity implements FileClickListener {
 	@Override
 	public void onFileClicked(File file) {
 		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
+		BookView bookView = new BookView(this, manager);
+		frameLayout.addView(bookView);
 	}
 
 	@Override

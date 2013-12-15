@@ -51,6 +51,12 @@ public class FileListView extends ViewGroup{
 				changeFileListDirectory(parent, position);
 			}
 		});
+		recentListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				recentItemClicked(parent, position);
+			}
+		});
 	}
 
 	// fileList
@@ -87,6 +93,28 @@ public class FileListView extends ViewGroup{
 			}
 		}
 	}
+
+	// recentList
+	private void recentItemClicked(AdapterView<?> parent, int position) {
+		String item = parent.getItemAtPosition(position).toString();
+		File file = new File(item);
+		fileClickListener.onFileClicked(file);
+		recentList.add(file.getAbsolutePath());
+		String recentFiles = null;
+		int i = 0;
+		if ((recentList.size()) > 20) {
+			i = recentList.size() - 20;
+		}
+		for( ; i < recentList.size(); i++) {
+			if(recentFiles == null) {
+				recentFiles = recentList.get(i) + "\n";
+				continue;
+			}
+			recentFiles = recentFiles + recentList.get(i) + "\n";
+		}
+		Fun.saveRoot(recentFiles, "recentFiles.txt");
+	}
+
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -128,7 +156,7 @@ public class FileListView extends ViewGroup{
 		layout = new LinearLayout(mContext);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		fileListView = new ListView(mContext);
-//		fileListView.setSmoothScrollbarEnabled(true);
+		//		fileListView.setSmoothScrollbarEnabled(true);
 		fileListView.setDividerHeight(0);
 		recentListView = new ListView(mContext);
 		recentListView.setDividerHeight(0);
@@ -144,7 +172,7 @@ public class FileListView extends ViewGroup{
 		String initialDir = readLastDir();
 		updateFileList(initialDir);
 	}
-	
+
 	//recent
 	private void showRecentList() {
 		readRecent();
@@ -162,7 +190,7 @@ public class FileListView extends ViewGroup{
 			return Fun.getExternalStoragePath();
 		}
 	}
-	
+
 	//recent
 	private void readRecent() {
 		try {
@@ -199,7 +227,7 @@ public class FileListView extends ViewGroup{
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, fileNameList);
 		fileListView.setAdapter(adapter);
 	}
-	
+
 	//recentList
 	private void updateRecentList() {
 		if(recentList != null) {
