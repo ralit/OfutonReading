@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import android.R.string;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -121,10 +123,14 @@ public class FileListView extends ViewGroup{
 
 	private void layout() {
 		Fun.log("FileListView.initialize()");
+		setBackgroundColor(Color.WHITE);
 		layout = new LinearLayout(mContext);
 		layout.setOrientation(LinearLayout.VERTICAL);
 		fileListView = new ListView(mContext);
+//		fileListView.setSmoothScrollbarEnabled(true);
+		fileListView.setDividerHeight(0);
 		recentListView = new ListView(mContext);
+		recentListView.setDividerHeight(0);
 		//		fileListView = new CardListView(mContext);
 		//		recentListView = new CardListView(mContext);
 		addView(layout);

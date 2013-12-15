@@ -15,7 +15,12 @@ import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.os.Environment;
 import android.util.Log;
@@ -200,6 +205,42 @@ public class Fun {
 		try {
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
 			bmp.compress(CompressFormat.JPEG, compress, out);
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void paintPosition(Bitmap bmp, ArrayList<Word> word, String bookName, int curPage) {
+//		Paint frame = new Paint();
+//		frame.setStyle(Style.STROKE);
+//		frame.setColor(Color.RED);
+//		frame.setStrokeWidth(4);
+		Paint number = new Paint();
+		number.setStyle(Style.FILL_AND_STROKE);
+		number.setColor(Color.RED);
+		number.setStrokeWidth(1);
+		number.setTextSize(20);
+		number.setAntiAlias(true);
+		Paint marker = new Paint();
+		marker.setStyle(Style.FILL_AND_STROKE);
+		marker.setColor(Color.YELLOW);
+		marker.setStrokeWidth(1);
+		marker.setAlpha(64);
+		Bitmap mutableBitmap = bmp.copy(bmp.getConfig(), true);
+		Canvas canvas = new Canvas(mutableBitmap);
+		for (int i = 0; i < word.size(); ++i) {
+			Rect rect = new Rect(word.get(i).getLeft(), word.get(i).getTop(), word.get(i).getRight(), word.get(i).getBottom());
+			canvas.drawRect(rect, marker);
+			canvas.drawText(Integer.toString(i), word.get(i).getLeft(), word.get(i).getTop(), number);
+		}
+		
+		File file = new File(DIR + bookName + "/layout/" + curPage + ".jpg");
+		try {
+			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
+			mutableBitmap.compress(CompressFormat.JPEG, 90, out);
 			out.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

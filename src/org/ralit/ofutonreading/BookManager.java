@@ -30,10 +30,12 @@ public class BookManager {
 	private ArrayList<Word> mPosList;
 	boolean mRecognized = false;
 	
-	private Docomo docomo;
+//	private Docomo docomo;
+	private DocomoOld docomo;
 	private ArrayList<Word> wordList;
 	
 	private CountDownTimer keyEventTimer;
+	boolean done = false;
 	
 
 	public BookManager(String bookName, String filePath, Context context) {
@@ -184,46 +186,52 @@ public class BookManager {
 			Fun.log("画像のサイズが取得できなかった");
 			return false;
 		}
-		String fileName = mCurPage + "_" + (int)size.x + "_" + (int)size.y;
+		String fileName = mCurPage + "_" + (int)size.x + "_" + (int)size.y + ".txt";
 		Gson gson = new Gson();
 		Fun.save(gson.toJson(mPosList, mPosList.getClass()), Fun.DIR + mBookName + "/layout/" + fileName, mBookName);
 		return true;
 	}
 
 	private ArrayList<Word> readPageLayout(int page) {
-		Fun.log("readPageLayout");
-		PointF size = null;
-		if (mType == FileType.pdf) { size = mPDF.getSize(page); }
-		String fileName = page + "_" + (int)size.x + "_" + (int)size.y;
+		try {
+			Fun.log("readPageLayout");
+			PointF size = null;
+			if (mType == FileType.pdf) { size = mPDF.getSize(page); }
+			String fileName = page + "_" + (int)size.x + "_" + (int)size.y + ".txt";
 
-		// しばらくエラー処理
-		if (!new File(Fun.DIR + mBookName + "/layout/" + fileName).exists()) {
-			Fun.log("少なくとも全く同じファイル名のLayoutデータは存在しない");
-			File[] files = new File(Fun.DIR + mBookName + "/layout/").listFiles();
-			ArrayList<String> names = new ArrayList<String>();
-			for (File file : files) { names.add(file.getName()); }
-			String conflictName = null;
-			for (String name : names) { 
-				if(Fun.match(name, page + "_[0-9]+?_[0-9]+?", false)) { conflictName = name; }
+			// しばらくエラー処理
+			if (!new File(Fun.DIR + mBookName + "/layout/" + fileName).exists()) {
+				Fun.log("少なくとも全く同じファイル名のLayoutデータは存在しない");
+				File[] files = new File(Fun.DIR + mBookName + "/layout/").listFiles();
+				ArrayList<String> names = new ArrayList<String>();
+				for (File file : files) { names.add(file.getName()); }
+				String conflictName = null;
+				for (String name : names) { 
+					if(Fun.match(name, page + "_[0-9]+?_[0-9]+?\\.txt", false)) { conflictName = name; }
+				}
+				if (conflictName != null) {
+					Fun.log("サイズが違うLayoutデータは存在する");
+					ArrayList<Word> list = new ArrayList<Word>();
+					Word word = new Word();
+					word.setPoint(-1, -1, -1, -1);
+					list.add(word);
+					return list;
+				} else {
+					Fun.log("まだ開いたことがないページ");
+					return null;
+				}
 			}
-			if (conflictName != null) {
-				Fun.log("サイズが違うLayoutデータは存在する");
-				ArrayList<Word> list = new ArrayList<Word>();
-				Word word = new Word();
-				word.setPoint(-1, -1, -1, -1);
-				list.add(word);
-				return list;
-			} else {
-				Fun.log("まだ開いたことがないページ");
-				return null;
-			}
+			
+			Fun.log("同じファイル名のLayoutデータが存在する");
+			Gson gson = new Gson();
+			String json = Fun.read(Fun.DIR + mBookName + "/layout/" + fileName);
+			Type type = new TypeToken<ArrayList<Word>>(){}.getType();
+			return gson.fromJson(json, type);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 		
-		Fun.log("同じファイル名のLayoutデータが存在する");
-		Gson gson = new Gson();
-		String json = Fun.read(Fun.DIR + mBookName + "/layout/" + fileName);
-		Type type = new TypeToken<ArrayList<Word>>(){}.getType();
-		return gson.fromJson(json, type);
 	}
 	
 	public boolean isRecognized() {
@@ -235,9 +243,16 @@ public class BookManager {
 		if (mType == FileType.pdf) {
 			Fun.log("recognize(): FileType == pdf");
 			Bitmap bmp = mPDF.getBitmap(mCurPage);
-//			DocomoOld docomo = new DocomoOld(bmp);
-			docomo = new Docomo(bmp, mBookName);
+//			PointF size = mPDF.getSize(mCurPage);
+//			size.x = size.x * 2;
+//			size.y = size.y * 2;
+//			Fun.log(String.valueOf(size.x));
+//			Fun.log(String.valueOf(size.y));
+//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
+//			docomo = new Docomo(bmp, mBookName);
+			docomo = new DocomoOld(bmp);
 			docomo.start();
+			done = false;
 			keyEventTimer = new CountDownTimer(20000, 1000) {
 				@Override
 				public void onTick(long millisUntilFinished) {
@@ -257,10 +272,22 @@ public class BookManager {
 		if(wordList == null) {
 			Fun.log("wordListはnull");
 		} else {
+			if(done) { return; } 
+			done = true;
 			Fun.log("wordList取得!");
 			Fun.log(wordList.toString());
 //			keyEventTimer.cancel();
 			keyEventTimer.onFinish();
+			mPosList = wordList;
+			savePageLayout();
+//			PointF size = mPDF.getSize(mCurPage);
+//			size.x = size.x * 2;
+//			size.y = size.y * 2;
+//			Fun.log(String.valueOf(size.x));
+//			Fun.log(String.valueOf(size.y));
+//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
+//			Fun.paintPosition(bmp, mPosList, mBookName, mCurPage);
+			Fun.paintPosition(getBitmap(), mPosList, mBookName, mCurPage);
 		}
 //		savePageLayout();
 	}
