@@ -36,7 +36,7 @@ public class MainActivity extends Activity implements FileClickListener {
 			AnimatorSet set = new AnimatorSet();
 			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
 			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
-			animator.setDuration(2000);
+			animator.setDuration(1500);
 			animator2.setDuration(500);
 			set.playSequentially(animator, animator2);
 			set.start();
