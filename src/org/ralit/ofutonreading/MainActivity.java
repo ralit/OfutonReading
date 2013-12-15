@@ -99,6 +99,7 @@ public class MainActivity extends Activity implements FileClickListener {
 		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
 		BookView bookView = new BookView(this, manager);
 		frameLayout.addView(bookView);
+		manager.setBookView(bookView);
 	}
 
 	@Override

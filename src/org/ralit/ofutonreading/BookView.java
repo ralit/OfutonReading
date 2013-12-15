@@ -7,6 +7,7 @@ import android.animation.AnimatorSet;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,6 +56,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mContext = context;
 		mBook = manager;
 		initialize();
+//		setImage(mBook.getBitmap(mBook.getCurPage()));
 	}
 
 	//	public BookView(Context context, AttributeSet attrs) {
@@ -67,35 +69,35 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		Fun.log("BookView()");
 		// 2画面の基本となる一番下の枠を作る
 		mLinearLayout = new LinearLayout(mContext);
-//		mLinearLayout.setBackgroundColor(Color.BLACK);
+		//		mLinearLayout.setBackgroundColor(Color.BLACK);
 		mTickerFrame = new FrameLayout(mContext);
 		mScrollView = new ScrollView(mContext);
 		mLinearLayout.addView(mTickerFrame);
 		mLinearLayout.addView(mScrollView);
-//		mTickerFrame.setBackgroundColor(Color.BLUE);
-//		mScrollView.setBackgroundColor(Color.CYAN);
+		//		mTickerFrame.setBackgroundColor(Color.BLUE);
+		//		mScrollView.setBackgroundColor(Color.CYAN);
 		// 上画面の電光掲示板を作る
 		mTicker1 = new ImageView(mContext);
 		mTicker2 = new ImageView(mContext);
 		mTickerFrame.addView(mTicker1);
 		mTickerFrame.addView(mTicker2);
-//		mTicker1.setBackgroundColor(Color.DKGRAY);
-//		mTicker2.setBackgroundColor(Color.GRAY);
+		//		mTicker1.setBackgroundColor(Color.DKGRAY);
+		//		mTicker2.setBackgroundColor(Color.GRAY);
 		// 下画面にFrameLayoutを入れる(ページとマーカーを重ねるため)
 		mPageFrame = new FrameLayout(mContext);
 		mScrollView.addView(mPageFrame);
 		mScrollView.setSmoothScrollingEnabled(true);
-//		mPageFrame.setBackgroundColor(Color.GREEN);
+		//		mPageFrame.setBackgroundColor(Color.GREEN);
 		// 下画面を作る
 		mPageView = new ImageView(mContext);
 		mMarkerView = new ImageView(mContext);
 		mPageFrame.addView(mPageView);
 		mPageFrame.addView(mMarkerView);
-//		mPageView.setBackgroundColor(Color.LTGRAY);
-//		mMarkerView.setBackgroundColor(Color.MAGENTA);
-//		// スプラッシュ表示のため
-//		mLinearLayout.setAlpha(0f);
-//		// ここで初めて描画
+		//		mPageView.setBackgroundColor(Color.LTGRAY);
+		//		mMarkerView.setBackgroundColor(Color.MAGENTA);
+		//		// スプラッシュ表示のため
+		//		mLinearLayout.setAlpha(0f);
+		//		// ここで初めて描画
 		addView(mLinearLayout);
 		setBackgroundColor(Color.WHITE);
 	}
@@ -155,19 +157,19 @@ public class BookView extends ViewGroup implements AnimatorListener{
 	}
 
 
-//	@Override
-//	public void addView(View view) {
-//		super.addView(view);
-//		int currentScreen = -1;
-//		final int index = indexOfChild(view);
-//		if (index > currentScreen) {
-//			if (currentScreen > 0) {
-//				view.setVisibility(View.GONE);//★非表示
-//			}
-//			currentScreen = index;
-//			view.setVisibility(View.VISIBLE);//★表示
-//		}
-//	}
+	//	@Override
+	//	public void addView(View view) {
+	//		super.addView(view);
+	//		int currentScreen = -1;
+	//		final int index = indexOfChild(view);
+	//		if (index > currentScreen) {
+	//			if (currentScreen > 0) {
+	//				view.setVisibility(View.GONE);//★非表示
+	//			}
+	//			currentScreen = index;
+	//			view.setVisibility(View.VISIBLE);//★表示
+	//		}
+	//	}
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
@@ -194,65 +196,69 @@ public class BookView extends ViewGroup implements AnimatorListener{
 			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
 		}
 	}
-	
-	
-	public void setImage() {
+
+
+	public void setImage(Bitmap _bmp) {
 		Fun.log("setImage()");
+		mPageBitmap = _bmp;
 		if(!mBook.isRecognized()) {
 			Fun.log("mBook.isRecognized() == false");
 			// レイアウト認識がまだだったらレイアウト認識を行う。
 			// レイアウト認識中は全画面でページを表示してあげる。
-			mTickerFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, 0));
-			mScrollView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
-			mPageFrame.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
-			mPageView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, (int)mRH));
-			mPageView.setImageResource(R.drawable.ofuton); // 後で消す
-			// ページを表示
-			mPageBitmap = mBook.getBitmap();
-			
-			float pageW = (float) mPageBitmap.getWidth();
+			final float pageW = (float) mPageBitmap.getWidth();
 			Fun.log("pageW:"+pageW);
-			float pageH = (float) mPageBitmap.getHeight();
+			final float pageH = (float) mPageBitmap.getHeight();
 			Fun.log("pageH:"+pageH);
-			float ratio = mRH / pageH;
+			final float ratio = mRH / pageH;
 			Fun.log("ratio:"+ratio);
-			float small_w = pageW * ratio;
+			final float small_w = pageW * ratio;
 			Fun.log("small_w:"+small_w);
-			float scale_ratio = mRW / small_w;
+			final float scale_ratio = mRW / small_w;
 			Fun.log("scale_ratio:"+scale_ratio);
 			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
 			Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
 			mPageView.setImageBitmap(mScaledPageBitmap);
 			// マーカーの処理
-//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
-//			markerview.setImageBitmap(markedPage);
+			//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
+			//			markerview.setImageBitmap(markedPage);
 			mPageFrame.setScaleX(scale_ratio);
 			mPageFrame.setScaleY(scale_ratio);
-			// Docomoによる認識を開始
-			mBook.recognize();
-			// 認識終了後
-			float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).get(3) + mBook.getPageLayout().get(mBook.getCurLine()).get(1)) / 2;
-			Fun.log("linemid:"+linemid);
-			float distance = pageH / 2 - linemid;
-			Fun.log("distance:"+distance);
-			float i = distance * (mRW / pageW);
-			Fun.log("i:"+i);
-			mPageFrame.setY(i);
-			AnimatorSet set = new AnimatorSet();
-			ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
-			ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mRH / 2);
-			ObjectAnimator anim3 = ObjectAnimator.ofFloat(mPageFrame, "y", i);
-			set.playTogether(anim1, anim2, anim3);
-			set.setDuration(500);
-			set.start();
+
+			// 認識終了を待つ
+			CountDownTimer keyEventTimer = new CountDownTimer(20000, 1000) {
+				@Override
+				public void onTick(long millisUntilFinished) {
+					Fun.log(String.valueOf(millisUntilFinished));
+					if(mBook.isRecognized()) {
+						float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
+						Fun.log("linemid:"+linemid);
+						float distance = pageH / 2 - linemid;
+						Fun.log("distance:"+distance);
+						float i = distance * (mRW / pageW);
+						Fun.log("i:"+i);
+						mPageFrame.setY(i);
+						AnimatorSet set = new AnimatorSet();
+						ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
+						ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mRH / 2);
+						ObjectAnimator anim3 = ObjectAnimator.ofFloat(mPageFrame, "y", i);
+						set.playTogether(anim1, anim2, anim3);
+						set.setDuration(500);
+						set.start();
+					}
+				}
+				@Override
+				public void onFinish() {
+					Fun.log("20秒待ったけど終わらなかった");
+				}
+			}.start();
 		}
 		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 		else { mAnimatingTicker = mTicker1; }
-		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).get(2) - mBook.getPageLayout().get(mBook.getCurLine()).get(0);
+		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
 		Fun.log("mLineW:"+mLineW);
-		mLineH = mBook.getPageLayout().get(mBook.getCurLine()).get(3) - mBook.getPageLayout().get(mBook.getCurLine()).get(1);
+		mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
 		Fun.log("mLineH:"+mLineH);
-		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).get(0), mBook.getPageLayout().get(mBook.getCurLine()).get(1), mLineW, mLineH));
+		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).getLeft(), mBook.getPageLayout().get(mBook.getCurLine()).getTop(), mLineW, mLineH));
 		mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
 		Fun.log("mTextZoom:"+mTextZoom);
 		mAnimatingTicker.setScaleX(mTextZoom);
@@ -264,7 +270,7 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mAnimatingTicker.setX(mTickerWidth);
 		mAnimatingTicker.setY(0);
 		// アニメーション開始
-		animation(0);
+//		animation(0);
 	}
 }
 

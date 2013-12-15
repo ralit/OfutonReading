@@ -37,7 +37,8 @@ public class BookManager {
 	private CountDownTimer keyEventTimer;
 	boolean done = false;
 
-	ZIP zip;
+	private ZIP zip;
+	private BookView mBookView;
 
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -70,7 +71,7 @@ public class BookManager {
 		return null;
 	}
 
-	private Bitmap getBitmap(int page) {
+	public Bitmap getBitmap(int page) {
 		if (mType == FileType.pdf) {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
@@ -113,6 +114,11 @@ public class BookManager {
 		saveFileSize();
 //		if (!mRecognized) { recognize(); }
 		recognize();
+	}
+	
+	public void setBookView(BookView bookView) {
+		mBookView = bookView;
+		mBookView.setImage(getBitmap(mCurPage));
 	}
 
 	public void setCurLine(int curLine) {
@@ -305,6 +311,7 @@ public class BookManager {
 			//			keyEventTimer.cancel();
 			keyEventTimer.onFinish();
 			mPosList = wordList;
+			mRecognized = true;
 			savePageLayout();
 			//			PointF size = mPDF.getSize(mCurPage);
 			//			size.x = size.x * 2;
