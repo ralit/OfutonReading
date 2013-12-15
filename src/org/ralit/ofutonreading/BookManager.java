@@ -22,21 +22,63 @@ public class BookManager {
 	private int mCurPage = 0;
 	private String mReadFilePath = "";
 	private long mFileSize;
-	
+
 	private enum FileType { pdf, zip, png, jpg };
 	private FileType mType; 
 
 	private PDF mPDF;
 	private ArrayList<Word> mPosList;
 	boolean mRecognized = false;
-	
-//	private Docomo docomo;
+
+	//	private Docomo docomo;
 	private DocomoOld docomo;
 	private ArrayList<Word> wordList;
-	
+
 	private CountDownTimer keyEventTimer;
 	boolean done = false;
-	
+
+	ZIP zip;
+
+	private void initializeBook() {
+		if (mType == FileType.pdf) {
+			mPDF = new PDF(mContext, mFilePath);
+		} else if (mType == FileType.zip) {
+			zip = new ZIP(mFilePath);
+		}
+	}
+
+	private void checkWithFileType() {
+		if (mType == FileType.pdf) {
+			if (mPDF.getPageCount() < mCurPage) {
+				Fun.log("PDFファイルのページ数よりmCurPageの方が大きい)");
+			}
+		} else if (mType == FileType.zip) {
+			if (zip.getCount() < mCurPage) {
+				Fun.log("PDFファイルのファイル数よりmCurPageの方が大きい)");
+			}
+		}
+	}
+
+	private PointF getSize(int page) {
+		if (mType == FileType.pdf) { 
+			return mPDF.getSize(page);
+		} else if (mType == FileType.zip) {
+//			zip.openZip(page);
+			zip.openZipMoreFaster(page);
+			return zip.getSize();
+		}
+		return null;
+	}
+
+	private Bitmap getBitmap(int page) {
+		if (mType == FileType.pdf) {
+			return mPDF.getBitmap(page);
+		} else if (mType == FileType.zip) {
+//			return zip.openZip(page);
+			return zip.openZipMoreFaster(page);
+		}
+		return null;
+	}
 
 	public BookManager(String bookName, String filePath, Context context) {
 		Fun.log("BookManager()");
@@ -48,12 +90,18 @@ public class BookManager {
 		mReadFilePath = readFilePath();
 		mFileSize = readFileSize();
 		mType = getFileType();
-		
-		if (mType == FileType.pdf) {
-			mPDF = new PDF(mContext, mFilePath);
+
+		if(mCurPage == -1) {
+			mCurPage = 0;
 		}
-		mPosList = readPageLayout(mCurPage);
+		if(mCurLine == -1) {
+			mCurLine = 0;
+		}
 		
+		initializeBook();
+
+		mPosList = readPageLayout(mCurPage);
+
 		Fun.log(String.valueOf(mCurLine));
 		Fun.log(String.valueOf(mCurPage));
 		Fun.log(mReadFilePath);
@@ -62,13 +110,12 @@ public class BookManager {
 		if (mPosList != null) {
 			Fun.log(mPosList.toString());
 		}
-
 		check();
 		saveCurLine();
 		saveCurPage();
 		saveFilePath();
 		saveFileSize();
-//		savePageLayout();
+//		if (!mRecognized) { recognize(); }
 		recognize();
 	}
 
@@ -146,18 +193,16 @@ public class BookManager {
 				mCurLine = 0;
 				saveCurLine();
 			}
-			if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
-				Fun.log("サイズが違うレイアウトデータが存在する場合");
+			if(mPosList != null) {
+				if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
+					Fun.log("サイズが違うレイアウトデータが存在する場合");
+				}
 			}
 			if (mPosList == null) { mRecognized = false; }
 			else { mRecognized = true; }
 		}
 		// ファイル種類別
-		if (mType == FileType.pdf) {
-			if (mPDF.getPageCount() < mCurPage) {
-				Fun.log("PDFファイルのページ数よりmCurPageの方が大きい)");
-			}
-		}
+		checkWithFileType();
 	}
 
 	private boolean isReading() {
@@ -180,8 +225,7 @@ public class BookManager {
 	}
 
 	private boolean savePageLayout() {
-		PointF size = null;
-		if (mType == FileType.pdf) { size = mPDF.getSize(mCurPage); }
+		PointF size = getSize(mCurPage);
 		if (size == null) {
 			Fun.log("画像のサイズが取得できなかった");
 			return false;
@@ -195,8 +239,7 @@ public class BookManager {
 	private ArrayList<Word> readPageLayout(int page) {
 		try {
 			Fun.log("readPageLayout");
-			PointF size = null;
-			if (mType == FileType.pdf) { size = mPDF.getSize(page); }
+			PointF size = getSize(page);
 			String fileName = page + "_" + (int)size.x + "_" + (int)size.y + ".txt";
 
 			// しばらくエラー処理
@@ -221,7 +264,7 @@ public class BookManager {
 					return null;
 				}
 			}
-			
+
 			Fun.log("同じファイル名のLayoutデータが存在する");
 			Gson gson = new Gson();
 			String json = Fun.read(Fun.DIR + mBookName + "/layout/" + fileName);
@@ -231,42 +274,39 @@ public class BookManager {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 	}
-	
+
 	public boolean isRecognized() {
 		return mRecognized;
 	}
-	
+
 	public void recognize() {
 		Fun.log("recognize()");
-		if (mType == FileType.pdf) {
-			Fun.log("recognize(): FileType == pdf");
-			Bitmap bmp = mPDF.getBitmap(mCurPage);
-//			PointF size = mPDF.getSize(mCurPage);
-//			size.x = size.x * 2;
-//			size.y = size.y * 2;
-//			Fun.log(String.valueOf(size.x));
-//			Fun.log(String.valueOf(size.y));
-//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
-//			docomo = new Docomo(bmp, mBookName);
-			docomo = new DocomoOld(bmp);
-			docomo.start();
-			done = false;
-			keyEventTimer = new CountDownTimer(20000, 1000) {
-				@Override
-				public void onTick(long millisUntilFinished) {
-					Fun.log(String.valueOf(millisUntilFinished));
-					setPos();
-				}
-				@Override
-				public void onFinish() {
-					Fun.log("20秒待ったけど終わらなかった");
-				}
-			}.start();
-		}
+		Bitmap bmp = getBitmap(mCurPage);
+		//			PointF size = mPDF.getSize(mCurPage);
+		//			size.x = size.x * 2;
+		//			size.y = size.y * 2;
+		//			Fun.log(String.valueOf(size.x));
+		//			Fun.log(String.valueOf(size.y));
+		//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
+		//			docomo = new Docomo(bmp, mBookName);
+		docomo = new DocomoOld(bmp);
+		docomo.start();
+		done = false;
+		keyEventTimer = new CountDownTimer(20000, 1000) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				Fun.log(String.valueOf(millisUntilFinished));
+				setPos();
+			}
+			@Override
+			public void onFinish() {
+				Fun.log("20秒待ったけど終わらなかった");
+			}
+		}.start();
 	}
-	
+
 	public void setPos() {
 		wordList = docomo.getWordList();
 		if(wordList == null) {
@@ -276,29 +316,19 @@ public class BookManager {
 			done = true;
 			Fun.log("wordList取得!");
 			Fun.log(wordList.toString());
-//			keyEventTimer.cancel();
+			//			keyEventTimer.cancel();
 			keyEventTimer.onFinish();
 			mPosList = wordList;
 			savePageLayout();
-//			PointF size = mPDF.getSize(mCurPage);
-//			size.x = size.x * 2;
-//			size.y = size.y * 2;
-//			Fun.log(String.valueOf(size.x));
-//			Fun.log(String.valueOf(size.y));
-//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
-//			Fun.paintPosition(bmp, mPosList, mBookName, mCurPage);
-			Fun.paintPosition(getBitmap(), mPosList, mBookName, mCurPage);
+			//			PointF size = mPDF.getSize(mCurPage);
+			//			size.x = size.x * 2;
+			//			size.y = size.y * 2;
+			//			Fun.log(String.valueOf(size.x));
+			//			Fun.log(String.valueOf(size.y));
+			//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
+			//			Fun.paintPosition(bmp, mPosList, mBookName, mCurPage);
+			Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
 		}
-//		savePageLayout();
-	}
-	
-	public Bitmap getBitmap() {
-		Fun.log("getBitmap()");
-		if (mType == FileType.pdf) {
-			Fun.log("getBitmap(): FileType == pdf");
-			return mPDF.getBitmap(mCurPage);
-		}
-		Fun.log("getBitmap(): return null");
-		return null;
+		//		savePageLayout();
 	}
 }

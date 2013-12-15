@@ -83,6 +83,7 @@ public class FileListView extends ViewGroup{
 					}
 					recentFiles = recentFiles + recentList.get(i) + "\n";
 				}
+				Fun.saveRoot(recentFiles, "recentFiles.txt");
 			}
 		}
 	}
