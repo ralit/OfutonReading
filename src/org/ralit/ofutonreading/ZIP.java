@@ -78,6 +78,7 @@ public class ZIP {
 		}
 	}
 	
+	// 間違ったコード
 	public Bitmap openZipFaster(int page) {
 		try {
 			ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));
@@ -105,6 +106,7 @@ public class ZIP {
 		}
 	}
 	
+	// 間違ったコード
 	public Bitmap openZipMoreFaster(int page) {
 		try {
 			ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));

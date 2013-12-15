@@ -63,8 +63,8 @@ public class BookManager {
 		if (mType == FileType.pdf) { 
 			return mPDF.getSize(page);
 		} else if (mType == FileType.zip) {
-//			zip.openZip(page);
-			zip.openZipMoreFaster(page);
+			zip.openZip(page);
+//			zip.openZipMoreFaster(page);
 			return zip.getSize();
 		}
 		return null;
@@ -74,8 +74,8 @@ public class BookManager {
 		if (mType == FileType.pdf) {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
-//			return zip.openZip(page);
-			return zip.openZipMoreFaster(page);
+			return zip.openZip(page);
+//			return zip.openZipMoreFaster(page);
 		}
 		return null;
 	}
@@ -91,12 +91,8 @@ public class BookManager {
 		mFileSize = readFileSize();
 		mType = getFileType();
 
-		if(mCurPage == -1) {
-			mCurPage = 0;
-		}
-		if(mCurLine == -1) {
-			mCurLine = 0;
-		}
+		if(mCurPage == -1) { mCurPage = 0; }
+		if(mCurLine == -1) { mCurLine = 0; }
 		
 		initializeBook();
 
@@ -182,16 +178,6 @@ public class BookManager {
 			}
 			if (new File(mFilePath).length() != mFileSize) {
 				Fun.log("ファイルが変更された");
-			}
-			if (mCurPage == -1) {
-				Fun.log("currentPage.txtが存在しなかった");
-				mCurPage = 0;
-				saveCurPage();
-			}
-			if (mCurLine == -1) {
-				Fun.log("currentLine.txtが存在しなかった");
-				mCurLine = 0;
-				saveCurLine();
 			}
 			if(mPosList != null) {
 				if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
