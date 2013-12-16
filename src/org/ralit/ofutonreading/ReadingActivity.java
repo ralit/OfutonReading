@@ -19,6 +19,7 @@ import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.animation.LinearInterpolator;
@@ -68,6 +69,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setRequestedOrientation(Configuration.ORIENTATION_LANDSCAPE);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		Fun.log(getResources().getConfiguration().orientation);
 
 		Intent intent = getIntent();
@@ -310,8 +312,8 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		mTickerHeight = (int) (mRH / 2); // 修正
 		Fun.log("mTickerWidth: "+mTickerWidth);
 		Fun.log("mTickerHeight: "+mTickerHeight);
-//		mAnimatingTicker.setX(mTickerWidth);
-//		mAnimatingTicker.setY(0);
+		mAnimatingTicker.setX(mTickerWidth);
+		mAnimatingTicker.setY(0);
 		// アニメーション開始
 		animation();
 	}
@@ -353,7 +355,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 //		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 //		else { mAnimatingTicker = mTicker1; }
 
-		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
+		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth/2, -mTickerWidth/2);
 		Fun.log(mTickerWidth);
 		if (mTickerWidth > mTickerHeight) {
 			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
