@@ -63,7 +63,14 @@ public class PageView extends FrameLayout{
 		{
 			android.view.ViewGroup.LayoutParams params = getLayoutParams();
 			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+			params.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
+			setLayoutParams(params);
+		}
+		if(0 < pageH && 0 < pageW) {
+			Fun.log("PageViewに画像をセットした後のonSizeChenged");
+			android.view.ViewGroup.LayoutParams params = getLayoutParams();
+			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+			params.height = (int)(mRW * (pageH/pageW));
 			setLayoutParams(params);
 		}
 		final int count  = getChildCount();
@@ -82,31 +89,32 @@ public class PageView extends FrameLayout{
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		super.onLayout(changed, l, t, r, b);
 		// TODO Auto-generated method stub
-		final int count = getChildCount();
-		final int left = getLeft();
-		final int top = getTop();
-		final int right = getRight();
-		final int bottom = getBottom();
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			if (view.getVisibility() != View.GONE) {
-				view.layout(left, top, right, bottom);
-			}
-		}
-		invalidate();
+		//		final int count = getChildCount();
+		//		final int left = getLeft();
+		//		final int top = getTop();
+		//		final int right = getRight();
+		//		final int bottom = getBottom();
+		//		for (int i = 0; i < count; i++) {
+		//			View view = getChildAt(i);
+		//			if (view.getVisibility() != View.GONE) {
+		//				view.layout(left, top, right, bottom);
+		//			}
+		//		}
+		//		invalidate();
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		//		final int count = getChildCount();
+		//		for(int i = 0; i < count; i++) {
+		//			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
+		//		}
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-		final int count = getChildCount();
-		for(int i = 0; i < count; i++) {
-			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
-		}
 	}
 
-	public void setimage(Bitmap _bmp) {
+	public void setImage(Bitmap _bmp) {
 		mPageBitmap = _bmp;
 		pageW = (float) mPageBitmap.getWidth();
 		Fun.log("pageW:"+pageW);
@@ -124,10 +132,18 @@ public class PageView extends FrameLayout{
 		// マーカーの処理
 		//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
 		//			markerview.setImageBitmap(markedPage);
+		mPageView.setScaleX(scale_ratio);
+		mPageView.setScaleY(scale_ratio);
 		setScaleX(scale_ratio);
 		setScaleY(scale_ratio);
-		
-		
+		{
+			android.view.ViewGroup.LayoutParams params = getLayoutParams();
+			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+			params.height = (int)(mRW * (pageH/pageW));
+			setLayoutParams(params);
+		}
+
+
 		if(!mBook.isRecognized()) {
 			Fun.log("mBook.isRecognized() == false");
 			waitForRecognizeTimer = new Timer();
@@ -149,7 +165,7 @@ public class PageView extends FrameLayout{
 			onFinishRecognize();
 		}
 	}
-	
+
 	public void onFinishRecognize() {
 		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
 		Fun.log("linemid:"+linemid);
@@ -164,7 +180,7 @@ public class PageView extends FrameLayout{
 		set.setDuration(500);
 		set.start();
 	}
-	
+
 	public Bitmap getImage() {
 		return mPageBitmap;
 	}

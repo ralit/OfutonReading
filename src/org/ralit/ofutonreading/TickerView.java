@@ -4,11 +4,14 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.os.Handler;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -24,11 +27,12 @@ interface LineEndListener {
 	void onLineEnd();
 }
 
-public class TickerView extends FrameLayout{
+public class TickerView extends FrameLayout implements AnimatorListener{
 
-	private ImageView mTicker1;
-	private ImageView mTicker2;
+//	private ImageView mTicker1;
+//	private ImageView mTicker2;
 	private LinkedList<ImageView> mTickerList = new LinkedList<ImageView>();
+	private LinkedList<ObjectAnimator> mAnimatorList = new LinkedList<ObjectAnimator>();
 	private Context context;
 	private BookManager mBook;
 	private float mRH;
@@ -36,16 +40,22 @@ public class TickerView extends FrameLayout{
 	private int mTickerWidth;
 	private int mTickerHeight;
 	private long mDuration;
+	private long animationDelay = 0;
+	private long loss = 0;
+	private Timer animationTimer;
+	private Handler handler = new Handler();
+	private ObjectAnimator move;
+	private Bitmap bmp;
 
 	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener) {
 		super(context);
 		this.context = context;
 		mBook = bookManager;
-		mTicker1 = new ImageView(context);
-		mTicker2 = new ImageView(context);
-		addView(mTicker1);
-		addView(mTicker2);
-		mTicker1.setBackgroundColor(Color.DKGRAY);
+//		mTicker1 = new ImageView(context);
+//		mTicker2 = new ImageView(context);
+//		addView(mTicker1);
+//		addView(mTicker2);
+//		mTicker1.setBackgroundColor(Color.DKGRAY);
 	}
 
 	@Override
@@ -65,6 +75,7 @@ public class TickerView extends FrameLayout{
 
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		super.onLayout(changed, l, t, r, b);
 		// TODO Auto-generated method stub
 		final int count = getChildCount();
 		final int left = getLeft();
@@ -82,17 +93,21 @@ public class TickerView extends FrameLayout{
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 		final int count = getChildCount();
 		for(int i = 0; i < count; i++) {
 			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
 		}
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
 	
-	public void setimage(Bitmap bmp) {
+	public void setImage(Bitmap _bmp) {
+		if (_bmp != null) {
+			bmp = _bmp;
+		}
+		
 		ImageView ticker = new ImageView(context);
 		mTickerList.add(ticker);
-		ticker.
+
 		int mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
 		Fun.log("mLineW:"+mLineW);
 		int mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
@@ -102,15 +117,21 @@ public class TickerView extends FrameLayout{
 		Fun.log("mTextZoom:"+mTextZoom);
 		ticker.setScaleX(mTextZoom);
 		ticker.setScaleY(mTextZoom);
-		int mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
-		int mTickerHeight = (int) (mRH / 2); // 修正
+		mTickerHeight = (int) (mRH / 2); // 修正
+		mTickerWidth = (int) (mLineW * ((float)mTickerHeight/(float)mLineH)); // 修正
+//		mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
 		Fun.log("mTickerWidth: "+mTickerWidth);
 		Fun.log("mTickerHeight: "+mTickerHeight);
-//		ticker.setX(mTickerWidth);
-//		ticker.setY(0);
+		ticker.setX(mTickerWidth/2);
+		ticker.setY(0);
 		// アニメーション開始
 //		animation();
+		ViewGroup parent = (ViewGroup)mTickerList.getFirst().getParent(); 
+		if ( parent != null ) {
+		    parent.removeView(mTickerList.getFirst());
+		}
 		addView(mTickerList.getFirst());
+		animation();
 	}
 	
 	
@@ -118,29 +139,79 @@ public class TickerView extends FrameLayout{
 		mDuration = 530;
 
 		ObjectAnimator move = ObjectAnimator.ofFloat(mTickerList.pollFirst(), "x", mTickerWidth/2, -mTickerWidth/2);
+		mAnimatorList.add(move);
 		if (mTickerWidth > mTickerHeight) { 
 			mDuration *= ((float)mTickerWidth / (float)mTickerHeight);
 		} else { 
 			mDuration *= ((float)mTickerHeight / (float)mTickerWidth);
 		}
+//		if (imageview.getWidth() > imageview.getHeight()) { 
+//			mDuration *= ((float)imageview.getWidth() / (float)imageview.getHeight());
+//		} else { 
+//			mDuration *= ((float)imageview.getHeight() / (float)imageview.getWidth());
+//		}
 		Fun.log("mDuration:"+mDuration);
 		
 		move.setDuration(mDuration);
-//		move.addListener(this);
+		move.addListener(this);
 		move.setInterpolator(new LinearInterpolator());
-		move.start();
+		mBook.setCurLine(mBook.getCurLine() + 1);
+		mAnimatorList.pollFirst().start();
+//		move.start();
 //		animationTimer = new Timer();
+//		if (loss != 0) {
+//			loss = System.currentTimeMillis() - loss;
+//		}
 //		animationTimer.schedule(new TimerTask() {
 //			@Override
 //			public void run() {
 //				handler.post(new Runnable() {
 //					@Override
 //					public void run() {
-//						move.start();
 //						mBook.setCurLine(mBook.getCurLine() + 1);
+//						mAnimatorList.pollFirst().start();
+//
 //					}
 //				});
 //			}
 //		}, animationDelay);
+	}
+	
+	
+
+
+	@Override
+	public void onAnimationCancel(Animator animation) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onAnimationEnd(Animator animation) {
+		setImage(null);
+	}
+
+	@Override
+	public void onAnimationRepeat(Animator animation) {
+		// TODO Auto-generated method stub
+
+	}
+
+	//	@Override
+	//	public void onAnimationStart(Animator animation) {
+	//		// TODO Auto-generated method stub
+	////		if (mAnimationFlag == AnimationFlag.loop) {
+	//			if(0 < animation.getStartDelay()) { mPending = true; } 
+	//			Fun.log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
+	//			animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));	
+	////		}
+	//	}
+
+	@Override
+	public void onAnimationStart(Animator animation) {
+//		animationDelay = (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth));
+//		loss = System.currentTimeMillis();
+//		Fun.log("onAnimationStart > animationDelay: " + animationDelay);
+//		setImage(null);
 	}
 }
