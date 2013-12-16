@@ -38,7 +38,14 @@ public class Fun {
 		} else {
 			Log.i("ralit", "☆null☆");
 		}
-		
+	}
+	
+	public static void log(Object object) {
+		if (object != null) {
+			Log.i("ralit", String.valueOf(object));
+		} else {
+			Log.i("ralit", "☆null☆");
+		}
 	}
 
 	public static void save(String data, String filePath, String bookName) {

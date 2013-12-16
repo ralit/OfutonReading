@@ -108,6 +108,7 @@ public class MainActivity extends Activity implements FileClickListener {
 //		BookView bookView = new BookView(this, manager);
 //		frameLayout.addView(bookView);
 //		manager.setBookView(bookView);
+		
 	}
 
 	@Override

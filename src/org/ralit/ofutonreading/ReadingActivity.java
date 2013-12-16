@@ -11,6 +11,7 @@ import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -50,17 +51,18 @@ public class ReadingActivity extends Activity {
 		//		setContentView(R.layout.activity_reading);
 		// Show the Up button in the action bar.
 		//		setupActionBar();
-//		initialize();
+//		
 		Intent intent = getIntent();
 		if (intent != null) {
 			String fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
 			BookManager manager = new BookManager(fileName, filePath, this);
-			BookView bookView = new BookView(this, manager);
-			setContentView(bookView);
-			manager.setBookView(bookView);
+//			BookView bookView = new BookView(this, manager);
+//			setContentView(bookView);
+//			manager.setBookView(bookView);
 		}
 		
+		initialize();
 	}
 
 	/**
@@ -134,35 +136,37 @@ public class ReadingActivity extends Activity {
 	}
 
 
-//	@Override
-//	public void onWindowFocusChanged(boolean hasFocus) {
-//		Fun.log("onWindowFocusChanged()");
-//		super.onWindowFocusChanged(hasFocus);
-//		super.onSizeChanged(w, h, oldw, oldh);
-//		final int count  = getChildCount();
-//		for (int i = 0; i < count; i++) {
-//			View view = getChildAt(i);
-//			LayoutParams params = view.getLayoutParams();
-//			params.width = LayoutParams.MATCH_PARENT;
-//			params.height = LayoutParams.MATCH_PARENT;
-//			view.setLayoutParams(params);
-//		}
-//		Fun.log(String.valueOf(w));
-//		Fun.log(String.valueOf(h));
-//		{
-//			LayoutParams params = mTickerFrame.getLayoutParams();
-//			params.width = w;
-//			params.height = h / 2;
-//			mTickerFrame.setLayoutParams(params);
-//		}
-//		{
-//			LayoutParams params = mScrollView.getLayoutParams();
-//			params.width = w;
-//			params.height = h / 2;
-//			mScrollView.setLayoutParams(params);
-//			mPageFrame.setMinimumHeight(h / 2);
-//		}
-//		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
-//	}
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		Fun.log("onWindowFocusChanged()");
+		super.onWindowFocusChanged(hasFocus);
+		mRW = mLinearLayout.getWidth();
+		mRH = mLinearLayout.getHeight();
+		Fun.log(mRW);
+		Fun.log(mRH);
+		
+		final int count  = mLinearLayout.getChildCount();
+		for (int i = 0; i < count; i++) {
+			View view = mLinearLayout.getChildAt(i);
+			LayoutParams params = view.getLayoutParams();
+			params.width = LayoutParams.MATCH_PARENT;
+			params.height = LayoutParams.MATCH_PARENT;
+			view.setLayoutParams(params);
+		}
+		{
+			LayoutParams params = mTickerFrame.getLayoutParams();
+			params.width = (int)mRW;
+			params.height = (int)mRH / 2;
+			mTickerFrame.setLayoutParams(params);
+		}
+		{
+			LayoutParams params = mScrollView.getLayoutParams();
+			params.width = (int)mRW;
+			params.height = (int)mRH / 2;
+			mScrollView.setLayoutParams(params);
+			mPageFrame.setMinimumHeight((int)mRH / 2);
+		}
+		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+	}
 
 }
