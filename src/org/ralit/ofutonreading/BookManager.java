@@ -38,8 +38,12 @@ public class BookManager {
 	boolean done = false;
 
 	private ZIP zip;
-	private BookView mBookView;
 	private CountDownTimer timer;
+	private boolean readyForSetImage = false;
+	
+	public boolean getReadyForSetImage() {
+		return readyForSetImage;
+	}
 
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -97,6 +101,8 @@ public class BookManager {
 		if(mCurLine == -1) { mCurLine = 0; }
 
 		initializeBook();
+		
+		readyForSetImage = true;
 
 		mPosList = readPageLayout(mCurPage);
 
@@ -117,31 +123,6 @@ public class BookManager {
 			recognize();
 		}
 //		recognize();
-		timer = new CountDownTimer(1000, 100) {
-			
-			@Override
-			public void onTick(long millisUntilFinished) {
-				// TODO Auto-generated method stub
-				if(mBookView != null) {
-					setImage();
-				}
-			}
-			
-			@Override
-			public void onFinish() {
-				// TODO Auto-generated method stub
-				
-			}
-		}.start();
-	}
-
-	private void setImage() {
-		mBookView.setImage(getBitmap(mCurPage));
-		timer.cancel();
-	}
-	
-	public void setBookView(BookView bookView) {
-		mBookView = bookView;
 	}
 
 	public void setCurLine(int curLine) {
@@ -313,7 +294,20 @@ public class BookManager {
 			@Override
 			public void onTick(long millisUntilFinished) {
 				Fun.log(String.valueOf(millisUntilFinished));
-				setPos();
+				wordList = docomo.getWordList();
+				if(wordList == null) {
+					Fun.log("wordListはnull");
+				} else {
+					if(done) { return; } 
+					done = true;
+					keyEventTimer.cancel();
+					Fun.log("wordList取得!");
+					Fun.log(wordList.toString());
+					mPosList = wordList;
+					mRecognized = true;
+					savePageLayout();
+					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
+				}
 			}
 			@Override
 			public void onFinish() {
@@ -322,30 +316,4 @@ public class BookManager {
 		}.start();
 	}
 
-	public void setPos() {
-		wordList = docomo.getWordList();
-		if(wordList == null) {
-			Fun.log("wordListはnull");
-		} else {
-			if(done) { return; } 
-			done = true;
-			Fun.log("wordList取得!");
-			Fun.log(wordList.toString());
-			//			keyEventTimer.cancel();
-			keyEventTimer.onFinish();
-			mPosList = wordList;
-			mRecognized = true;
-			savePageLayout();
-			mBookView.setImage(getBitmap(mCurPage));
-			//			PointF size = mPDF.getSize(mCurPage);
-			//			size.x = size.x * 2;
-			//			size.y = size.y * 2;
-			//			Fun.log(String.valueOf(size.x));
-			//			Fun.log(String.valueOf(size.y));
-			//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
-			//			Fun.paintPosition(bmp, mPosList, mBookName, mCurPage);
-			Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
-		}
-		//		savePageLayout();
-	}
 }
