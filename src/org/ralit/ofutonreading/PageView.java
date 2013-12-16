@@ -8,6 +8,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.Handler;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -20,7 +21,7 @@ import android.widget.ImageView;
  */
 
 interface LayoutFinishedListener {
-	void onLayoutFinished();
+	void onPageViewLayoutFinished();
 }
 
 public class PageView extends FrameLayout{
@@ -37,6 +38,7 @@ public class PageView extends FrameLayout{
 	private float pageW;
 	private float pageH;
 	private Timer waitForRecognizeTimer;
+	private Handler handler = new Handler();
 
 	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener) {
 		super(context);
@@ -73,7 +75,7 @@ public class PageView extends FrameLayout{
 			view.setLayoutParams(params);
 		}
 		if(isFirstLayout) {
-			layoutFinishedListener.onLayoutFinished();
+			layoutFinishedListener.onPageViewLayoutFinished();
 			isFirstLayout = false;
 		}
 	}
@@ -137,14 +139,14 @@ public class PageView extends FrameLayout{
 							@Override
 							public void run() {
 								waitForRecognizeTimer.cancel();
-								afterRecognized(pageH, pageW);
+								onFinishRecognize();
 							}
 						});
 					}
 				}
 			}, 0, 1000);
 		} else {
-			afterRecognized(pageH, pageW);
+			onFinishRecognize();
 		}
 	}
 	

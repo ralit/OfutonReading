@@ -169,16 +169,11 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	}
 
 	@Override
-	public void onLayoutFinished() {
-		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
+	public void onPageViewLayoutFinished() {
+//		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
+		mPageView.setimage(mBook.getBitmap(mBook.getCurPage()));
 	}
 
-//	public void setImage(Bitmap _bmp) {
-//		Fun.log("setImage()");
-//
-//
-//
-//	}
 //
 //	private void afterRecognized(float pageH, float pageW) {
 //

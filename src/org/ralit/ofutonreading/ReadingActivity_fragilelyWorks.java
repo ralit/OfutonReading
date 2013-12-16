@@ -28,7 +28,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class ReadingActivity_fragilelyWorking extends Activity implements AnimatorListener{
+public class ReadingActivity_fragilelyWorks extends Activity implements AnimatorListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
