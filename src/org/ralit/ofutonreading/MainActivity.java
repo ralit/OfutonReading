@@ -5,6 +5,7 @@ import java.io.File;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
@@ -44,22 +45,7 @@ public class MainActivity extends Activity implements FileClickListener {
 //			set.playSequentially(animator, animator2);
 //			set.start();
 //		}
-		CountDownTimer timer = new CountDownTimer(3000, 1000) {
-			
-			@Override
-			public void onTick(long millisUntilFinished) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onFinish() {
-				// TODO Auto-generated method stub
-				BookView bookView = new BookView(getApplicationContext(), null);
-				frameLayout.addView(bookView);
-//				bookView.setAlpha(1f);
-			}
-		}.start();
+		
 		
 		//		Configuration config = getResources().getConfiguration();
 		//		config.orientation = Configuration.ORIENTATION_LANDSCAPE;
@@ -113,10 +99,15 @@ public class MainActivity extends Activity implements FileClickListener {
 
 	@Override
 	public void onFileClicked(File file) {
-		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
-		BookView bookView = new BookView(this, manager);
-		frameLayout.addView(bookView);
-		manager.setBookView(bookView);
+		Intent intent = new Intent();
+		intent.setClass(getApplicationContext(), ReadingActivity.class);
+		intent.putExtra("fileName", file.getName());
+		intent.putExtra("filePath", file.getAbsolutePath());
+		startActivity(intent);
+//		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
+//		BookView bookView = new BookView(this, manager);
+//		frameLayout.addView(bookView);
+//		manager.setBookView(bookView);
 	}
 
 	@Override

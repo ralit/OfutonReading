@@ -4,5 +4,8 @@
     <string name="ofuton_app_name">おふとんリーディング</string>
     <string name="ofuton_action_settings">設定</string>
     <string name="ofuton_open_file">ファイルを開く</string>
+    <string name="title_activity_reading">ReadingActivity</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>

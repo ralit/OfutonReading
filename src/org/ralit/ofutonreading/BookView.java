@@ -1,22 +1,20 @@
 package org.ralit.ofutonreading;
 
 import android.animation.Animator;
-import android.animation.ObjectAnimator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.CountDownTimer;
-import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
-import android.widget.TextView;
 
 /**
  * ScrollViewの子にはminimumHeightを設定しないと大きさが0になるっぽい
@@ -104,33 +102,11 @@ public class BookView extends ViewGroup implements AnimatorListener{
 	}
 
 	@Override
-	public void onAnimationCancel(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onAnimationEnd(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onAnimationRepeat(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onAnimationStart(Animator animation) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		Fun.log("onSizeChanged");
 		super.onSizeChanged(w, h, oldw, oldh);
+		mRW = w;
+		mRH = h;
 		final int count  = getChildCount();
 		for (int i = 0; i < count; i++) {
 			View view = getChildAt(i);
@@ -216,7 +192,8 @@ public class BookView extends ViewGroup implements AnimatorListener{
 			Fun.log("small_w:"+small_w);
 			final float scale_ratio = mRW / small_w;
 			Fun.log("scale_ratio:"+scale_ratio);
-			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+//			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, getWidth(), (int)(getWidth() * (pageH/pageW)), false);
 			Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
 			mPageView.setImageBitmap(mScaledPageBitmap);
 			// マーカーの処理
@@ -272,6 +249,67 @@ public class BookView extends ViewGroup implements AnimatorListener{
 		mAnimatingTicker.setY(0);
 		// アニメーション開始
 //		animation(0);
+	}
+	
+	public void animation(long startDelay) {
+		if(mPending) { return; }
+		mAnimation = new AnimatorSet();
+		ObjectAnimator move = null;
+		mDuration = 530;
+		Fun.log("mDuration:"+mDuration);
+		
+		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+		else { mAnimatingTicker = mTicker1; }
+
+		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
+		if (mTickerWidth > mTickerHeight) {
+			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
+		} else {
+			mDuration *= ((float)mTickerHeight / (float)mTickerWidth); // intへのキャストを削除
+		}
+		Fun.log("mDuration:"+mDuration);
+		move.setDuration(mDuration);
+		move.setInterpolator(new LinearInterpolator());
+		mAnimation.addListener(this);
+//		mAnimationFlag = AnimationFlag.loop;
+		mAnimation.setStartDelay(startDelay);
+		mAnimation.start();
+	}
+	
+	@Override
+	public void onAnimationCancel(Animator animation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAnimationEnd(Animator animation) {
+		// TODO Auto-generated method stub
+//		if (mAnimationFlag == AnimationFlag.loop) {
+			mPending = false;
+//		} else if (mAnimationFlag == AnimationFlag.layout) {
+//			updateLayout();
+//		}
+	}
+
+	@Override
+	public void onAnimationRepeat(Animator animation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAnimationStart(Animator animation) {
+		// TODO Auto-generated method stub
+//		if (mAnimationFlag == AnimationFlag.loop) {
+			if(0 < animation.getStartDelay()) { mPending = true; } 
+			Fun.log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
+			animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));	
+//		}
+	}
+	
+	public void finishAnimation() {
+		mAnimation.end();
 	}
 }
 

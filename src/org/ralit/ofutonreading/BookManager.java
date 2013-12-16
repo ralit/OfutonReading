@@ -39,6 +39,7 @@ public class BookManager {
 
 	private ZIP zip;
 	private BookView mBookView;
+	private CountDownTimer timer;
 
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -65,7 +66,7 @@ public class BookManager {
 			return mPDF.getSize(page);
 		} else if (mType == FileType.zip) {
 			zip.openZip(page);
-//			zip.openZipMoreFaster(page);
+			//			zip.openZipMoreFaster(page);
 			return zip.getSize();
 		}
 		return null;
@@ -76,7 +77,7 @@ public class BookManager {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
 			return zip.openZip(page);
-//			return zip.openZipMoreFaster(page);
+			//			return zip.openZipMoreFaster(page);
 		}
 		return null;
 	}
@@ -94,7 +95,7 @@ public class BookManager {
 
 		if(mCurPage == -1) { mCurPage = 0; }
 		if(mCurLine == -1) { mCurLine = 0; }
-		
+
 		initializeBook();
 
 		mPosList = readPageLayout(mCurPage);
@@ -112,13 +113,35 @@ public class BookManager {
 		saveCurPage();
 		saveFilePath();
 		saveFileSize();
-//		if (!mRecognized) { recognize(); }
-		recognize();
+		if (!mRecognized) { 
+			recognize();
+		}
+//		recognize();
+		timer = new CountDownTimer(1000, 100) {
+			
+			@Override
+			public void onTick(long millisUntilFinished) {
+				// TODO Auto-generated method stub
+				if(mBookView != null) {
+					setImage();
+				}
+			}
+			
+			@Override
+			public void onFinish() {
+				// TODO Auto-generated method stub
+				
+			}
+		}.start();
+	}
+
+	private void setImage() {
+		mBookView.setImage(getBitmap(mCurPage));
+		timer.cancel();
 	}
 	
 	public void setBookView(BookView bookView) {
 		mBookView = bookView;
-		mBookView.setImage(getBitmap(mCurPage));
 	}
 
 	public void setCurLine(int curLine) {
@@ -313,6 +336,7 @@ public class BookManager {
 			mPosList = wordList;
 			mRecognized = true;
 			savePageLayout();
+			mBookView.setImage(getBitmap(mCurPage));
 			//			PointF size = mPDF.getSize(mCurPage);
 			//			size.x = size.x * 2;
 			//			size.y = size.y * 2;
