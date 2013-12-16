@@ -205,40 +205,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 					Fun.log(String.valueOf(millisUntilFinished));
 					if(mBook.isRecognized()) {
 						waitForRecognize.cancel();
-						float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
-						Fun.log("linemid:"+linemid);
-						float distance = pageH / 2 - linemid;
-						Fun.log("distance:"+distance);
-						float i = distance * (mRW / pageW);
-						Fun.log("i:"+i);
-						mPageFrame.setY(i);
-						AnimatorSet set = new AnimatorSet();
-						ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
-						ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mRH / 2);
-						ObjectAnimator anim3 = ObjectAnimator.ofFloat(mPageFrame, "y", i);
-						set.playTogether(anim1, anim2, anim3);
-						set.setDuration(500);
-						set.start();
-						
-						if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
-						else { mAnimatingTicker = mTicker1; }
-						mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
-						Fun.log("mLineW:"+mLineW);
-						mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
-						Fun.log("mLineH:"+mLineH);
-						mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).getLeft(), mBook.getPageLayout().get(mBook.getCurLine()).getTop(), mLineW, mLineH));
-						mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
-						Fun.log("mTextZoom:"+mTextZoom);
-						mAnimatingTicker.setScaleX(mTextZoom);
-						mAnimatingTicker.setScaleY(mTextZoom);
-						mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
-						mTickerHeight = (int) (mRH / 2); // 修正
-						Fun.log("mTickerWidth: "+mTickerWidth);
-						Fun.log("mTickerHeight: "+mTickerHeight);
-//						mAnimatingTicker.setX(mTickerWidth);
-						mAnimatingTicker.setY(0);
-						// アニメーション開始
-//						animation(0);
+						afterRecognized(pageH, pageW);
 					}
 				}
 				@Override
@@ -246,8 +213,46 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 					Fun.log("20秒待ったけど終わらなかった");
 				}
 			}.start();
+		} else {
+			afterRecognized(pageH, pageW);
 		}
-
+	}
+	
+	private void afterRecognized(float pageH, float pageW) {
+		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
+		Fun.log("linemid:"+linemid);
+		float distance = pageH / 2 - linemid;
+		Fun.log("distance:"+distance);
+		float i = distance * (mRW / pageW);
+		Fun.log("i:"+i);
+		mPageFrame.setY(i);
+		AnimatorSet set = new AnimatorSet();
+		ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
+		ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mRH / 2);
+		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mPageFrame, "y", i);
+		set.playTogether(anim1, anim2, anim3);
+		set.setDuration(500);
+		set.start();
+		
+		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+		else { mAnimatingTicker = mTicker1; }
+		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
+		Fun.log("mLineW:"+mLineW);
+		mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
+		Fun.log("mLineH:"+mLineH);
+		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).getLeft(), mBook.getPageLayout().get(mBook.getCurLine()).getTop(), mLineW, mLineH));
+		mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
+		Fun.log("mTextZoom:"+mTextZoom);
+		mAnimatingTicker.setScaleX(mTextZoom);
+		mAnimatingTicker.setScaleY(mTextZoom);
+		mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
+		mTickerHeight = (int) (mRH / 2); // 修正
+		Fun.log("mTickerWidth: "+mTickerWidth);
+		Fun.log("mTickerHeight: "+mTickerHeight);
+//		mAnimatingTicker.setX(mTickerWidth);
+		mAnimatingTicker.setY(0);
+		// アニメーション開始
+//		animation(0);
 	}
 	
 	public void animation(long startDelay) {
