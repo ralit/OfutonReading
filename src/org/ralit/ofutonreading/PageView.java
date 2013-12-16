@@ -1,11 +1,16 @@
 package org.ralit.ofutonreading;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 
 
 
@@ -14,13 +19,29 @@ import android.widget.ScrollView;
  * http://ga29.blog.fc2.com/blog-entry-7.html
  */
 
+interface LayoutFinishedListener {
+	void onLayoutFinished();
+}
+
 public class PageView extends FrameLayout{
 
 	private ImageView mPageView;
 	private ImageView mMarkerView;
+	private Bitmap mPageBitmap;
+	private Bitmap mScaledPageBitmap;
+	private float mRH;
+	private float mRW;
+	private LayoutFinishedListener layoutFinishedListener;
+	private boolean isFirstLayout = true;
+	private BookManager mBook;
+	private float pageW;
+	private float pageH;
+	private Timer waitForRecognizeTimer;
 
-	public PageView(Context context) {
+	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener) {
 		super(context);
+		layoutFinishedListener = _layoutFinishedListener;
+		mBook = bookManager;
 
 		mPageView = new ImageView(context);
 		mMarkerView = new ImageView(context);
@@ -28,18 +49,20 @@ public class PageView extends FrameLayout{
 		addView(mMarkerView);
 		setBackgroundColor(Color.GREEN);
 		mPageView.setBackgroundColor(Color.BLACK);
-//		mPageView.setImageResource(R.drawable.usagi);
+		//		mPageView.setImageResource(R.drawable.usagi);
 
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
+		mRH = h;
+		mRW = w;
 		{
-		android.view.ViewGroup.LayoutParams params = getLayoutParams();
-		params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		setLayoutParams(params);
+			android.view.ViewGroup.LayoutParams params = getLayoutParams();
+			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+			setLayoutParams(params);
 		}
 		final int count  = getChildCount();
 		for (int i = 0; i < count; i++) {
@@ -49,7 +72,10 @@ public class PageView extends FrameLayout{
 			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 			view.setLayoutParams(params);
 		}
-		
+		if(isFirstLayout) {
+			layoutFinishedListener.onLayoutFinished();
+			isFirstLayout = false;
+		}
 	}
 
 	@Override
@@ -76,5 +102,64 @@ public class PageView extends FrameLayout{
 		for(int i = 0; i < count; i++) {
 			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
 		}
+	}
+
+	public void setimage(Bitmap _bmp) {
+		mPageBitmap = _bmp;
+		pageW = (float) mPageBitmap.getWidth();
+		Fun.log("pageW:"+pageW);
+		pageH = (float) mPageBitmap.getHeight();
+		Fun.log("pageH:"+pageH);
+		final float ratio = mRH / pageH;
+		Fun.log("ratio:"+ratio);
+		final float small_w = pageW * ratio;
+		Fun.log("small_w:"+small_w);
+		final float scale_ratio = mRW / small_w;
+		Fun.log("scale_ratio:"+scale_ratio);
+		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+		Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
+		mPageView.setImageBitmap(mScaledPageBitmap);
+		// マーカーの処理
+		//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
+		//			markerview.setImageBitmap(markedPage);
+		setScaleX(scale_ratio);
+		setScaleY(scale_ratio);
+		
+		
+		if(!mBook.isRecognized()) {
+			Fun.log("mBook.isRecognized() == false");
+			waitForRecognizeTimer = new Timer();
+			waitForRecognizeTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					if(mBook.isRecognized()) {
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								waitForRecognizeTimer.cancel();
+								afterRecognized(pageH, pageW);
+							}
+						});
+					}
+				}
+			}, 0, 1000);
+		} else {
+			afterRecognized(pageH, pageW);
+		}
+	}
+	
+	public void onFinishRecognize() {
+		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
+		Fun.log("linemid:"+linemid);
+		float distance = pageH / 2 - linemid;
+		Fun.log("distance:"+distance);
+		float i = distance * (mRW / pageW);
+		Fun.log("i:"+i);
+		setY(i);
+		AnimatorSet set = new AnimatorSet();
+		ObjectAnimator anim3 = ObjectAnimator.ofFloat(this, "y", i);
+		set.playTogether(anim3);
+		set.setDuration(500);
+		set.start();
 	}
 }

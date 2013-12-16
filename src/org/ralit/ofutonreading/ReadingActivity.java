@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -28,7 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class ReadingActivity extends Activity implements LineEndListener{
+public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
@@ -42,8 +43,7 @@ public class ReadingActivity extends Activity implements LineEndListener{
 	private int mTickerWidth;
 	private int mTickerHeight;
 	private ImageView mAnimatingTicker; 
-	private Bitmap mPageBitmap;
-	private Bitmap mScaledPageBitmap;
+	
 	private int mDuration;
 	private int mLineW;
 	private int mLineH;
@@ -54,7 +54,7 @@ public class ReadingActivity extends Activity implements LineEndListener{
 	private CountDownTimer waitForRecognize;
 	private boolean isWindowFocusChanged = false;
 	private Timer timer;
-	private Timer waitForRecognizeTimer;
+	
 	private Timer animationTimer;
 	private Handler handler = new Handler();
 	private ObjectAnimator move;
@@ -88,6 +88,7 @@ public class ReadingActivity extends Activity implements LineEndListener{
 			}, 0, 100);
 		}
 		initialize();
+		
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class ReadingActivity extends Activity implements LineEndListener{
 		mLinearLayout = new LinearLayout(this);
 		mTickerView = new TickerView(this, this);
 		mScrollView = new ScrollView(this);
-		mPageView = new PageView(this);
+		mPageView = new PageView(this, mBook, this);
 		mLinearLayout.addView(mTickerView);
 		mLinearLayout.addView(mScrollView);
 		mScrollView.addView(mPageView);
@@ -148,7 +149,16 @@ public class ReadingActivity extends Activity implements LineEndListener{
 			params.height = (int)mRH / 2;
 			mScrollView.setLayoutParams(params);
 		}
+		
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		
+		{
+			LayoutParams params = mPageView.getLayoutParams();
+			params.width = LayoutParams.MATCH_PARENT;
+			params.height = LayoutParams.WRAP_CONTENT;
+			mPageView.setLayoutParams(params);
+		}
+		
 		isWindowFocusChanged = true;
 	}
 
@@ -158,88 +168,19 @@ public class ReadingActivity extends Activity implements LineEndListener{
 		
 	}
 
+	@Override
+	public void onLayoutFinished() {
+		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
+	}
+
 //	public void setImage(Bitmap _bmp) {
 //		Fun.log("setImage()");
 //
-//		if (_bmp != null) {
-//			mPageBitmap = _bmp;
-//		}
-//		final float pageW = (float) mPageBitmap.getWidth();
-//		Fun.log("pageW:"+pageW);
-//		final float pageH = (float) mPageBitmap.getHeight();
-//		Fun.log("pageH:"+pageH);
-//		final float ratio = mRH / pageH;
-//		Fun.log("ratio:"+ratio);
-//		final float small_w = pageW * ratio;
-//		Fun.log("small_w:"+small_w);
-//		final float scale_ratio = mRW / small_w;
-//		Fun.log("scale_ratio:"+scale_ratio);
-//		if (_bmp != null) {
-//			//		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-//			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-//			Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
-//			mPageView.setImageBitmap(mScaledPageBitmap);
-//			// マーカーの処理
-//			//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
-//			//			markerview.setImageBitmap(markedPage);
-//			mPageFrame.setScaleX(scale_ratio);
-//			mPageFrame.setScaleY(scale_ratio);
-//		}
 //
-//		if(!mBook.isRecognized()) {
-//			Fun.log("mBook.isRecognized() == false");
-//			// レイアウト認識がまだだったらレイアウト認識を行う。
-//			// レイアウト認識中は全画面でページを表示してあげる。
-//			//			waitForRecognize = new CountDownTimer(20000, 1000) {
-//			//				@Override
-//			//				public void onTick(long millisUntilFinished) {
-//			//					Fun.log(String.valueOf(millisUntilFinished));
-//			//					if(mBook.isRecognized()) {
-//			//						waitForRecognize.cancel();
-//			//						afterRecognized(pageH, pageW);
-//			//					}
-//			//				}
-//			//				@Override
-//			//				public void onFinish() {
-//			//					Fun.log("20秒待ったけど終わらなかった");
-//			//				}
-//			//			}.start();
 //
-//			waitForRecognizeTimer = new Timer();
-//			waitForRecognizeTimer.schedule(new TimerTask() {
-//				@Override
-//				public void run() {
-//					if(mBook.isRecognized()) {
-//						handler.post(new Runnable() {
-//							@Override
-//							public void run() {
-//								waitForRecognizeTimer.cancel();
-//								afterRecognized(pageH, pageW);
-//							}
-//						});
-//					}
-//				}
-//			}, 0, 1000);
-//		} else {
-//			afterRecognized(pageH, pageW);
-//		}
 //	}
 //
 //	private void afterRecognized(float pageH, float pageW) {
-//		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
-//		Fun.log("linemid:"+linemid);
-//		float distance = pageH / 2 - linemid;
-//		Fun.log("distance:"+distance);
-//		float i = distance * (mRW / pageW);
-//		Fun.log("i:"+i);
-//		mPageFrame.setY(i);
-//		AnimatorSet set = new AnimatorSet();
-//		ObjectAnimator anim1 = ObjectAnimator.ofFloat(mTickerFrame, "height", mRH / 2);
-//		ObjectAnimator anim2 = ObjectAnimator.ofFloat(mScrollView, "height", mRH / 2);
-//		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mPageFrame, "y", i);
-//		set.playTogether(anim1, anim2, anim3);
-//		set.setDuration(500);
-//		set.start();
 //
 //		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 //		else { mAnimatingTicker = mTicker1; }
