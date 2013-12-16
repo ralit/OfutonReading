@@ -80,7 +80,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 						handler.post(new Runnable() {
 							@Override public void run() {
 								timer.cancel();
-//								setImage(mBook.getBitmap(mBook.getCurPage()));
+								mTickerView.setimage(mPageView.getImage());
 							}
 						});
 					}
@@ -110,7 +110,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 	private void initialize() {
 		mLinearLayout = new LinearLayout(this);
-		mTickerView = new TickerView(this, this);
+		mTickerView = new TickerView(this, mBook, this);
 		mScrollView = new ScrollView(this);
 		mPageView = new PageView(this, mBook, this);
 		mLinearLayout.addView(mTickerView);
@@ -174,107 +174,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		mPageView.setimage(mBook.getBitmap(mBook.getCurPage()));
 	}
 
-//
-//	private void afterRecognized(float pageH, float pageW) {
-//
-//		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
-//		else { mAnimatingTicker = mTicker1; }
-//		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
-//		Fun.log("mLineW:"+mLineW);
-//		mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
-//		Fun.log("mLineH:"+mLineH);
-//		mAnimatingTicker.setImageBitmap(Bitmap.createBitmap(mPageBitmap, mBook.getPageLayout().get(mBook.getCurLine()).getLeft(), mBook.getPageLayout().get(mBook.getCurLine()).getTop(), mLineW, mLineH));
-//		mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
-//		Fun.log("mTextZoom:"+mTextZoom);
-//		mAnimatingTicker.setScaleX(mTextZoom);
-//		mAnimatingTicker.setScaleY(mTextZoom);
-//		mTickerWidth = (int) (mRW * ((float)mLineW/(float)mLineH)); // 修正
-//		mTickerHeight = (int) (mRH / 2); // 修正
-//		Fun.log("mTickerWidth: "+mTickerWidth);
-//		Fun.log("mTickerHeight: "+mTickerHeight);
-//		mAnimatingTicker.setX(mTickerWidth);
-//		mAnimatingTicker.setY(0);
-//		// アニメーション開始
-//		animation();
-//	}
-//
-//	//	public void animation(long startDelay) {
-//	//		if(mPending) { return; }
-//	//		mAnimation = new AnimatorSet();
-//	//		ObjectAnimator move = null;
-//	//		mDuration = 530;
-//	//		Fun.log("mDuration:"+mDuration);
-//	//		
-//	//		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
-//	//		else { mAnimatingTicker = mTicker1; }
-//	//
-//	//		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
-//	//		if (mTickerWidth > mTickerHeight) {
-//	//			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
-//	//		} else {
-//	//			mDuration *= ((float)mTickerHeight / (float)mTickerWidth); // intへのキャストを削除
-//	//		}
-//	//		Fun.log("mDuration:"+mDuration);
-//	//		move.setDuration(mDuration);
-//	//		move.setInterpolator(new LinearInterpolator());
-//	//		mAnimation.addListener(this);
-//	////		mAnimationFlag = AnimationFlag.loop;
-//	//		mAnimation.setStartDelay(startDelay);
-//	//		mAnimation.start();
-//	//	}
-//
-//	public void animation() {
-//		if(mPending) { return; }
-//		Fun.log("animation()");
-//		Fun.log(animationDelay);
-//
-//		move = null;
-//		mDuration = 530;
-//		Fun.log("mDuration:"+mDuration);
-//
-////		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
-////		else { mAnimatingTicker = mTicker1; }
-//
-//		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth/2, -mTickerWidth/2);
-//		Fun.log(mTickerWidth);
-//		if (mTickerWidth > mTickerHeight) {
-//			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
-//		} else {
-//			mDuration *= ((float)mTickerHeight / (float)mTickerWidth); // intへのキャストを削除
-//		}
-//		Fun.log("mDuration:"+mDuration);
-//		move.setDuration(mDuration);
-//		move.addListener(this);
-//		move.setInterpolator(new LinearInterpolator());
-//		//		CountDownTimer nextAnimationTimer = new CountDownTimer(startDelay, startDelay) {
-//		//
-//		//			@Override
-//		//			public void onTick(long millisUntilFinished) {
-//		//				// TODO Auto-generated method stub
-//		//
-//		//			}
-//		//
-//		//			@Override
-//		//			public void onFinish() {
-//		//				// TODO Auto-generated method stub
-//		//				mAnimation.start();
-//		//			}
-//		//		}.start();
-////		move.start();
-//		animationTimer = new Timer();
-//		animationTimer.schedule(new TimerTask() {
-//			@Override
-//			public void run() {
-//				handler.post(new Runnable() {
-//					@Override
-//					public void run() {
-//						move.start();
-//						mBook.setCurLine(mBook.getCurLine() + 1);
-//					}
-//				});
-//			}
-//		}, animationDelay);
-//	}
+
+
 //
 //	@Override
 //	public void onAnimationCancel(Animator animation) {

@@ -164,4 +164,8 @@ public class PageView extends FrameLayout{
 		set.setDuration(500);
 		set.start();
 	}
+	
+	public Bitmap getImage() {
+		return mPageBitmap;
+	}
 }
