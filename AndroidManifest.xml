@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="org.ralit.ofutonreading.MainActivity"
-            android:configChanges="orientation"
+            
             android:label="@string/ofuton_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

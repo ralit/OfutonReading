@@ -1,20 +1,26 @@
 package org.ralit.ofutonreading;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.Window;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -34,7 +40,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 	private ImageView mPageView;
 	private ImageView mMarkerView;
 	// その他
-	private AnimatorSet mAnimation;
+	//	private AnimatorSet mAnimation;
 	private float mTextZoom;
 	private int mTickerWidth;
 	private int mTickerHeight;
@@ -50,39 +56,72 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 	private CountDownTimer initialSetImagetimer;
 	private CountDownTimer waitForRecognize;
 	private boolean isWindowFocusChanged = false;
+	private Timer timer;
+	private Timer waitForRecognizeTimer;
+	private Timer animationTimer;
+	private Handler handler = new Handler();
+	private ObjectAnimator move;
+	private long animationDelay = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setRequestedOrientation(Configuration.ORIENTATION_LANDSCAPE);
+		Fun.log(getResources().getConfiguration().orientation);
+
 		Intent intent = getIntent();
 		if (intent != null) {
 			String fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
 			mBook = new BookManager(fileName, filePath, this);
-//			BookView bookView = new BookView(this, manager);
-//			setContentView(bookView);
-//			manager.setBookView(bookView);
-			initialSetImagetimer = new CountDownTimer(3000, 100) {
-				
+			//			BookView bookView = new BookView(this, manager);
+			//			setContentView(bookView);
+			//			manager.setBookView(bookView);
+			//			initialSetImagetimer = new CountDownTimer(3000, 100) {
+			//
+			//				@Override
+			//				public void onTick(long millisUntilFinished) {
+			//					if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
+			//						initialSetImagetimerFinished();
+			//					}
+			//				}
+			//
+			//				@Override
+			//				public void onFinish() {
+			//					// TODO Auto-generated method stub
+			//
+			//				}
+			//			}.start();
+			timer = new Timer();
+			timer.schedule(new TimerTask() {
 				@Override
-				public void onTick(long millisUntilFinished) {
+				public void run() {
 					if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
-						initialSetImagetimer.cancel();
-						setImage(mBook.getBitmap(mBook.getCurPage()));
+
+						handler.post(new Runnable() {
+
+							@Override
+							public void run() {
+								timer.cancel();
+								setImage(mBook.getBitmap(mBook.getCurPage()));
+							}
+						});
+
 					}
 				}
-				
-				@Override
-				public void onFinish() {
-					// TODO Auto-generated method stub
-					
-				}
-			}.start();
+			}, 0, 100);
+
 		}
 		initialize();
 	}
-	
+
+	private void initialSetImagetimerFinished() {
+		initialSetImagetimer.cancel();
+		initialSetImagetimer = null;
+		setImage(mBook.getBitmap(mBook.getCurPage()));
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		//		getMenuInflater().inflate(R.menu.reading, menu);
@@ -122,6 +161,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		mPageFrame = new FrameLayout(this);
 		mScrollView.addView(mPageFrame);
 		mScrollView.setSmoothScrollingEnabled(true);
+		mScrollView.setPadding(0, 0, 0, 0);
 		//		mPageFrame.setBackgroundColor(Color.GREEN);
 		// 下画面を作る
 		mPageView = new ImageView(this);
@@ -146,7 +186,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		mRH = mLinearLayout.getHeight();
 		Fun.log(mRW);
 		Fun.log(mRH);
-		
+
 		final int count  = mLinearLayout.getChildCount();
 		for (int i = 0; i < count; i++) {
 			View view = mLinearLayout.getChildAt(i);
@@ -171,11 +211,13 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 		isWindowFocusChanged = true;
 	}
-	
+
 	public void setImage(Bitmap _bmp) {
 		Fun.log("setImage()");
-		mPageBitmap = _bmp;
-		
+
+		if (_bmp != null) {
+			mPageBitmap = _bmp;
+		}
 		final float pageW = (float) mPageBitmap.getWidth();
 		Fun.log("pageW:"+pageW);
 		final float pageH = (float) mPageBitmap.getHeight();
@@ -186,38 +228,57 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		Fun.log("small_w:"+small_w);
 		final float scale_ratio = mRW / small_w;
 		Fun.log("scale_ratio:"+scale_ratio);
-//		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-		Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
-		mPageView.setImageBitmap(mScaledPageBitmap);
-		// マーカーの処理
-		//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
-		//			markerview.setImageBitmap(markedPage);
-		mPageFrame.setScaleX(scale_ratio);
-		mPageFrame.setScaleY(scale_ratio);
+		if (_bmp != null) {
+			//		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
+			Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
+			mPageView.setImageBitmap(mScaledPageBitmap);
+			// マーカーの処理
+			//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
+			//			markerview.setImageBitmap(markedPage);
+			mPageFrame.setScaleX(scale_ratio);
+			mPageFrame.setScaleY(scale_ratio);
+		}
+
 		if(!mBook.isRecognized()) {
 			Fun.log("mBook.isRecognized() == false");
 			// レイアウト認識がまだだったらレイアウト認識を行う。
 			// レイアウト認識中は全画面でページを表示してあげる。
-			waitForRecognize = new CountDownTimer(20000, 1000) {
+			//			waitForRecognize = new CountDownTimer(20000, 1000) {
+			//				@Override
+			//				public void onTick(long millisUntilFinished) {
+			//					Fun.log(String.valueOf(millisUntilFinished));
+			//					if(mBook.isRecognized()) {
+			//						waitForRecognize.cancel();
+			//						afterRecognized(pageH, pageW);
+			//					}
+			//				}
+			//				@Override
+			//				public void onFinish() {
+			//					Fun.log("20秒待ったけど終わらなかった");
+			//				}
+			//			}.start();
+
+			waitForRecognizeTimer = new Timer();
+			waitForRecognizeTimer.schedule(new TimerTask() {
 				@Override
-				public void onTick(long millisUntilFinished) {
-					Fun.log(String.valueOf(millisUntilFinished));
+				public void run() {
 					if(mBook.isRecognized()) {
-						waitForRecognize.cancel();
-						afterRecognized(pageH, pageW);
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								waitForRecognizeTimer.cancel();
+								afterRecognized(pageH, pageW);
+							}
+						});
 					}
 				}
-				@Override
-				public void onFinish() {
-					Fun.log("20秒待ったけど終わらなかった");
-				}
-			}.start();
+			}, 0, 1000);
 		} else {
 			afterRecognized(pageH, pageW);
 		}
 	}
-	
+
 	private void afterRecognized(float pageH, float pageW) {
 		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
 		Fun.log("linemid:"+linemid);
@@ -233,7 +294,7 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		set.playTogether(anim1, anim2, anim3);
 		set.setDuration(500);
 		set.start();
-		
+
 		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
 		else { mAnimatingTicker = mTicker1; }
 		mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
@@ -250,22 +311,50 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		Fun.log("mTickerWidth: "+mTickerWidth);
 		Fun.log("mTickerHeight: "+mTickerHeight);
 //		mAnimatingTicker.setX(mTickerWidth);
-		mAnimatingTicker.setY(0);
+//		mAnimatingTicker.setY(0);
 		// アニメーション開始
-//		animation(0);
+		animation();
 	}
-	
-	public void animation(long startDelay) {
+
+	//	public void animation(long startDelay) {
+	//		if(mPending) { return; }
+	//		mAnimation = new AnimatorSet();
+	//		ObjectAnimator move = null;
+	//		mDuration = 530;
+	//		Fun.log("mDuration:"+mDuration);
+	//		
+	//		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+	//		else { mAnimatingTicker = mTicker1; }
+	//
+	//		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
+	//		if (mTickerWidth > mTickerHeight) {
+	//			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
+	//		} else {
+	//			mDuration *= ((float)mTickerHeight / (float)mTickerWidth); // intへのキャストを削除
+	//		}
+	//		Fun.log("mDuration:"+mDuration);
+	//		move.setDuration(mDuration);
+	//		move.setInterpolator(new LinearInterpolator());
+	//		mAnimation.addListener(this);
+	////		mAnimationFlag = AnimationFlag.loop;
+	//		mAnimation.setStartDelay(startDelay);
+	//		mAnimation.start();
+	//	}
+
+	public void animation() {
 		if(mPending) { return; }
-		mAnimation = new AnimatorSet();
-		ObjectAnimator move = null;
+		Fun.log("animation()");
+		Fun.log(animationDelay);
+
+		move = null;
 		mDuration = 530;
 		Fun.log("mDuration:"+mDuration);
-		
-		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
-		else { mAnimatingTicker = mTicker1; }
+
+//		if(mAnimatingTicker == mTicker1) { mAnimatingTicker = mTicker2; } 
+//		else { mAnimatingTicker = mTicker1; }
 
 		move = ObjectAnimator.ofFloat(mAnimatingTicker, "x", mTickerWidth, -mTickerWidth);
+		Fun.log(mTickerWidth);
 		if (mTickerWidth > mTickerHeight) {
 			mDuration *= ((float)mTickerWidth / (float)mTickerHeight); // intへのキャストを削除
 		} else {
@@ -273,47 +362,78 @@ public class ReadingActivity extends Activity implements AnimatorListener{
 		}
 		Fun.log("mDuration:"+mDuration);
 		move.setDuration(mDuration);
+		move.addListener(this);
 		move.setInterpolator(new LinearInterpolator());
-		mAnimation.addListener(this);
-//		mAnimationFlag = AnimationFlag.loop;
-		mAnimation.setStartDelay(startDelay);
-		mAnimation.start();
+		//		CountDownTimer nextAnimationTimer = new CountDownTimer(startDelay, startDelay) {
+		//
+		//			@Override
+		//			public void onTick(long millisUntilFinished) {
+		//				// TODO Auto-generated method stub
+		//
+		//			}
+		//
+		//			@Override
+		//			public void onFinish() {
+		//				// TODO Auto-generated method stub
+		//				mAnimation.start();
+		//			}
+		//		}.start();
+//		move.start();
+		animationTimer = new Timer();
+		animationTimer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					@Override
+					public void run() {
+						move.start();
+						mBook.setCurLine(mBook.getCurLine() + 1);
+					}
+				});
+			}
+		}, animationDelay);
 	}
-	
+
 	@Override
 	public void onAnimationCancel(Animator animation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onAnimationEnd(Animator animation) {
 		// TODO Auto-generated method stub
-//		if (mAnimationFlag == AnimationFlag.loop) {
-			mPending = false;
-//		} else if (mAnimationFlag == AnimationFlag.layout) {
-//			updateLayout();
-//		}
+		//		if (mAnimationFlag == AnimationFlag.loop) {
+		mPending = false;
+		//		} else if (mAnimationFlag == AnimationFlag.layout) {
+		//			updateLayout();
+		//		}
 	}
 
 	@Override
 	public void onAnimationRepeat(Animator animation) {
 		// TODO Auto-generated method stub
-		
+
 	}
+
+	//	@Override
+	//	public void onAnimationStart(Animator animation) {
+	//		// TODO Auto-generated method stub
+	////		if (mAnimationFlag == AnimationFlag.loop) {
+	//			if(0 < animation.getStartDelay()) { mPending = true; } 
+	//			Fun.log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
+	//			animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));	
+	////		}
+	//	}
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-		// TODO Auto-generated method stub
-//		if (mAnimationFlag == AnimationFlag.loop) {
-			if(0 < animation.getStartDelay()) { mPending = true; } 
-			Fun.log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
-			animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));	
-//		}
+		animationDelay = (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth));
+		setImage(null);
 	}
-	
+
 	public void finishAnimation() {
-		mAnimation.end();
+		move.end();
 	}
 
 }
