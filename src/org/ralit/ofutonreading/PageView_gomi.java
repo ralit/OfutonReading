@@ -3,9 +3,11 @@ package org.ralit.ofutonreading;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 
 
@@ -14,33 +16,41 @@ import android.widget.ScrollView;
  * http://ga29.blog.fc2.com/blog-entry-7.html
  */
 
-public class PageView extends FrameLayout{
+public class PageView_gomi extends ViewGroup{
 
+	private ScrollView mScrollView;
 	private ImageView mPageView;
 	private ImageView mMarkerView;
+	private FrameLayout mPageFrame;
 
-	public PageView(Context context) {
+	public PageView_gomi(Context context) {
 		super(context);
-
+		mScrollView = new ScrollView(context);
+		mScrollView.setSmoothScrollingEnabled(true);
+		mScrollView.setPadding(0, 0, 0, 0);
+		mScrollView.setFillViewport(true);
+		addView(mScrollView);
+		mPageFrame = new FrameLayout(context);
+		mScrollView.addView(mPageFrame);
+		
+		
 		mPageView = new ImageView(context);
 		mMarkerView = new ImageView(context);
-		addView(mPageView);
-		addView(mMarkerView);
-		setBackgroundColor(Color.GREEN);
+		mPageFrame.addView(mPageView);
+		mPageFrame.addView(mMarkerView);
+		mPageFrame.setBackgroundColor(Color.GREEN);
 		mPageView.setBackgroundColor(Color.BLACK);
-//		mPageView.setImageResource(R.drawable.usagi);
-
+		mScrollView.setBackgroundColor(Color.RED);
+		setBackgroundColor(Color.YELLOW);
+		TextView view = new TextView(context);
+		view.setText("hello");
+		mPageFrame.addView(view);
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		{
-		android.view.ViewGroup.LayoutParams params = getLayoutParams();
-		params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		setLayoutParams(params);
-		}
+		
 		final int count  = getChildCount();
 		for (int i = 0; i < count; i++) {
 			View view = getChildAt(i);
@@ -49,7 +59,8 @@ public class PageView extends FrameLayout{
 			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 			view.setLayoutParams(params);
 		}
-		
+		mPageFrame.setMinimumHeight((int)h / 2);
+		mScrollView.setMinimumHeight((int)h / 2);
 	}
 
 	@Override

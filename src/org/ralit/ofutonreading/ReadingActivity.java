@@ -34,6 +34,7 @@ public class ReadingActivity extends Activity implements LineEndListener{
 	// レイアウトとビュー
 	private LinearLayout mLinearLayout;
 	private TickerView mTickerView;
+	private ScrollView mScrollView;
 	private PageView mPageView;
 	// その他
 	//	private AnimatorSet mAnimation;
@@ -109,9 +110,11 @@ public class ReadingActivity extends Activity implements LineEndListener{
 	private void initialize() {
 		mLinearLayout = new LinearLayout(this);
 		mTickerView = new TickerView(this, this);
+		mScrollView = new ScrollView(this);
 		mPageView = new PageView(this);
 		mLinearLayout.addView(mTickerView);
-		mLinearLayout.addView(mPageView);
+		mLinearLayout.addView(mScrollView);
+		mScrollView.addView(mPageView);
 		setContentView(mLinearLayout);
 	}
 
@@ -122,6 +125,8 @@ public class ReadingActivity extends Activity implements LineEndListener{
 		super.onWindowFocusChanged(hasFocus);
 		mRW = mLinearLayout.getWidth();
 		mRH = mLinearLayout.getHeight();
+		
+		mPageView.setMinimumHeight((int)mRH/2);
 		
 		final int count  = mLinearLayout.getChildCount();
 		for (int i = 0; i < count; i++) {
@@ -138,10 +143,10 @@ public class ReadingActivity extends Activity implements LineEndListener{
 			mTickerView.setLayoutParams(params);
 		}
 		{
-			LayoutParams params = mPageView.getLayoutParams();
+			LayoutParams params = mScrollView.getLayoutParams();
 			params.width = (int)mRW;
 			params.height = (int)mRH / 2;
-			mPageView.setLayoutParams(params);
+			mScrollView.setLayoutParams(params);
 		}
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 		isWindowFocusChanged = true;

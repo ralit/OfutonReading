@@ -14,33 +14,35 @@ import android.widget.ScrollView;
  * http://ga29.blog.fc2.com/blog-entry-7.html
  */
 
-public class PageView extends FrameLayout{
+public class PageView_extendsScrollView extends ScrollView{
 
+	private FrameLayout mTickerFrame;
+	private ImageView mTicker1;
+	private ImageView mTicker2;
 	private ImageView mPageView;
 	private ImageView mMarkerView;
+	private FrameLayout mPageFrame;
 
-	public PageView(Context context) {
+	public PageView_extendsScrollView(Context context) {
 		super(context);
-
+		mPageFrame = new FrameLayout(context);
+		addView(mPageFrame);
+		setSmoothScrollingEnabled(true);
+		setPadding(0, 0, 0, 0);
 		mPageView = new ImageView(context);
 		mMarkerView = new ImageView(context);
-		addView(mPageView);
-		addView(mMarkerView);
-		setBackgroundColor(Color.GREEN);
+		mPageFrame.addView(mPageView);
+		mPageFrame.addView(mMarkerView);
+		mPageFrame.setBackgroundColor(Color.GREEN);
 		mPageView.setBackgroundColor(Color.BLACK);
-//		mPageView.setImageResource(R.drawable.usagi);
-
+		setBackgroundColor(Color.RED);
+		mPageFrame.setMinimumHeight(1000);
 	}
 
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
-		{
-		android.view.ViewGroup.LayoutParams params = getLayoutParams();
-		params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-		setLayoutParams(params);
-		}
+//		mPageFrame.setMinimumHeight((int)h / 2);
 		final int count  = getChildCount();
 		for (int i = 0; i < count; i++) {
 			View view = getChildAt(i);
