@@ -31,7 +31,8 @@
         <activity
             android:name="org.ralit.ofutonreading.ReadingActivity"
             android:label="@string/title_activity_reading"
-            android:parentActivityName="MainActivity" >
+            android:parentActivityName="MainActivity"
+            android:screenOrientation="landscape" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
