@@ -34,11 +34,13 @@ public class PageView extends ScrollView{
 	private float pageH;
 	private Timer waitForRecognizeTimer;
 	private Handler handler = new Handler();
+	private Context context;
 
 	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener) {
 		super(context);
 		layoutFinishedListener = _layoutFinishedListener;
 		mBook = bookManager;
+		this.context = context;
 
 		setBackgroundColor(Color.GREEN);
 	}
@@ -49,21 +51,21 @@ public class PageView extends ScrollView{
 		mRH = h;
 		mRW = w;
 		
-		if(0 < pageH && 0 < pageW) {
-			Fun.log("PageViewに画像をセットした後のonSizeChenged");
-			android.view.ViewGroup.LayoutParams params = getLayoutParams();
-			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = (int)(mRW * (pageH/pageW));
-			setLayoutParams(params);
-		}
-		final int count  = getChildCount();
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			view.setLayoutParams(params);
-		}
+//		if(0 < pageH && 0 < pageW) {
+//			Fun.log("PageViewに画像をセットした後のonSizeChenged");
+//			android.view.ViewGroup.LayoutParams params = getLayoutParams();
+//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			params.height = (int)(mRW * (pageH/pageW));
+//			setLayoutParams(params);
+//		}
+//		final int count  = getChildCount();
+//		for (int i = 0; i < count; i++) {
+//			View view = getChildAt(i);
+//			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			view.setLayoutParams(params);
+//		}
 		if(isFirstLayout) {
 			layoutFinishedListener.onPageViewLayoutFinished();
 			isFirstLayout = false;
@@ -74,26 +76,26 @@ public class PageView extends ScrollView{
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
 		// TODO Auto-generated method stub
-		//		final int count = getChildCount();
-		//		final int left = getLeft();
-		//		final int top = getTop();
-		//		final int right = getRight();
-		//		final int bottom = getBottom();
-		//		for (int i = 0; i < count; i++) {
-		//			View view = getChildAt(i);
-		//			if (view.getVisibility() != View.GONE) {
-		//				view.layout(left, top, right, bottom);
-		//			}
-		//		}
-		//		invalidate();
+		final int count = getChildCount();
+		final int left = getLeft();
+		final int top = getTop();
+		final int right = getRight();
+		final int bottom = getBottom();
+		for (int i = 0; i < count; i++) {
+			View view = getChildAt(i);
+			if (view.getVisibility() != View.GONE) {
+				view.layout(left, top, right, bottom);
+			}
+		}
+		invalidate();
 	}
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//		final int count = getChildCount();
-		//		for(int i = 0; i < count; i++) {
-		//			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
-		//		}
+		final int count = getChildCount();
+		for(int i = 0; i < count; i++) {
+			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
+		}
 		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 	}
 
@@ -103,6 +105,10 @@ public class PageView extends ScrollView{
 		pageH = (float) mPageBitmap.getHeight();
 		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
 		
+		InnerPageView innerPageView = new InnerPageView(context, mPageBitmap);
+		innerPageView.setMinimumHeight((int)pageH);
+		innerPageViewList.add(innerPageView);
+		addView(innerPageViewList.getFirst());
 
 
 		if(!mBook.isRecognized()) {

@@ -13,10 +13,12 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -42,43 +44,23 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	private boolean isWindowFocusChanged = false;
 	private Timer timer;
 	private Handler handler = new Handler();
-	
-	
+
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setRequestedOrientation(Configuration.ORIENTATION_LANDSCAPE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		Fun.log(getResources().getConfiguration().orientation);
 
-		
-		
 		Intent intent = getIntent();
 		if (intent != null) {
 			String fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
 			mBook = new BookManager(fileName, filePath, this);
-			initialize();
-//			mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-			
-			timer = new Timer();
-			timer.schedule(new TimerTask() {
-				@Override public void run() {
-					if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
-						timer.cancel();
-						handler.post(new Runnable() {
-							@Override public void run() {
-								Fun.log("TickerViewのsetimageを呼び出すタイマー");
-								mTickerView.setImage(mPageView.getImage());
-							}
-						});
-					}
-				}
-			}, 0, 100);
+			mLinearLayout = new LinearLayout(this);
+			setContentView(mLinearLayout);
 		}
-		
 	}
 
 	@Override
@@ -98,23 +80,32 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void initialize() {
-		mLinearLayout = new LinearLayout(this);
-		mTickerView = new TickerView(this, mBook, this);
-		mPageView = new PageView(this, mBook, this);
-		mLinearLayout.addView(mTickerView);
-		mLinearLayout.addView(mPageView);
-		setContentView(mLinearLayout);
-	}
-
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Fun.log("onWindowFocusChanged()");
 		super.onWindowFocusChanged(hasFocus);
-		mRW = mLinearLayout.getWidth();
-		mRH = mLinearLayout.getHeight();
-		
+		if (mRW != mLinearLayout.getWidth() || mRH != mLinearLayout.getHeight()) {
+			mRW = mLinearLayout.getWidth();
+			mRH = mLinearLayout.getHeight();
+			Fun.log(mRW);
+			Fun.log(mRH);
+			
+			mTickerView = new TickerView(this, mBook, this, mRW, mRH);
+			mPageView = new PageView(this, mBook, this, mRW, mRH);
+			mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+			mLinearLayout.addView(mTickerView);
+			mLinearLayout.addView(mPageView);
+		}
+
+
+
+		{
+			LayoutParams params = mLinearLayout.getLayoutParams();
+			params.width = LayoutParams.MATCH_PARENT;
+			params.height = LayoutParams.MATCH_PARENT;
+			mLinearLayout.setLayoutParams(params);
+		}
+
 		{
 			LayoutParams params = mTickerView.getLayoutParams();
 			params.width = (int)mRW;
@@ -127,21 +118,40 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			params.height = (int)mRH / 2;
 			mPageView.setLayoutParams(params);
 		}
-		
-		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+
+
 		isWindowFocusChanged = true;
 	}
 
 	@Override
 	public void onLineEnd() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onPageViewLayoutFinished() {
-//		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
+		//		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
+		//		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+
 		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override public void run() {
+				if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
+					timer.cancel();
+					handler.post(new Runnable() {
+						@Override public void run() {
+							Fun.log("TickerViewのsetimageを呼び出すタイマー");
+							mTickerView.setImage(mPageView.getImage());
+						}
+					});
+				}
+			}
+		}, 0, 100);
+
+
 		Fun.log("onPageViewLayoutFinished");
 		Fun.log(mPageView.getHeight());
 		Fun.log(mPageView.getWidth());

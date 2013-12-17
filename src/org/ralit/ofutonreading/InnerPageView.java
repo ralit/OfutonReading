@@ -23,7 +23,11 @@ public class InnerPageView extends FrameLayout{
 	
 	public InnerPageView(Context context, Bitmap bmp) {
 		super(context);
-		// TODO Auto-generated constructor stub
+		mPageView = new ImageView(context);
+		mMarkerView = new ImageView(context);
+		mPageView.setImageBitmap(bmp);
+		addView(mPageView);
+		addView(mMarkerView);
 	}
 
 	@Override
