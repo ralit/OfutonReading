@@ -1,5 +1,6 @@
 package org.ralit.ofutonreading;
 
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -12,22 +13,16 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
-
-
-/**
- * ViewGroupの作成は以下のページが参考になりました。
- * http://ga29.blog.fc2.com/blog-entry-7.html
- */
 
 interface LayoutFinishedListener {
 	void onPageViewLayoutFinished();
 }
 
-public class PageView extends FrameLayout{
+public class PageView extends ScrollView{
 
-	private ImageView mPageView;
-	private ImageView mMarkerView;
+	private LinkedList<InnerPageView> innerPageViewList = new LinkedList<InnerPageView>();
 	private Bitmap mPageBitmap;
 	private Bitmap mScaledPageBitmap;
 	private float mRH;
@@ -45,14 +40,7 @@ public class PageView extends FrameLayout{
 		layoutFinishedListener = _layoutFinishedListener;
 		mBook = bookManager;
 
-		mPageView = new ImageView(context);
-		mMarkerView = new ImageView(context);
-		addView(mPageView);
-		addView(mMarkerView);
 		setBackgroundColor(Color.GREEN);
-		mPageView.setBackgroundColor(Color.BLACK);
-		//		mPageView.setImageResource(R.drawable.usagi);
-
 	}
 
 	@Override
@@ -60,12 +48,7 @@ public class PageView extends FrameLayout{
 		super.onSizeChanged(w, h, oldw, oldh);
 		mRH = h;
 		mRW = w;
-		{
-			android.view.ViewGroup.LayoutParams params = getLayoutParams();
-			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-			setLayoutParams(params);
-		}
+		
 		if(0 < pageH && 0 < pageW) {
 			Fun.log("PageViewに画像をセットした後のonSizeChenged");
 			android.view.ViewGroup.LayoutParams params = getLayoutParams();
@@ -117,31 +100,9 @@ public class PageView extends FrameLayout{
 	public void setImage(Bitmap _bmp) {
 		mPageBitmap = _bmp;
 		pageW = (float) mPageBitmap.getWidth();
-		Fun.log("pageW:"+pageW);
 		pageH = (float) mPageBitmap.getHeight();
-		Fun.log("pageH:"+pageH);
-		final float ratio = mRH / pageH;
-		Fun.log("ratio:"+ratio);
-		final float small_w = pageW * ratio;
-		Fun.log("small_w:"+small_w);
-		final float scale_ratio = mRW / small_w;
-		Fun.log("scale_ratio:"+scale_ratio);
 		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-		Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
-		mPageView.setImageBitmap(mScaledPageBitmap);
-		// マーカーの処理
-		//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
-		//			markerview.setImageBitmap(markedPage);
-		mPageView.setScaleX(scale_ratio);
-		mPageView.setScaleY(scale_ratio);
-		setScaleX(scale_ratio);
-		setScaleY(scale_ratio);
-		{
-			android.view.ViewGroup.LayoutParams params = getLayoutParams();
-			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = (int)(mRW * (pageH/pageW));
-			setLayoutParams(params);
-		}
+		
 
 
 		if(!mBook.isRecognized()) {

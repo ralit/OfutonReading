@@ -29,18 +29,33 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
-public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener{
+public class ReadingActivity_20131217_1805 extends Activity implements LineEndListener, LayoutFinishedListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
 	private LinearLayout mLinearLayout;
 	private TickerView mTickerView;
+	private ScrollView mScrollView;
 	private PageView mPageView;
 	// その他
+	//	private AnimatorSet mAnimation;
+	private float mTextZoom;
+	private int mTickerWidth;
+	private int mTickerHeight;
+	private ImageView mAnimatingTicker; 
+	
+	private int mDuration;
+	private int mLineW;
+	private int mLineH;
 	private float mRW;
 	private float mRH;
+	private boolean mPending = false;
+	private CountDownTimer initialSetImagetimer;
+	private CountDownTimer waitForRecognize;
 	private boolean isWindowFocusChanged = false;
 	private Timer timer;
+	
+	
 	private Handler handler = new Handler();
 	
 	
@@ -101,9 +116,11 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	private void initialize() {
 		mLinearLayout = new LinearLayout(this);
 		mTickerView = new TickerView(this, mBook, this);
+		mScrollView = new ScrollView(this);
 		mPageView = new PageView(this, mBook, this);
 		mLinearLayout.addView(mTickerView);
-		mLinearLayout.addView(mPageView);
+		mLinearLayout.addView(mScrollView);
+		mScrollView.addView(mPageView);
 		setContentView(mLinearLayout);
 	}
 
@@ -115,6 +132,16 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		mRW = mLinearLayout.getWidth();
 		mRH = mLinearLayout.getHeight();
 		
+		mPageView.setMinimumHeight((int)mRH/2);
+		
+		final int count  = mLinearLayout.getChildCount();
+		for (int i = 0; i < count; i++) {
+			View view = mLinearLayout.getChildAt(i);
+			LayoutParams params = view.getLayoutParams();
+			params.width = LayoutParams.MATCH_PARENT;
+			params.height = LayoutParams.MATCH_PARENT;
+			view.setLayoutParams(params);
+		}
 		{
 			LayoutParams params = mTickerView.getLayoutParams();
 			params.width = (int)mRW;
@@ -122,13 +149,23 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			mTickerView.setLayoutParams(params);
 		}
 		{
-			LayoutParams params = mPageView.getLayoutParams();
+			LayoutParams params = mScrollView.getLayoutParams();
 			params.width = (int)mRW;
 			params.height = (int)mRH / 2;
-			mPageView.setLayoutParams(params);
+			mScrollView.setLayoutParams(params);
 		}
 		
 		mLinearLayout.setOrientation(LinearLayout.VERTICAL);
+		
+		{
+			LayoutParams params = mPageView.getLayoutParams();
+			params.width = LayoutParams.MATCH_PARENT;
+			params.height = LayoutParams.WRAP_CONTENT;
+			mPageView.setLayoutParams(params);
+		}
+		Fun.log("onWindowFocusChanged");
+		Fun.log(mPageView.getHeight());
+		Fun.log(mPageView.getWidth());
 		isWindowFocusChanged = true;
 	}
 
@@ -142,9 +179,12 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	public void onPageViewLayoutFinished() {
 //		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
 		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+		mScrollView.invalidate();
 		Fun.log("onPageViewLayoutFinished");
 		Fun.log(mPageView.getHeight());
 		Fun.log(mPageView.getWidth());
+		Fun.log(mScrollView.getHeight());
+		Fun.log(mScrollView.getWidth());
 		Fun.log(mTickerView.getHeight());
 		Fun.log(mTickerView.getWidth());
 	}
