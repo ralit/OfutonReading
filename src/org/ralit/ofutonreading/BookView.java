@@ -192,12 +192,12 @@ public class BookView extends ViewGroup implements AnimatorListener{
 			Fun.log("small_w:"+small_w);
 			final float scale_ratio = mRW / small_w;
 			Fun.log("scale_ratio:"+scale_ratio);
-//			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, getWidth(), (int)(getWidth() * (pageH/pageW)), false);
+//			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
+			mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, getWidth(), (int)(getWidth() * (pageH/pageW)), true);
 			Fun.log("(mRW * (pageH/pageW)):"+(mRW * (pageH/pageW)));
 			mPageView.setImageBitmap(mScaledPageBitmap);
 			// マーカーの処理
-			//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), false);
+			//			markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)dW, (int)(dW * (h/w)), true);
 			//			markerview.setImageBitmap(markedPage);
 			mPageFrame.setScaleX(scale_ratio);
 			mPageFrame.setScaleY(scale_ratio);

@@ -3,33 +3,17 @@ package org.ralit.ofutonreading;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Point;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
-import android.view.animation.LinearInterpolator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 
 public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener{
 
@@ -60,12 +44,33 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			mBook = new BookManager(fileName, filePath, this);
 			mLinearLayout = new LinearLayout(this);
 			setContentView(mLinearLayout);
+			{
+				LayoutParams params = mLinearLayout.getLayoutParams();
+				params.width = LayoutParams.MATCH_PARENT;
+				params.height = LayoutParams.MATCH_PARENT;
+				mLinearLayout.setLayoutParams(params);
+			}
+//			LinearLayout linearLayout = new LinearLayout(this);
+//			LayeredImageScrollView layeredImageScrollView1 = new LayeredImageScrollView(this, Color.rgb(240, 180, 140));
+//			LayeredImageScrollView layeredImageScrollView2 = new LayeredImageScrollView(this, Color.rgb(200, 200, 255));
+//			setContentView(linearLayout);
+//			linearLayout.addView(layeredImageScrollView1);
+//			linearLayout.addView(layeredImageScrollView2);
+//			linearLayout.setOrientation(LinearLayout.VERTICAL);
+//			LayoutParams params = layeredImageScrollView1.getLayoutParams();
+//			params.height = 400;
+//			params.width = 400;
+//			layeredImageScrollView1.setLayoutParams(params);
+//			params = layeredImageScrollView2.getLayoutParams();
+//			params.height = 400;
+//			params.width = 400;
+//			layeredImageScrollView2.setLayoutParams(params);
 		}
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//		getMenuInflater().inflate(R.menu.reading, menu);
+		getMenuInflater().inflate(R.menu.reading, menu);
 		return true;
 	}
 
@@ -89,37 +94,26 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			mRH = mLinearLayout.getHeight();
 			Fun.log(mRW);
 			Fun.log(mRH);
-			
+
 			mTickerView = new TickerView(this, mBook, this, mRW, mRH);
-			mPageView = new PageView(this, mBook, this, mRW, mRH);
+			mPageView = new PageView(this, mBook, this, mRW, mRH, mBook.getBitmap(mBook.getCurPage()));
 			mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 			mLinearLayout.addView(mTickerView);
 			mLinearLayout.addView(mPageView);
+			
+			{
+				LayoutParams params = mTickerView.getLayoutParams();
+				params.width = (int)mRW;
+				params.height = (int)mRH / 2;
+				mTickerView.setLayoutParams(params);
+			}
+			{
+				LayoutParams params = mPageView.getLayoutParams();
+				params.width = (int)mRW;
+				params.height = (int)mRH / 2;
+				mPageView.setLayoutParams(params);
+			}
 		}
-
-
-
-		{
-			LayoutParams params = mLinearLayout.getLayoutParams();
-			params.width = LayoutParams.MATCH_PARENT;
-			params.height = LayoutParams.MATCH_PARENT;
-			mLinearLayout.setLayoutParams(params);
-		}
-
-		{
-			LayoutParams params = mTickerView.getLayoutParams();
-			params.width = (int)mRW;
-			params.height = (int)mRH / 2;
-			mTickerView.setLayoutParams(params);
-		}
-		{
-			LayoutParams params = mPageView.getLayoutParams();
-			params.width = (int)mRW;
-			params.height = (int)mRH / 2;
-			mPageView.setLayoutParams(params);
-		}
-
-
 		isWindowFocusChanged = true;
 	}
 
@@ -134,7 +128,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		//		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
 		//		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
 
-		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+//		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
 
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -150,13 +144,13 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 				}
 			}
 		}, 0, 100);
-
-
-		Fun.log("onPageViewLayoutFinished");
-		Fun.log(mPageView.getHeight());
-		Fun.log(mPageView.getWidth());
-		Fun.log(mTickerView.getHeight());
-		Fun.log(mTickerView.getWidth());
+//
+//
+//		Fun.log("onPageViewLayoutFinished");
+//		Fun.log(mPageView.getHeight());
+//		Fun.log(mPageView.getWidth());
+//		Fun.log(mTickerView.getHeight());
+//		Fun.log(mTickerView.getWidth());
 	}
 
 }

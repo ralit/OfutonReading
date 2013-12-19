@@ -9,6 +9,7 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +30,6 @@ interface LineEndListener {
 
 public class TickerView extends FrameLayout implements AnimatorListener{
 
-//	private ImageView mTicker1;
-//	private ImageView mTicker2;
 	private LinkedList<ImageView> mTickerList = new LinkedList<ImageView>();
 	private LinkedList<ObjectAnimator> mAnimatorList = new LinkedList<ObjectAnimator>();
 	private Context context;
@@ -40,65 +39,32 @@ public class TickerView extends FrameLayout implements AnimatorListener{
 	private int mTickerWidth;
 	private int mTickerHeight;
 	private long mDuration;
-	private long animationDelay = 0;
-	private long loss = 0;
-	private Timer animationTimer;
 	private Handler handler = new Handler();
-	private ObjectAnimator move;
 	private Bitmap bmp;
 
-	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener) {
+	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener, float w, float h) {
 		super(context);
 		this.context = context;
 		mBook = bookManager;
-//		mTicker1 = new ImageView(context);
-//		mTicker2 = new ImageView(context);
-//		addView(mTicker1);
-//		addView(mTicker2);
-//		mTicker1.setBackgroundColor(Color.DKGRAY);
-	}
-
-	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(w, h, oldw, oldh);
-		mRH = h;
 		mRW = w;
-		final int count  = getChildCount();
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-			view.setLayoutParams(params);
-		}
+		mRH = h;
+		setBackgroundColor(Color.DKGRAY);
 	}
 
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		super.onLayout(changed, l, t, r, b);
-		// TODO Auto-generated method stub
-		final int count = getChildCount();
-		final int left = getLeft();
-		final int top = getTop();
-		final int right = getRight();
-		final int bottom = getBottom();
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			if (view.getVisibility() != View.GONE) {
-				view.layout(left, top, right, bottom);
-			}
-		}
-		invalidate();
-	}
-
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		final int count = getChildCount();
-		for(int i = 0; i < count; i++) {
-			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
-		}
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-	}
+//	@Override
+//	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+//		super.onSizeChanged(w, h, oldw, oldh);
+//		mRH = h;
+//		mRW = w;
+//		final int count  = getChildCount();
+//		for (int i = 0; i < count; i++) {
+//			View view = getChildAt(i);
+//			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			view.setLayoutParams(params);
+//		}
+//	}
 	
 	public void setImage(Bitmap _bmp) {
 		if (_bmp != null) {
@@ -145,11 +111,6 @@ public class TickerView extends FrameLayout implements AnimatorListener{
 		} else { 
 			mDuration *= ((float)mTickerHeight / (float)mTickerWidth);
 		}
-//		if (imageview.getWidth() > imageview.getHeight()) { 
-//			mDuration *= ((float)imageview.getWidth() / (float)imageview.getHeight());
-//		} else { 
-//			mDuration *= ((float)imageview.getHeight() / (float)imageview.getWidth());
-//		}
 		Fun.log("mDuration:"+mDuration);
 		
 		move.setDuration(mDuration);
@@ -157,24 +118,6 @@ public class TickerView extends FrameLayout implements AnimatorListener{
 		move.setInterpolator(new LinearInterpolator());
 		mBook.setCurLine(mBook.getCurLine() + 1);
 		mAnimatorList.pollFirst().start();
-//		move.start();
-//		animationTimer = new Timer();
-//		if (loss != 0) {
-//			loss = System.currentTimeMillis() - loss;
-//		}
-//		animationTimer.schedule(new TimerTask() {
-//			@Override
-//			public void run() {
-//				handler.post(new Runnable() {
-//					@Override
-//					public void run() {
-//						mBook.setCurLine(mBook.getCurLine() + 1);
-//						mAnimatorList.pollFirst().start();
-//
-//					}
-//				});
-//			}
-//		}, animationDelay);
 	}
 	
 	

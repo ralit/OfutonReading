@@ -1,6 +1,5 @@
 package org.ralit.ofutonreading;
 
-import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -8,7 +7,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Handler;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -22,7 +20,9 @@ interface LayoutFinishedListener {
 
 public class PageView extends ScrollView{
 
-	private LinkedList<InnerPageView> innerPageViewList = new LinkedList<InnerPageView>();
+	private FrameLayout mFrameLayout;
+	private ImageView mPageView;
+	private ImageView mMarkerView;
 	private Bitmap mPageBitmap;
 	private Bitmap mScaledPageBitmap;
 	private float mRH;
@@ -36,80 +36,36 @@ public class PageView extends ScrollView{
 	private Handler handler = new Handler();
 	private Context context;
 
-	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener) {
+	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener, float w, float h, Bitmap _bmp) {
 		super(context);
-		layoutFinishedListener = _layoutFinishedListener;
-		mBook = bookManager;
 		this.context = context;
-
-		setBackgroundColor(Color.GREEN);
-	}
-
-	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(w, h, oldw, oldh);
-		mRH = h;
+		mBook = bookManager;
+		layoutFinishedListener = _layoutFinishedListener;
 		mRW = w;
-		
-//		if(0 < pageH && 0 < pageW) {
-//			Fun.log("PageViewに画像をセットした後のonSizeChenged");
-//			android.view.ViewGroup.LayoutParams params = getLayoutParams();
-//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-//			params.height = (int)(mRW * (pageH/pageW));
-//			setLayoutParams(params);
-//		}
-//		final int count  = getChildCount();
-//		for (int i = 0; i < count; i++) {
-//			View view = getChildAt(i);
-//			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-//			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-//			view.setLayoutParams(params);
-//		}
-		if(isFirstLayout) {
-			layoutFinishedListener.onPageViewLayoutFinished();
-			isFirstLayout = false;
-		}
-	}
-
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		super.onLayout(changed, l, t, r, b);
-		// TODO Auto-generated method stub
-		final int count = getChildCount();
-		final int left = getLeft();
-		final int top = getTop();
-		final int right = getRight();
-		final int bottom = getBottom();
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			if (view.getVisibility() != View.GONE) {
-				view.layout(left, top, right, bottom);
-			}
-		}
-		invalidate();
-	}
-
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		final int count = getChildCount();
-		for(int i = 0; i < count; i++) {
-			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
-		}
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-	}
-
-	public void setImage(Bitmap _bmp) {
+		mRH = h;
 		mPageBitmap = _bmp;
+
+		mFrameLayout = new FrameLayout(context);
+		mPageView = new ImageView(context);
+		mMarkerView = new ImageView(context);
+
 		pageW = (float) mPageBitmap.getWidth();
 		pageH = (float) mPageBitmap.getHeight();
-		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-		
-		InnerPageView innerPageView = new InnerPageView(context, mPageBitmap);
-		innerPageView.setMinimumHeight((int)pageH);
-		innerPageViewList.add(innerPageView);
-		addView(innerPageViewList.getFirst());
+		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
+		mPageView.setImageBitmap(mScaledPageBitmap);
+		mFrameLayout.addView(mPageView);
+		mFrameLayout.addView(mMarkerView);
+		addView(mFrameLayout);
 
+		final int count = getChildCount();
+		Fun.log("PageView.getChildCount: " + count);
+		for (int i = 0; i < count; i++) {
+			View view = getChildAt(i);
+			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+			params.width = (int)mRW;
+			params.height = (int)(mRW * (pageH/pageW));
+			view.setLayoutParams(params);
+		}
 
 		if(!mBook.isRecognized()) {
 			Fun.log("mBook.isRecognized() == false");
@@ -118,10 +74,10 @@ public class PageView extends ScrollView{
 				@Override
 				public void run() {
 					if(mBook.isRecognized()) {
+						waitForRecognizeTimer.cancel();
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								waitForRecognizeTimer.cancel();
 								onFinishRecognize();
 							}
 						});
@@ -133,19 +89,47 @@ public class PageView extends ScrollView{
 		}
 	}
 
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(w, h, oldw, oldh);
+		if(isFirstLayout) {
+			layoutFinishedListener.onPageViewLayoutFinished();
+			isFirstLayout = false;
+		}
+	}
+
 	public void onFinishRecognize() {
 		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
 		Fun.log("linemid:"+linemid);
 		float distance = pageH / 2 - linemid;
 		Fun.log("distance:"+distance);
-		float i = distance * (mRW / pageW);
+		final float i = distance * (mRW / pageW);
 		Fun.log("i:"+i);
-		setY(i);
-		AnimatorSet set = new AnimatorSet();
-		ObjectAnimator anim3 = ObjectAnimator.ofFloat(this, "y", i);
-		set.playTogether(anim3);
-		set.setDuration(500);
-		set.start();
+		/*
+		 * frameLayoutの位置を直接動かしてはいけない！
+		 * ScrollViewをScrollToさせるんだ！
+		 */
+		Thread thread = new Thread(new Runnable() {
+			
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						smoothScrollTo(0, (int)-i);
+					}
+				});
+			}
+		});
+		thread.start();
+		
+//		AnimatorSet set = new AnimatorSet();
+//		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mFrameLayout, "y", i);
+//		set.playTogether(anim3);
+//		set.setDuration(500);
+//		set.start();
 	}
 
 	public Bitmap getImage() {

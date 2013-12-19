@@ -19,55 +19,48 @@ public class InnerPageView extends FrameLayout{
 
 	private ImageView mPageView;
 	private ImageView mMarkerView;
-
+//	private Bitmap mScaledPageBitmap;
+	private Bitmap mPageBitmap;
+	private float mRH;
+	private float mRW;
+	private Context mContext;
+	private float pageW;
+	private float pageH;
 	
-	public InnerPageView(Context context, Bitmap bmp) {
+	public InnerPageView(Context context, Bitmap bmp, float w, float h) {
 		super(context);
+		mContext = context;
+		mPageBitmap = bmp;
+		mRW = w;
+		mRH = h;
+		
 		mPageView = new ImageView(context);
 		mMarkerView = new ImageView(context);
-		mPageView.setImageBitmap(bmp);
+//		mPageView.setImageBitmap(bmp);
+//		addView(mPageView);
+//		addView(mMarkerView);
+		
+		pageW = (float) mPageBitmap.getWidth();
+		pageH = (float) mPageBitmap.getHeight();
+//		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
+		mPageView.setImageBitmap(mPageBitmap);
+		
+
+		
 		addView(mPageView);
 		addView(mMarkerView);
-	}
-
-	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(w, h, oldw, oldh);
-//		final int count  = getChildCount();
+//		final int count = getChildCount();
+//		Fun.log("InnerPageView.getChildCount: " + count);
 //		for (int i = 0; i < count; i++) {
 //			View view = getChildAt(i);
 //			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-//			params.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-//			params.height = android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+//			params.width = LayoutParams.MATCH_PARENT;
+//			params.height = LayoutParams.MATCH_PARENT;
 //			view.setLayoutParams(params);
 //		}
-	}
+//		mMarkerView.setBackgroundColor(Color.RED);
+		setBackgroundColor(Color.GREEN);
 
-	@Override
-	protected void onLayout(boolean changed, int l, int t, int r, int b) {
-		super.onLayout(changed, l, t, r, b);
-		// TODO Auto-generated method stub
-		//		final int count = getChildCount();
-		//		final int left = getLeft();
-		//		final int top = getTop();
-		//		final int right = getRight();
-		//		final int bottom = getBottom();
-		//		for (int i = 0; i < count; i++) {
-		//			View view = getChildAt(i);
-		//			if (view.getVisibility() != View.GONE) {
-		//				view.layout(left, top, right, bottom);
-		//			}
-		//		}
-		//		invalidate();
+		
 	}
-
-	@Override
-	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-		//		final int count = getChildCount();
-		//		for(int i = 0; i < count; i++) {
-		//			getChildAt(i).measure(widthMeasureSpec, heightMeasureSpec);
-		//		}
-		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-	}
-
 }
