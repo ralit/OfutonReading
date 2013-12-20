@@ -78,14 +78,14 @@ public class PageView extends ScrollView{
 						handler.post(new Runnable() {
 							@Override
 							public void run() {
-								onFinishRecognize();
+								scrollToCurrentLine();
 							}
 						});
 					}
 				}
 			}, 0, 1000);
 		} else {
-			onFinishRecognize();
+			scrollToCurrentLine();
 		}
 	}
 
@@ -98,27 +98,30 @@ public class PageView extends ScrollView{
 		}
 	}
 
-	public void onFinishRecognize() {
-		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
-		Fun.log("linemid:"+linemid);
-		float distance = pageH / 2 - linemid;
-		Fun.log("distance:"+distance);
-		final float i = distance * (mRW / pageW);
-		Fun.log("i:"+i);
+	public void scrollToCurrentLine() {
+//		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
+//		Fun.log("linemid:"+linemid);
+//		float distance = pageH / 2 - linemid;
+//		Fun.log("distance:"+distance);
+//		final float i = distance * (mRW / pageW);
+//		Fun.log("i:"+i);
+		Word word = mBook.getPageLayout().get(mBook.getCurLine());
+//		final int scroll = (word.getTop() + word.getBottom()) / 2 + (int)mRH / 4;
+		final int scroll = ((word.getTop() + word.getBottom()) / 2) * (int)(mRW * (pageH/pageW));
+		Fun.log("Scroll位置");
+		Fun.log(scroll);
 		/*
 		 * frameLayoutの位置を直接動かしてはいけない！
 		 * ScrollViewをScrollToさせるんだ！
 		 */
 		Thread thread = new Thread(new Runnable() {
-			
 			@Override
 			public void run() {
 				handler.post(new Runnable() {
-					
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
-						smoothScrollTo(0, (int)-i);
+						smoothScrollTo(0, scroll);
 					}
 				});
 			}

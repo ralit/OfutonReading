@@ -8,8 +8,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
@@ -28,7 +31,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	private boolean isWindowFocusChanged = false;
 	private Timer timer;
 	private Handler handler = new Handler();
-
+	private GestureDetector gesture;
 
 
 	@Override
@@ -50,6 +53,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 				params.height = LayoutParams.MATCH_PARENT;
 				mLinearLayout.setLayoutParams(params);
 			}
+			
+			gesture = new GestureDetector(this, gestureListener);
 //			LinearLayout linearLayout = new LinearLayout(this);
 //			LayeredImageScrollView layeredImageScrollView1 = new LayeredImageScrollView(this, Color.rgb(240, 180, 140));
 //			LayeredImageScrollView layeredImageScrollView2 = new LayeredImageScrollView(this, Color.rgb(200, 200, 255));
@@ -119,8 +124,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 	@Override
 	public void onLineEnd() {
-		// TODO Auto-generated method stub
-
+		Fun.log("onLineEnd");
+		mPageView.scrollToCurrentLine();
 	}
 
 	@Override
@@ -152,5 +157,32 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 //		Fun.log(mTickerView.getHeight());
 //		Fun.log(mTickerView.getWidth());
 	}
+	
+	
+	@Override
+	public boolean onTouchEvent(MotionEvent ev) {
+		Fun.log("onTouchEvent in activity");
+		return gesture.onTouchEvent(ev);
+	}
+
+	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
+		
+		@Override
+		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
+			Fun.log("onFling in activity");
+			if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
+				// 1行戻る
+				//					if (set.getChildAnimations().get(0).isRunning()) { 
+				//						if (index > 0) { --index; }
+				//					}
+				//					set.cancel();
+			} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
+				// 1行進む
+				Fun.log("1行進む in activity");
+				mTickerView.mAnimatorList.getFirst().end();
+			}
+			return false;
+		}
+	};
 
 }

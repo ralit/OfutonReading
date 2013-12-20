@@ -39,11 +39,6 @@ public class BookManager {
 
 	private ZIP zip;
 	private CountDownTimer timer;
-	private boolean readyForSetImage = false;
-	
-	public boolean getReadyForSetImage() {
-		return readyForSetImage;
-	}
 
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -101,8 +96,6 @@ public class BookManager {
 		if(mCurLine == -1) { mCurLine = 0; }
 
 		initializeBook();
-		
-		readyForSetImage = true;
 
 		mPosList = readPageLayout(mCurPage);
 
