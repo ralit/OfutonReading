@@ -18,7 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 
-public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener{
+public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener, RecognizeFinishedListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
@@ -32,7 +32,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	private Timer timer;
 	private Handler handler = new Handler();
 	private GestureDetector gesture;
-
+	private Timer timerForSetImageToTickerView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +44,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		if (intent != null) {
 			String fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
-			mBook = new BookManager(fileName, filePath, this);
+			mBook = new BookManager(fileName, filePath, this, this);
 			mLinearLayout = new LinearLayout(this);
 			setContentView(mLinearLayout);
 			{
@@ -92,7 +92,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
-		Fun.log("onWindowFocusChanged()");
+		Fun.log("onWindowFocusChanged() in ReadingActivity");
 		super.onWindowFocusChanged(hasFocus);
 		if (mRW != mLinearLayout.getWidth() || mRH != mLinearLayout.getHeight()) {
 			mRW = mLinearLayout.getWidth();
@@ -135,20 +135,20 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 //		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
 
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override public void run() {
-				if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
-					timer.cancel();
-					handler.post(new Runnable() {
-						@Override public void run() {
-							Fun.log("TickerViewのsetimageを呼び出すタイマー");
-							mTickerView.setImage(mPageView.getImage());
-						}
-					});
-				}
-			}
-		}, 0, 100);
+//		timer = new Timer();
+//		timer.schedule(new TimerTask() {
+//			@Override public void run() {
+//				if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
+//					timer.cancel();
+//					handler.post(new Runnable() {
+//						@Override public void run() {
+//							Fun.log("TickerViewのsetimageを呼び出すタイマー");
+//							mTickerView.setImage(mPageView.getImage());
+//						}
+//					});
+//				}
+//			}
+//		}, 0, 100);
 //
 //
 //		Fun.log("onPageViewLayoutFinished");
@@ -185,4 +185,20 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		}
 	};
 
+
+	@Override
+	public void onRecognizeFinished() {
+		Fun.log("onRecognizeFinished");
+		timerForSetImageToTickerView = new Timer();
+		timerForSetImageToTickerView.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				if(isWindowFocusChanged) {
+					timerForSetImageToTickerView.cancel();
+					mTickerView.setImage(mPageView.getImage());			
+				}
+			}
+		}, 0, 100);
+	}
+	
 }

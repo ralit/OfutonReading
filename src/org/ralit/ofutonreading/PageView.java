@@ -73,7 +73,7 @@ public class PageView extends ScrollView{
 			waitForRecognizeTimer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					if(mBook.isRecognized()) {
+					if(mBook.isRecognized()) { // 1ページ目はこれでいいかもしれないけど、…いや、ページが変わるときにmRecognizedをfalseにさせればいいのか…
 						waitForRecognizeTimer.cancel();
 						handler.post(new Runnable() {
 							@Override

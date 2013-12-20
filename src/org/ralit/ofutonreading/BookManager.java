@@ -3,6 +3,8 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -12,6 +14,9 @@ import android.os.CountDownTimer;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+interface RecognizeFinishedListener {
+	void onRecognizeFinished();
+}
 
 public class BookManager {
 
@@ -33,13 +38,13 @@ public class BookManager {
 	//	private Docomo docomo;
 	private DocomoOld docomo;
 	private ArrayList<Word> wordList;
-
-	private CountDownTimer keyEventTimer;
+	
 	boolean done = false;
-
 	private ZIP zip;
-	private CountDownTimer timer;
+	private Timer timer;
 
+	private RecognizeFinishedListener mRecognizeFinishedListener;
+	
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
 			mPDF = new PDF(mContext, mFilePath);
@@ -81,11 +86,12 @@ public class BookManager {
 		return null;
 	}
 
-	public BookManager(String bookName, String filePath, Context context) {
+	public BookManager(String bookName, String filePath, Context context, RecognizeFinishedListener recognizeFinishedListener) {
 		Fun.log("BookManager()");
 		mBookName = bookName;
 		mFilePath = filePath;
 		mContext = context;
+		mRecognizeFinishedListener = recognizeFinishedListener;
 		mCurLine = readCurLine();
 		mCurPage = readCurPage();
 		mReadFilePath = readFilePath();
@@ -114,8 +120,9 @@ public class BookManager {
 		saveFileSize();
 		if (!mRecognized) { 
 			recognize();
+		} else {
+			mRecognizeFinishedListener.onRecognizeFinished();
 		}
-//		recognize();
 	}
 
 	public void setCurLine(int curLine) {
@@ -282,31 +289,23 @@ public class BookManager {
 		//			docomo = new Docomo(bmp, mBookName);
 		docomo = new DocomoOld(bmp);
 		docomo.start();
-		done = false;
-		keyEventTimer = new CountDownTimer(20000, 1000) {
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
 			@Override
-			public void onTick(long millisUntilFinished) {
-				Fun.log(String.valueOf(millisUntilFinished));
+			public void run() {
 				wordList = docomo.getWordList();
 				if(wordList == null) {
 					Fun.log("wordListはnull");
 				} else {
-					if(done) { return; } 
-					done = true;
-					keyEventTimer.cancel();
+					timer.cancel();
 					Fun.log("wordList取得!");
-					Fun.log(wordList.toString());
 					mPosList = wordList;
 					mRecognized = true;
 					savePageLayout();
+					mRecognizeFinishedListener.onRecognizeFinished();
 					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
 				}
 			}
-			@Override
-			public void onFinish() {
-				Fun.log("20秒待ったけど終わらなかった");
-			}
-		}.start();
+		}, 0, 1000);
 	}
-
 }

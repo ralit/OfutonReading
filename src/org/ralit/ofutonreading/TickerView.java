@@ -102,8 +102,29 @@ public class TickerView extends FrameLayout implements AnimatorListener, OnGestu
 		if ( parent != null ) {
 			parent.removeView(mTickerList.getFirst());
 		}
-		addView(mTickerList.getFirst());
-		animation();
+		
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				addView(mTickerList.getFirst());
+				animation();
+			}
+		});
+		
+//		Thread thread = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				handler.post(new Runnable() {
+//					@Override
+//					public void run() {
+//						addView(mTickerList.getFirst());
+//					}
+//				});
+//			}
+//		});
+//		thread.start();
+//		addView(mTickerList.getFirst());
+//		animation();
 	}
 
 
