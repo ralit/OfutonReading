@@ -3,16 +3,20 @@ package org.ralit.ofutonreading;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
+/*
+ *  横長の画像のばあい、上下に大きな余白ができてしまう
+ */
 
 interface LayoutFinishedListener {
 	void onPageViewLayoutFinished();
@@ -35,6 +39,8 @@ public class PageView extends ScrollView{
 	private Timer waitForRecognizeTimer;
 	private Handler handler = new Handler();
 	private Context context;
+	private GestureDetector gestureDetector;
+	private View.OnTouchListener gestureListener;
 
 	public PageView(Context context, BookManager bookManager, LayoutFinishedListener _layoutFinishedListener, float w, float h, Bitmap _bmp) {
 		super(context);
@@ -67,6 +73,8 @@ public class PageView extends ScrollView{
 			view.setLayoutParams(params);
 		}
 
+//		gestureDetector = new GestureDetector(context, new YScrollDetector());
+		
 		if(!mBook.isRecognized()) {
 			Fun.log("mBook.isRecognized() == false");
 			waitForRecognizeTimer = new Timer();
@@ -99,14 +107,14 @@ public class PageView extends ScrollView{
 	}
 
 	public void scrollToCurrentLine() {
-//		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
-//		Fun.log("linemid:"+linemid);
-//		float distance = pageH / 2 - linemid;
-//		Fun.log("distance:"+distance);
-//		final float i = distance * (mRW / pageW);
-//		Fun.log("i:"+i);
+		//		float linemid = (mBook.getPageLayout().get(mBook.getCurLine()).getBottom() + mBook.getPageLayout().get(mBook.getCurLine()).getTop()) / 2;
+		//		Fun.log("linemid:"+linemid);
+		//		float distance = pageH / 2 - linemid;
+		//		Fun.log("distance:"+distance);
+		//		final float i = distance * (mRW / pageW);
+		//		Fun.log("i:"+i);
 		Word word = mBook.getPageLayout().get(mBook.getCurLine());
-//		final int scroll = (word.getTop() + word.getBottom()) / 2 + (int)mRH / 4;
+		//		final int scroll = (word.getTop() + word.getBottom()) / 2 + (int)mRH / 4;
 		final int scroll = ((word.getTop() + word.getBottom()) / 2) * (int)(mRW * (pageH/pageW));
 		Fun.log("Scroll位置");
 		Fun.log(scroll);
@@ -127,15 +135,53 @@ public class PageView extends ScrollView{
 			}
 		});
 		thread.start();
-		
-//		AnimatorSet set = new AnimatorSet();
-//		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mFrameLayout, "y", i);
-//		set.playTogether(anim3);
-//		set.setDuration(500);
-//		set.start();
+
+		//		AnimatorSet set = new AnimatorSet();
+		//		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mFrameLayout, "y", i);
+		//		set.playTogether(anim3);
+		//		set.setDuration(500);
+		//		set.start();
 	}
 
 	public Bitmap getImage() {
 		return mPageBitmap;
 	}
+
+
+//	@Override
+//	public boolean onTouchEvent(MotionEvent ev) {
+//		return super.onTouchEvent(ev);
+//	}
+//
+//	@Override
+//	public boolean onInterceptTouchEvent(MotionEvent ev) {
+//		Fun.log("onInterceptTouchEvent");
+//		boolean result = super.onInterceptTouchEvent(ev);
+//		if (gestureDetector.onTouchEvent(ev)) {
+//			Fun.log(result);
+//			return result;
+//		} else {
+//			Fun.log("else->false");
+//			return false;
+//		}
+//	}
+//	
+//	class YScrollDetector extends SimpleOnGestureListener {
+//		@Override
+//		public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//			Fun.log("onScroll");
+//			try {
+//				if (Math.abs(distanceX) > Math.abs(distanceY)) {
+//					return true;
+//				} else {
+//					return false;
+//				}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//			return false;
+//		}
+//	}
+//	
 }
+

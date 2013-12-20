@@ -29,7 +29,7 @@ interface LineEndListener {
 	void onLineEnd();
 }
 
-public class TickerView extends FrameLayout implements AnimatorListener, OnGestureListener{
+public class TickerView extends FrameLayout implements AnimatorListener {
 
 	private LinkedList<ImageView> mTickerList = new LinkedList<ImageView>();
 //	private LinkedList<ObjectAnimator> mAnimatorList = new LinkedList<ObjectAnimator>();
@@ -44,7 +44,7 @@ public class TickerView extends FrameLayout implements AnimatorListener, OnGestu
 	private Handler handler = new Handler();
 	private Bitmap bmp;
 	private LineEndListener lineEndListener;
-	private GestureDetector gesture;
+//	private GestureDetector gesture;
 
 	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener, float w, float h) {
 		super(context);
@@ -54,7 +54,7 @@ public class TickerView extends FrameLayout implements AnimatorListener, OnGestu
 		mRW = w;
 		mRH = h;
 		setBackgroundColor(Color.DKGRAY);
-		gesture = new GestureDetector(context, gestureListener);
+//		gesture = new GestureDetector(context, gestureListener);
 //		gesture = new GestureDetector
 	}
 
@@ -171,16 +171,6 @@ public class TickerView extends FrameLayout implements AnimatorListener, OnGestu
 
 	}
 
-	//	@Override
-	//	public void onAnimationStart(Animator animation) {
-	//		// TODO Auto-generated method stub
-	////		if (mAnimationFlag == AnimationFlag.loop) {
-	//			if(0 < animation.getStartDelay()) { mPending = true; } 
-	//			Fun.log("startdelay: " + (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));
-	//			animation((long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth)));	
-	////		}
-	//	}
-
 	@Override
 	public void onAnimationStart(Animator animation) {
 		//		animationDelay = (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth));
@@ -190,73 +180,73 @@ public class TickerView extends FrameLayout implements AnimatorListener, OnGestu
 	}
 
 
-	@Override
-	public boolean onTouchEvent(MotionEvent ev) {
-		Fun.log("onTouchEvent");
-		return gesture.onTouchEvent(ev);
-	}
+//	@Override
+//	public boolean onTouchEvent(MotionEvent ev) {
+//		Fun.log("onTouchEvent");
+//		return gesture.onTouchEvent(ev);
+//	}
+//
+//	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
+//		
+//		@Override
+//		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
+//			Fun.log("onFling");
+//			if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
+//				// 1行戻る
+//				//					if (set.getChildAnimations().get(0).isRunning()) { 
+//				//						if (index > 0) { --index; }
+//				//					}
+//				//					set.cancel();
+//			} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
+//				// 1行進む
+//				Fun.log("1行進む");
+//				mAnimatorList.getFirst().end();
+//			}
+//			return false;
+//		}
+//	};
 
-	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
-		
-		@Override
-		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
-			Fun.log("onFling");
-			if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
-				// 1行戻る
-				//					if (set.getChildAnimations().get(0).isRunning()) { 
-				//						if (index > 0) { --index; }
-				//					}
-				//					set.cancel();
-			} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
-				// 1行進む
-				Fun.log("1行進む");
-				mAnimatorList.getFirst().end();
-			}
-			return false;
-		}
-	};
-
-	@Override
-	public boolean onDown(MotionEvent e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-		// TODO Auto-generated method stub
-		Fun.log("ふつうのonFling");
-		if (e1.getX() - e2.getX() > 120 && Math.abs(velocityX) > 200) {
-			// 1行進む
-			Fun.log("1行進む");
-			mAnimatorList.getFirst().end();
-		}
-		return false;
-	}
-
-	@Override
-	public void onLongPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public void onShowPress(MotionEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public boolean onSingleTapUp(MotionEvent e) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+//	@Override
+//	public boolean onDown(MotionEvent e) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
+//
+//	@Override
+//	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+//		// TODO Auto-generated method stub
+//		Fun.log("ふつうのonFling");
+//		if (e1.getX() - e2.getX() > 120 && Math.abs(velocityX) > 200) {
+//			// 1行進む
+//			Fun.log("1行進む");
+//			mAnimatorList.getFirst().end();
+//		}
+//		return false;
+//	}
+//
+//	@Override
+//	public void onLongPress(MotionEvent e) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
+//
+//	@Override
+//	public void onShowPress(MotionEvent e) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	@Override
+//	public boolean onSingleTapUp(MotionEvent e) {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
 
 
 

@@ -9,14 +9,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener, RecognizeFinishedListener{
 
@@ -29,7 +30,6 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	private float mRW;
 	private float mRH;
 	private boolean isWindowFocusChanged = false;
-	private Timer timer;
 	private Handler handler = new Handler();
 	private GestureDetector gesture;
 	private Timer timerForSetImageToTickerView;
@@ -38,7 +38,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); // 寝落ちしたときのことも考えたい
 
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -53,23 +53,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 				params.height = LayoutParams.MATCH_PARENT;
 				mLinearLayout.setLayoutParams(params);
 			}
-			
 			gesture = new GestureDetector(this, gestureListener);
-//			LinearLayout linearLayout = new LinearLayout(this);
-//			LayeredImageScrollView layeredImageScrollView1 = new LayeredImageScrollView(this, Color.rgb(240, 180, 140));
-//			LayeredImageScrollView layeredImageScrollView2 = new LayeredImageScrollView(this, Color.rgb(200, 200, 255));
-//			setContentView(linearLayout);
-//			linearLayout.addView(layeredImageScrollView1);
-//			linearLayout.addView(layeredImageScrollView2);
-//			linearLayout.setOrientation(LinearLayout.VERTICAL);
-//			LayoutParams params = layeredImageScrollView1.getLayoutParams();
-//			params.height = 400;
-//			params.width = 400;
-//			layeredImageScrollView1.setLayoutParams(params);
-//			params = layeredImageScrollView2.getLayoutParams();
-//			params.height = 400;
-//			params.width = 400;
-//			layeredImageScrollView2.setLayoutParams(params);
 		}
 	}
 
@@ -105,7 +89,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			mLinearLayout.setOrientation(LinearLayout.VERTICAL);
 			mLinearLayout.addView(mTickerView);
 			mLinearLayout.addView(mPageView);
-			
+
 			{
 				LayoutParams params = mTickerView.getLayoutParams();
 				params.width = (int)mRW;
@@ -130,35 +114,15 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 	@Override
 	public void onPageViewLayoutFinished() {
-		//		mPageView.setimage(BitmapFactory.decodeResource(getResources(), R.drawable.usagi));
-		//		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
 
-//		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-
-//		timer = new Timer();
-//		timer.schedule(new TimerTask() {
-//			@Override public void run() {
-//				if(mBook.getReadyForSetImage() && isWindowFocusChanged) {
-//					timer.cancel();
-//					handler.post(new Runnable() {
-//						@Override public void run() {
-//							Fun.log("TickerViewのsetimageを呼び出すタイマー");
-//							mTickerView.setImage(mPageView.getImage());
-//						}
-//					});
-//				}
-//			}
-//		}, 0, 100);
-//
-//
-//		Fun.log("onPageViewLayoutFinished");
-//		Fun.log(mPageView.getHeight());
-//		Fun.log(mPageView.getWidth());
-//		Fun.log(mTickerView.getHeight());
-//		Fun.log(mTickerView.getWidth());
 	}
-	
-	
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev){
+		super.dispatchTouchEvent(ev);    
+		return gesture.onTouchEvent(ev); 
+	}
+
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		Fun.log("onTouchEvent in activity");
@@ -166,20 +130,25 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 	}
 
 	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
-		
+
 		@Override
 		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
-			Fun.log("onFling in activity");
-			if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
-				// 1行戻る
-				//					if (set.getChildAnimations().get(0).isRunning()) { 
-				//						if (index > 0) { --index; }
-				//					}
-				//					set.cancel();
-			} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
-				// 1行進む
-				Fun.log("1行進む in activity");
-				mTickerView.mAnimatorList.getFirst().end();
+			if (ev1.getY() < mRH) {
+				Fun.log("Ticker系Gesture");
+				if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
+					// 1行戻る
+					//					if (set.getChildAnimations().get(0).isRunning()) { 
+					//						if (index > 0) { --index; }
+					//					}
+					//					set.cancel();
+				} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
+					// 1行進む
+					Fun.log("1行進む in activity");
+					mTickerView.mAnimatorList.getFirst().end();
+				}
+			} else {
+				Fun.log("PageView系Gesture");
+				
 			}
 			return false;
 		}
@@ -200,5 +169,5 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			}
 		}, 0, 100);
 	}
-	
+
 }
