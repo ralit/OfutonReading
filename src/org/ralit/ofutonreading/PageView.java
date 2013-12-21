@@ -1,5 +1,6 @@
 package org.ralit.ofutonreading;
 
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -25,8 +26,10 @@ interface LayoutFinishedListener {
 public class PageView extends ScrollView{
 
 	private FrameLayout mFrameLayout;
-	private ImageView mPageView;
-	private ImageView mMarkerView;
+//	private ImageView mPageView;
+//	private ImageView mMarkerView;
+	private LinkedList<ImageView> mPageViewList = new LinkedList<ImageView>();
+	private LinkedList<ImageView> mMarkerViewList = new LinkedList<ImageView>();
 	private Bitmap mPageBitmap;
 	private Bitmap mScaledPageBitmap;
 	private float mRH;
@@ -52,15 +55,22 @@ public class PageView extends ScrollView{
 		mPageBitmap = _bmp;
 
 		mFrameLayout = new FrameLayout(context);
-		mPageView = new ImageView(context);
-		mMarkerView = new ImageView(context);
+		ImageView pageView = new ImageView(context);
+		mPageViewList.add(pageView);
+		ImageView markerView = new ImageView(context);
+		mMarkerViewList.add(markerView);
+//		mPageView = new ImageView(context);
+//		mMarkerView = new ImageView(context);
 
 		pageW = (float) mPageBitmap.getWidth();
 		pageH = (float) mPageBitmap.getHeight();
 		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
-		mPageView.setImageBitmap(mScaledPageBitmap);
-		mFrameLayout.addView(mPageView);
-		mFrameLayout.addView(mMarkerView);
+		mPageViewList.getFirst().setImageBitmap(mScaledPageBitmap);
+		mFrameLayout.addView(mPageViewList.getFirst());
+		mFrameLayout.addView(mMarkerViewList.getFirst());
+//		mPageView.setImageBitmap(mScaledPageBitmap);
+//		mFrameLayout.addView(mPageView);
+//		mFrameLayout.addView(mMarkerView);
 		addView(mFrameLayout);
 
 		final int count = getChildCount();
@@ -97,6 +107,63 @@ public class PageView extends ScrollView{
 		}
 	}
 
+	public void setImage(Bitmap bmp) {
+		ImageView pageView = new ImageView(context);
+		mPageViewList.add(pageView);
+		ImageView markerView = new ImageView(context);
+		mMarkerViewList.add(markerView);
+		
+		mPageBitmap = bmp;
+		
+		pageW = (float) mPageBitmap.getWidth();
+		pageH = (float) mPageBitmap.getHeight();
+		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
+		mPageViewList.getLast().setImageBitmap(mScaledPageBitmap);
+		handler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		mFrameLayout.addView(mPageViewList.getLast());
+		mFrameLayout.addView(mMarkerViewList.getLast());
+		mFrameLayout.removeView(mPageViewList.pollFirst());
+		mFrameLayout.removeView(mMarkerViewList.pollFirst());
+
+		final int count = getChildCount();
+		Fun.log("PageView.getChildCount: " + count);
+		for (int i = 0; i < count; i++) {
+			View view = getChildAt(i);
+			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
+			params.width = (int)mRW;
+			params.height = (int)(mRW * (pageH/pageW));
+			view.setLayoutParams(params);
+		}
+		
+		if(!mBook.isRecognized()) {
+			Fun.log("mBook.isRecognized() == false");
+			waitForRecognizeTimer = new Timer();
+			waitForRecognizeTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					if(mBook.isRecognized()) { // 1ページ目はこれでいいかもしれないけど、…いや、ページが変わるときにmRecognizedをfalseにさせればいいのか…
+						waitForRecognizeTimer.cancel();
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+								scrollToCurrentLine();
+							}
+						});
+					}
+				}
+			}, 0, 1000);
+		} else {
+			scrollToCurrentLine();
+		}
+	}
+	
 	@Override
 	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		super.onSizeChanged(w, h, oldw, oldh);
@@ -115,26 +182,37 @@ public class PageView extends ScrollView{
 		//		Fun.log("i:"+i);
 		Word word = mBook.getPageLayout().get(mBook.getCurLine());
 		//		final int scroll = (word.getTop() + word.getBottom()) / 2 + (int)mRH / 4;
-		final int scroll = ((word.getTop() + word.getBottom()) / 2) * (int)(mRW * (pageH/pageW));
+//		final int scroll = ((word.getTop() + word.getBottom()) / 2) * (int)(mRW * (pageH/pageW));
+		final int scroll = (int)(((word.getTop() + word.getBottom()) / 2) * (mRW/pageW) - (mRH / 4));
 		Fun.log("Scroll位置");
 		Fun.log(scroll);
 		/*
 		 * frameLayoutの位置を直接動かしてはいけない！
 		 * ScrollViewをScrollToさせるんだ！
 		 */
-		Thread thread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				handler.post(new Runnable() {
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						smoothScrollTo(0, scroll);
-					}
-				});
-			}
-		});
-		thread.start();
+//		Thread thread = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				handler.post(new Runnable() {
+//					@Override
+//					public void run() {
+//						// TODO Auto-generated method stub
+//						smoothScrollTo(0, scroll);
+//					}
+//				});
+//			}
+//		});
+//		thread.start();
+		
+//		handler.post(new Runnable() {
+//			@Override
+//			public void run() {
+//				// TODO Auto-generated method stub
+//				smoothScrollTo(0, scroll);
+//			}
+//		});
+		
+		smoothScrollTo(0, scroll);
 
 		//		AnimatorSet set = new AnimatorSet();
 		//		ObjectAnimator anim3 = ObjectAnimator.ofFloat(mFrameLayout, "y", i);

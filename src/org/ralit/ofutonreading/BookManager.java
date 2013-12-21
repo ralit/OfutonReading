@@ -162,6 +162,19 @@ public class BookManager {
 
 	public void setCurPage(int curPage) {
 		mCurPage = curPage;
+		mPosList = readPageLayout(mCurPage);
+		saveCurPage();
+		if(mPosList != null) {
+			if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
+				Fun.log("サイズが違うレイアウトデータが存在する場合");
+			}
+		}
+		if (mPosList == null) { 
+			mRecognized = false;
+			recognize();
+		} else { 
+			mRecognized = true; 
+		}
 	}
 
 	public int getCurPage() {

@@ -2,12 +2,11 @@ package org.ralit.ofutonreading;
 
 import java.io.File;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -31,7 +30,15 @@ public class MainActivity extends Activity implements FileClickListener {
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
 		
-		
+	    DisplayMetrics metrics = new DisplayMetrics();  
+	    getWindowManager().getDefaultDisplay().getMetrics(metrics);  
+	    Log.d("test", "density=" + metrics.density);  
+	    Log.d("test", "densityDpi=" + metrics.densityDpi);  
+	    Log.d("test", "scaledDensity=" + metrics.scaledDensity);  
+	    Log.d("test", "widthPixels=" + metrics.widthPixels);  
+	    Log.d("test", "heightPixels=" + metrics.heightPixels);  
+	    Log.d("test", "xDpi=" + metrics.xdpi);  
+	    Log.d("test", "yDpi=" + metrics.ydpi);  
 
 //		if(isLaunch) {
 //			SplashView splashView = new SplashView(this);

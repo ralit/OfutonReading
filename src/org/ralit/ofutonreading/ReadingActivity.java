@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
@@ -42,6 +43,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 		Intent intent = getIntent();
 		if (intent != null) {
+			Fun.log("intent != null");
 			String fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
 			mBook = new BookManager(fileName, filePath, this, this);
@@ -56,7 +58,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 			gesture = new GestureDetector(this, gestureListener);
 		}
 	}
-
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.reading, menu);
@@ -74,6 +76,13 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 		return super.onOptionsItemSelected(item);
 	}
 
+	private void initialize() {
+		mTickerView = null;
+		mPageView = null;
+		mTickerView = new TickerView(this, mBook, this, mRW, mRH);
+		mPageView = new PageView(this, mBook, this, mRW, mRH, mBook.getBitmap(mBook.getCurPage()));
+	}
+	
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Fun.log("onWindowFocusChanged() in ReadingActivity");
@@ -133,7 +142,10 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 
 		@Override
 		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
-			if (ev1.getY() < mRH) {
+			DisplayMetrics metrics = new DisplayMetrics();  
+		    getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		    
+			if (ev1.getY() < mRH / 2) {
 				Fun.log("Ticker系Gesture");
 				if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
 					// 1行戻る
@@ -141,14 +153,54 @@ public class ReadingActivity extends Activity implements LineEndListener, Layout
 					//						if (index > 0) { --index; }
 					//					}
 					//					set.cancel();
-				} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
+				} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 400) {
 					// 1行進む
 					Fun.log("1行進む in activity");
 					mTickerView.mAnimatorList.getFirst().end();
 				}
 			} else {
 				Fun.log("PageView系Gesture");
-				
+				Fun.log(ev1.getX());
+				if (mRW - metrics.density * 14 < ev1.getX() && Math.abs(vx) > 400) {
+					mBook.setCurPage(mBook.getCurPage() + 1);
+//					mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+//					mTickerView.destroy();
+					handler.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							initialize();
+						}
+					});
+					
+					timerForSetImageToTickerView = new Timer();
+					timerForSetImageToTickerView.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							if(mBook.isRecognized()) {
+								timerForSetImageToTickerView.cancel();
+								mTickerView.setImage(mPageView.getImage());			
+							}
+						}
+					}, 0, 100);
+				} else if (ev1.getX() < metrics.density * 14 && Math.abs(vx) > 400) {
+					mBook.setCurPage(mBook.getCurPage() - 1);
+//					mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+//					mTickerView.destroy();
+//					
+					initialize();
+					timerForSetImageToTickerView = new Timer();
+					timerForSetImageToTickerView.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							if(mBook.isRecognized()) {
+								timerForSetImageToTickerView.cancel();
+								mTickerView.setImage(mPageView.getImage());			
+							}
+						}
+					}, 0, 100);
+				}
 			}
 			return false;
 		}

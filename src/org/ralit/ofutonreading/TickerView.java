@@ -72,6 +72,21 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	//			view.setLayoutParams(params);
 	//		}
 	//	}
+	
+	public void destroy() {
+		if( mAnimatorList.size() > 0 ) {
+			mAnimatorList.getFirst().removeAllListeners();
+			mAnimatorList.pollFirst().cancel();
+			
+//			ViewGroup parent = (ViewGroup)mTickerList.getFirst().getParent(); 
+//			if ( parent != null ) {
+//				parent.removeView(mTickerList.pollFirst());
+//			}
+			removeAllViews();
+			mTickerList = new LinkedList<ImageView>();
+		}
+		
+	}
 
 	public void setImage(Bitmap _bmp) {
 		if (_bmp != null) {
