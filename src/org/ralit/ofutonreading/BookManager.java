@@ -28,7 +28,7 @@ public class BookManager {
 	private String mReadFilePath = "";
 	private long mFileSize;
 
-	private enum FileType { pdf, zip, png, jpg };
+	private enum FileType { pdf, zip };
 	private FileType mType; 
 
 	private PDF mPDF;
@@ -70,7 +70,6 @@ public class BookManager {
 			return mPDF.getSize(page);
 		} else if (mType == FileType.zip) {
 			zip.openZip(page);
-			//			zip.openZipMoreFaster(page);
 			return zip.getSize();
 		}
 		return null;
@@ -81,7 +80,6 @@ public class BookManager {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
 			return zip.openZip(page);
-			//			return zip.openZipMoreFaster(page);
 		}
 		return null;
 	}
@@ -105,14 +103,6 @@ public class BookManager {
 
 		mPosList = readPageLayout(mCurPage);
 
-		Fun.log(String.valueOf(mCurLine));
-		Fun.log(String.valueOf(mCurPage));
-		Fun.log(mReadFilePath);
-		Fun.log(String.valueOf(mFileSize));
-		Fun.log(String.valueOf(mType));
-		if (mPosList != null) {
-			Fun.log(mPosList.toString());
-		}
 		check();
 		saveCurLine();
 		saveCurPage();
@@ -223,8 +213,6 @@ public class BookManager {
 		Fun.log("getFileType()");
 		if (Fun.match(mFilePath, "\\.pdf$", true)) { return FileType.pdf; }
 		if (Fun.match(mFilePath, "\\.zip$", true)) { return FileType.zip; }
-		if (Fun.match(mFilePath, "\\.png$", true)) { return FileType.png; }
-		if (Fun.match(mFilePath, "\\.jpe?g$", true)) { return FileType.jpg; }
 		return null;
 	}
 

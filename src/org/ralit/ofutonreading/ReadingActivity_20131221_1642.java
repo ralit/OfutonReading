@@ -20,7 +20,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class ReadingActivity extends Activity implements LineEndListener, LayoutFinishedListener, RecognizeFinishedListener{
+public class ReadingActivity_20131221_1642 extends Activity implements LineEndListener, LayoutFinishedListener, RecognizeFinishedListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー

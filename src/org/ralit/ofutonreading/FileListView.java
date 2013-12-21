@@ -2,6 +2,7 @@ package org.ralit.ofutonreading;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import android.R.string;
 import android.content.Context;
@@ -203,26 +204,48 @@ public class FileListView extends ViewGroup{
 		}
 	}
 
+	//	//fileList
+	//	private void updateFileList(String dirPath) {
+	//		File[] fileList = new File(dirPath).listFiles();
+	//		String[] fileNameList = null;
+	//		int listCount = 0;
+	//		if(Fun.match(dirPath, "/.+/", false)) {
+	//			fileNameList = new String[fileList.length + 1];
+	//			fileNameList[listCount] = "↑";
+	//			listCount++;
+	//		} else {
+	//			fileNameList = new String[fileList.length];
+	//		}
+	//
+	//		for (File file : fileList) {
+	//			if(file.isDirectory()) {
+	//				fileNameList[listCount] = file.getName() + "/";
+	//			} else {
+	//				fileNameList[listCount] = file.getName();
+	//			}
+	//			++listCount;
+	//		}
+	//		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, fileNameList);
+	//		fileListView.setAdapter(adapter);
+	//	}
+
 	//fileList
 	private void updateFileList(String dirPath) {
 		File[] fileList = new File(dirPath).listFiles();
-		String[] fileNameList = null;
-		int listCount = 0;
+		ArrayList<String> fileNameList = new ArrayList<String>();
 		if(Fun.match(dirPath, "/.+/", false)) {
-			fileNameList = new String[fileList.length + 1];
-			fileNameList[listCount] = "↑";
-			listCount++;
-		} else {
-			fileNameList = new String[fileList.length];
+			fileNameList.add("↑");
 		}
-
 		for (File file : fileList) {
 			if(file.isDirectory()) {
-				fileNameList[listCount] = file.getName() + "/";
+				fileNameList.add(file.getName() + "/");
 			} else {
-				fileNameList[listCount] = file.getName();
+				if(Fun.match(file.getName(), "\\.pdf$", true)) {
+					fileNameList.add(file.getName());
+				} else if (Fun.match(file.getName(), "\\.zip$", true)) {
+					fileNameList.add(file.getName());
+				}
 			}
-			++listCount;
 		}
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, fileNameList);
 		fileListView.setAdapter(adapter);

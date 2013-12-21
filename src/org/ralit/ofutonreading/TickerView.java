@@ -18,8 +18,6 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-
-
 /**
  * ViewGroupの作成は以下のページが参考になりました。
  * http://ga29.blog.fc2.com/blog-entry-7.html
@@ -32,7 +30,6 @@ interface LineEndListener {
 public class TickerView extends FrameLayout implements AnimatorListener {
 
 	private LinkedList<ImageView> mTickerList = new LinkedList<ImageView>();
-//	private LinkedList<ObjectAnimator> mAnimatorList = new LinkedList<ObjectAnimator>();
 	public LinkedList<ObjectAnimator> mAnimatorList = new LinkedList<ObjectAnimator>();
 	private Context context;
 	private BookManager mBook;
@@ -44,7 +41,6 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	private Handler handler = new Handler();
 	private Bitmap bmp;
 	private LineEndListener lineEndListener;
-//	private GestureDetector gesture;
 
 	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener, float w, float h) {
 		super(context);
@@ -54,8 +50,6 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		mRW = w;
 		mRH = h;
 		setBackgroundColor(Color.DKGRAY);
-//		gesture = new GestureDetector(context, gestureListener);
-//		gesture = new GestureDetector
 	}
 
 	//	@Override
@@ -111,8 +105,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		Fun.log("mTickerHeight: "+mTickerHeight);
 		ticker.setX(mTickerWidth/2);
 		ticker.setY(0);
-		// アニメーション開始
-		//		animation();
+
 		ViewGroup parent = (ViewGroup)mTickerList.getFirst().getParent(); 
 		if ( parent != null ) {
 			parent.removeView(mTickerList.getFirst());
@@ -125,21 +118,6 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 				animation();
 			}
 		});
-		
-//		Thread thread = new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				handler.post(new Runnable() {
-//					@Override
-//					public void run() {
-//						addView(mTickerList.getFirst());
-//					}
-//				});
-//			}
-//		});
-//		thread.start();
-//		addView(mTickerList.getFirst());
-//		animation();
 	}
 
 
@@ -161,9 +139,6 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		mBook.setCurLine(mBook.getCurLine());
 		mAnimatorList.getFirst().start();
 	}
-
-
-
 
 	@Override
 	public void onAnimationCancel(Animator animation) {
@@ -188,81 +163,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-		//		animationDelay = (long)(mDuration * ((float)(mTickerWidth - mRW) / (float)mTickerWidth));
-		//		loss = System.currentTimeMillis();
-		//		Fun.log("onAnimationStart > animationDelay: " + animationDelay);
-		//		setImage(null);
+
 	}
-
-
-//	@Override
-//	public boolean onTouchEvent(MotionEvent ev) {
-//		Fun.log("onTouchEvent");
-//		return gesture.onTouchEvent(ev);
-//	}
-//
-//	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
-//		
-//		@Override
-//		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
-//			Fun.log("onFling");
-//			if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
-//				// 1行戻る
-//				//					if (set.getChildAnimations().get(0).isRunning()) { 
-//				//						if (index > 0) { --index; }
-//				//					}
-//				//					set.cancel();
-//			} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 200) {
-//				// 1行進む
-//				Fun.log("1行進む");
-//				mAnimatorList.getFirst().end();
-//			}
-//			return false;
-//		}
-//	};
-
-//	@Override
-//	public boolean onDown(MotionEvent e) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
-//
-//	@Override
-//	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-//		// TODO Auto-generated method stub
-//		Fun.log("ふつうのonFling");
-//		if (e1.getX() - e2.getX() > 120 && Math.abs(velocityX) > 200) {
-//			// 1行進む
-//			Fun.log("1行進む");
-//			mAnimatorList.getFirst().end();
-//		}
-//		return false;
-//	}
-//
-//	@Override
-//	public void onLongPress(MotionEvent e) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
-//
-//	@Override
-//	public void onShowPress(MotionEvent e) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public boolean onSingleTapUp(MotionEvent e) {
-//		// TODO Auto-generated method stub
-//		return false;
-//	}
-
-
 
 }
