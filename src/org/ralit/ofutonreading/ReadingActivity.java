@@ -18,9 +18,8 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
-public class ReadingActivity extends Activity implements LineEndListener, RecognizeFinishedListener, Con{
+public class ReadingActivity extends Activity implements LineEndListener, RecognizeFinishedListener, Con, TimerCallbackListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
@@ -36,6 +35,9 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private Timer timerForSetImageToTickerView;
 
 	protected State state;
+	private final int FlingSpeed = 100;
+	private final int FlingFromEdgePixels = 14;
+	private final int FlingMinDistance = 120;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,14 +80,6 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void initialize() {
-		mLinearLayout.removeAllViews();
-		mTickerView = new TickerView(this, mBook, this, mRW, mRH);
-		mPageView = new PageView(this, mBook, mRW, mRH, mBook.getBitmap(mBook.getCurPage()));
-		mLinearLayout.addView(mTickerView);
-		mLinearLayout.addView(mPageView);
-	}
-
 	@Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		Fun.log("onWindowFocusChanged() in ReadingActivity");
@@ -124,7 +118,6 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 
 	@Override
 	public void onLineEnd() {
-		Fun.log("onLineEnd");
 		mPageView.scrollToCurrentLine();
 	}
 
@@ -146,95 +139,62 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 			DisplayMetrics metrics = new DisplayMetrics();  
 			getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			if (ev1.getY() < mRH / 2) {
-				Fun.log("Ticker系Gesture");
-				if (ev2.getX() - ev1.getX() > 120 && Math.abs(vx) > 200) {
-					// 1行戻る
-					//					if (set.getChildAnimations().get(0).isRunning()) { 
-					//						if (index > 0) { --index; }
-					//					}
-					//					set.cancel();
-				} else if (ev1.getX() - ev2.getX() > 120 && Math.abs(vx) > 400) {
-					// 1行進む
-					Fun.log("1行進む in activity");
-					mTickerView.mAnimatorList.getFirst().end();
+				if (ev2.getX() - ev1.getX() > metrics.density * FlingMinDistance && Math.abs(vx) > metrics.density * FlingSpeed) {
+					state.onChangeLine(ReadingActivity.this, 0);
+				} else if (ev1.getX() - ev2.getX() > metrics.density * FlingMinDistance && Math.abs(vx) > metrics.density * FlingSpeed) {
+					state.onChangeLine(ReadingActivity.this, 1); // 第2引数は行番号を指定するつもりだったが、1行ずつ移動することにして、1は進む、0は戻るとする。
 				}
 			} else {
-				Fun.log("PageView系Gesture");
-				Fun.log(ev1.getX());
-				if (mRW - metrics.density * 14 < ev1.getX() && Math.abs(vx) > 400) {
+				if (mRW - metrics.density * FlingFromEdgePixels < ev1.getX() && Math.abs(vx) > metrics.density * FlingSpeed) {
 					state.onChangePage(ReadingActivity.this, mBook.getCurPage() + 1);
-					
-				} else if (ev1.getX() < metrics.density * 14 && Math.abs(vx) > 400) {
-					mBook.setCurPage(mBook.getCurPage() - 1);
-					//					mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-					//					mTickerView.destroy();
-					//					
-					initialize();
-					timerForSetImageToTickerView = new Timer();
-					timerForSetImageToTickerView.schedule(new TimerTask() {
-						@Override
-						public void run() {
-							if(mBook.isRecognized()) {
-								timerForSetImageToTickerView.cancel();
-								mTickerView.setImage(mPageView.getImage());			
-							}
-						}
-					}, 0, 100);
+				} else if (ev1.getX() < metrics.density * FlingFromEdgePixels && Math.abs(vx) > metrics.density * FlingSpeed) {
+					state.onChangePage(ReadingActivity.this, mBook.getCurPage() - 1);
 				}
 			}
 			return false;
 		}
 	};
 
-
 	@Override
 	public void onRecognizeFinished() {
 		Fun.log("onRecognizeFinished");
-		timerForSetImageToTickerView = new Timer();
-		timerForSetImageToTickerView.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				if(isWindowFocusChanged) {
-					timerForSetImageToTickerView.cancel();
-					mTickerView.setImage(mPageView.getImage());			
-				}
-			}
-		}, 0, 100);
+		changeState(StateNormal.getInstance());
+		new SimpleTimer(this).start(100, "onRecognizeFinished");
 	}
-	
 
 	@Override
-	public void changePage() {
-		mBook.setCurPage(mBook.getCurPage() + 1);
-		//					mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-		//					mTickerView.destroy();
-		handler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				//							initialize();
-				mLinearLayout.removeAllViews();
-				layout();
-			}
-		});
-
-		timerForSetImageToTickerView = new Timer();
-		timerForSetImageToTickerView.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				if(mBook.isRecognized()) {
-					timerForSetImageToTickerView.cancel();
-					mTickerView.setImage(mPageView.getImage());			
-				}
-			}
-		}, 0, 100);
-		
+	public void changePage(int page) {
+		Fun.log("Con.changePage");
+		mBook.setCurPage(page);
+		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+		mTickerView.destroy();
+		if(mBook.isRecognized()) {
+			mTickerView.setImage(mPageView.getImage());
+		}
 	}
 
 	@Override
 	public void changeState(State state) {
 		this.state = state;
+	}
+
+	@Override
+	public void timerCallback(String message, SimpleTimer timer) {
+		if (message.equals("onRecognizeFinished")) {
+			if(isWindowFocusChanged) {
+				timer.cancel();
+				mTickerView.setImage(mPageView.getImage());			
+			}
+		}
+	}
+
+	@Override
+	public void changeLine(int line) {
+		if (line == 1) {
+			mTickerView.nextLine();
+		} else if (line == 0) {
+			mTickerView.previousLine();
+		}
 	}
 
 }

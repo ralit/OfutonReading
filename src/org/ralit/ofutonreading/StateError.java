@@ -1,22 +1,22 @@
 package org.ralit.ofutonreading;
 
-public class StateNormal implements State{
+public class StateError implements State{
 
-	private static StateNormal singleton = new StateNormal();
+	private static StateError singleton = new StateError();
 	
-	private StateNormal() {}
+	private StateError() {}
 	
 	public static State getInstance() { return singleton; }
 
 	@Override
 	public void onChangePage(Con con, int page) {
-		con.changePage(page);
+		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void onChangeLine(Con con, int line) {
-		con.changeLine(line);
+		// TODO Auto-generated method stub
 		
 	}
 

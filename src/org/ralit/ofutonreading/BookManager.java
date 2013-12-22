@@ -3,7 +3,6 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -19,64 +18,32 @@ interface RecognizeFinishedListener {
 	void onRecognizeFinished();
 }
 
-class BookData {
-	private int curLine;
-	private int curPage;
-	private ArrayList<Word> posList;
-	private boolean recognized;
-	
-	public BookData(int curLine, int curPage, ArrayList<Word> posList, boolean recognized) {
-		this.curLine = curLine;
-		this.curPage = curPage;
-		this.posList = posList;
-		this.recognized = recognized;
-	}
-	
-	public void updateBookData(int curLine, int curPage, ArrayList<Word> posList, boolean recognized) {
-		this.curLine = curLine;
-		this.curPage = curPage;
-		this.posList = posList;
-		this.recognized = recognized;
-	}
-	
-	public int curLine() {
-		return curLine;
-	}
-	
-	public int curPage() {
-		return curPage;
-	}
-	
-	public ArrayList<Word> posList() {
-		return posList;
-	}
-	
-	public boolean recognized() {
-		return recognized;
-	}
-}
-
 public class BookManager {
-	
-//	private int mCurLine = 0;
-//	private int mCurPage = 0;
-//	private String mReadFilePath = ""; // 不要な気がする
-//	private ArrayList<Word> mPosList;
-//	boolean mRecognized = false;
-//	private ArrayList<Word> wordList;
-//	private boolean done = false;
-	final private String mBookName;
-	final private String mFilePath;
-	final private Context mContext;
-	final private long mFileSize;
-	final private FileType mType;
-	private enum FileType { pdf, zip };
+
+	private String mBookName;
+	private String mFilePath;
+	private Context mContext;
+	private int mCurLine = 0;
+	private int mCurPage = 0;
+	private String mReadFilePath = "";
+	private long mFileSize;
+
+	private enum FileType { pdf, zip, png, jpg };
+	private FileType mType; 
+
 	private PDF mPDF;
+	private ArrayList<Word> mPosList;
+	boolean mRecognized = false;
+
+	//	private Docomo docomo;
+	private DocomoOld docomo;
+	private ArrayList<Word> wordList;
+	
+	boolean done = false;
 	private ZIP zip;
 	private Timer timer;
+
 	private RecognizeFinishedListener mRecognizeFinishedListener;
-	private DocomoOld docomo;
-//	private Docomo docomo;
 	
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -103,6 +70,7 @@ public class BookManager {
 			return mPDF.getSize(page);
 		} else if (mType == FileType.zip) {
 			zip.openZip(page);
+			//			zip.openZipMoreFaster(page);
 			return zip.getSize();
 		}
 		return null;
@@ -113,6 +81,7 @@ public class BookManager {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
 			return zip.openZip(page);
+			//			return zip.openZipMoreFaster(page);
 		}
 		return null;
 	}
@@ -136,6 +105,12 @@ public class BookManager {
 
 		mPosList = readPageLayout(mCurPage);
 
+		if (mPosList != null) {
+			if(mPosList.size() - 1 < mCurLine) { 
+				mCurLine = 0;
+				// 本当はStateErrorにする。
+			}
+		}
 		check();
 		saveCurLine();
 		saveCurPage();
@@ -150,6 +125,7 @@ public class BookManager {
 
 	public void setCurLine(int curLine) {
 		mCurLine = curLine;
+		saveCurLine();
 	}
 
 	public int getCurLine() {
@@ -185,18 +161,24 @@ public class BookManager {
 
 	public void setCurPage(int curPage) {
 		mCurPage = curPage;
+		mCurLine = readCurLine();
+		if(mCurLine == -1) {
+			mCurLine = 0;
+		}
 		mPosList = readPageLayout(mCurPage);
 		saveCurPage();
 		if(mPosList != null) {
 			if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
 				Fun.log("サイズが違うレイアウトデータが存在する場合");
 			}
-		}
-		if (mPosList == null) { 
+			if (mPosList.size() - 1 < mCurLine) {
+				mCurLine = 0;
+				// 本当はStateError
+			}
+			mRecognized = true;
+		} else {
 			mRecognized = false;
 			recognize();
-		} else { 
-			mRecognized = true; 
 		}
 	}
 
@@ -246,6 +228,8 @@ public class BookManager {
 		Fun.log("getFileType()");
 		if (Fun.match(mFilePath, "\\.pdf$", true)) { return FileType.pdf; }
 		if (Fun.match(mFilePath, "\\.zip$", true)) { return FileType.zip; }
+		if (Fun.match(mFilePath, "\\.png$", true)) { return FileType.png; }
+		if (Fun.match(mFilePath, "\\.jpe?g$", true)) { return FileType.jpg; }
 		return null;
 	}
 

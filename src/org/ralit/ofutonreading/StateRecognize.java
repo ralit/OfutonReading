@@ -9,67 +9,67 @@ public class StateRecognize implements State{
 	public static State getInstance() { return singleton; }
 
 	@Override
-	public void onChangePage(int page) {
+	public void onChangePage(Con con, int page) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onChangeLine(int line) {
+	public void onChangeLine(Con con, int line) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onChangeSpeed(boolean up) {
+	public void onChangeSpeed(Con con, boolean up) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onMark() {
+	public void onMark(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onRotate() {
+	public void onRotate(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onOpenMarkerList() {
+	public void onOpenMarkerList(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onBack() {
+	public void onBack(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onSleep() {
+	public void onSleep(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onHome() {
+	public void onHome(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onPause() {
+	public void onPause(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void onResume() {
+	public void onResume(Con con) {
 		// TODO Auto-generated method stub
 		
 	}
