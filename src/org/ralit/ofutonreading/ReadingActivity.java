@@ -1,14 +1,18 @@
 package org.ralit.ofutonreading;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.Menu;
@@ -120,7 +124,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	public void onLineEnd() {
 		mPageView.scrollToCurrentLine();
 	}
-	
+
 	@Override
 	public void onPageEnd() {
 		state.onChangePage(ReadingActivity.this, mBook.getCurPage() + 1);
@@ -154,6 +158,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 					state.onChangePage(ReadingActivity.this, mBook.getCurPage() + 1);
 				} else if (ev1.getX() < metrics.density * FlingFromEdgePixels && Math.abs(vx) > metrics.density * FlingSpeed) {
 					state.onChangePage(ReadingActivity.this, mBook.getCurPage() - 1);
+				} else if (Math.abs(vy) < Math.abs(vx)) {
+					state.onMark(ReadingActivity.this, ev1, ev2);
 				}
 			}
 			return false;
@@ -206,6 +212,16 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		} else if (line == 0) {
 			mTickerView.previousLine();
 		}
+	}
+
+	@Override
+	public void mark(MotionEvent ev1, MotionEvent ev2) {
+		Fun.log("mark");
+		Point screen = new Point();
+//		getWindowManager().getDefaultDisplay().getSize(screen);
+		screen = Fun.getDisplaySize(ReadingActivity.this);
+		Fun.log("screen: " + screen.toString());
+		mPageView.mark(ev1, ev2, screen);
 	}
 
 
