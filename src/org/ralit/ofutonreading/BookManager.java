@@ -3,6 +3,7 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,32 +19,64 @@ interface RecognizeFinishedListener {
 	void onRecognizeFinished();
 }
 
-public class BookManager {
-
-	private String mBookName;
-	private String mFilePath;
-	private Context mContext;
-	private int mCurLine = 0;
-	private int mCurPage = 0;
-	private String mReadFilePath = "";
-	private long mFileSize;
-
-	private enum FileType { pdf, zip };
-	private FileType mType; 
-
-	private PDF mPDF;
-	private ArrayList<Word> mPosList;
-	boolean mRecognized = false;
-
-	//	private Docomo docomo;
-	private DocomoOld docomo;
-	private ArrayList<Word> wordList;
+class BookData {
+	private int curLine;
+	private int curPage;
+	private ArrayList<Word> posList;
+	private boolean recognized;
 	
-	boolean done = false;
+	public BookData(int curLine, int curPage, ArrayList<Word> posList, boolean recognized) {
+		this.curLine = curLine;
+		this.curPage = curPage;
+		this.posList = posList;
+		this.recognized = recognized;
+	}
+	
+	public void updateBookData(int curLine, int curPage, ArrayList<Word> posList, boolean recognized) {
+		this.curLine = curLine;
+		this.curPage = curPage;
+		this.posList = posList;
+		this.recognized = recognized;
+	}
+	
+	public int curLine() {
+		return curLine;
+	}
+	
+	public int curPage() {
+		return curPage;
+	}
+	
+	public ArrayList<Word> posList() {
+		return posList;
+	}
+	
+	public boolean recognized() {
+		return recognized;
+	}
+}
+
+public class BookManager {
+	
+//	private int mCurLine = 0;
+//	private int mCurPage = 0;
+//	private String mReadFilePath = ""; // 不要な気がする
+//	private ArrayList<Word> mPosList;
+//	boolean mRecognized = false;
+//	private ArrayList<Word> wordList;
+//	private boolean done = false;
+	final private String mBookName;
+	final private String mFilePath;
+	final private Context mContext;
+	final private long mFileSize;
+	final private FileType mType;
+	private enum FileType { pdf, zip };
+	private PDF mPDF;
 	private ZIP zip;
 	private Timer timer;
-
 	private RecognizeFinishedListener mRecognizeFinishedListener;
+	private DocomoOld docomo;
+//	private Docomo docomo;
 	
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
