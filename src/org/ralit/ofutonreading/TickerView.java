@@ -138,6 +138,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		move.setInterpolator(new LinearInterpolator());
 		mBook.setCurLine(mBook.getCurLine());
 		mAnimatorList.getFirst().start();
+		
 	}
 
 	@Override
@@ -163,7 +164,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-
+		
 	}
 
 }
