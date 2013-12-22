@@ -3,13 +3,13 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
-import android.os.CountDownTimer;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -27,6 +27,7 @@ public class BookManager {
 	private int mCurPage = 0;
 	private String mReadFilePath = "";
 	private long mFileSize;
+//	private int mPageCount;
 
 	private enum FileType { pdf, zip, png, jpg };
 	private FileType mType; 
@@ -37,7 +38,6 @@ public class BookManager {
 
 	//	private Docomo docomo;
 	private DocomoOld docomo;
-	private ArrayList<Word> wordList;
 	
 	boolean done = false;
 	private ZIP zip;
@@ -63,6 +63,15 @@ public class BookManager {
 				Fun.log("PDFファイルのファイル数よりmCurPageの方が大きい)");
 			}
 		}
+	}
+	
+	public int getPageCount() {
+		if (mType == FileType.pdf) {
+			return mPDF.getPageCount();
+		} else if (mType == FileType.zip) {
+			return zip.getCount();
+		}
+		return -1;
 	}
 
 	private PointF getSize(int page) {
@@ -102,6 +111,11 @@ public class BookManager {
 		if(mCurLine == -1) { mCurLine = 0; }
 
 		initializeBook();
+//		mPageCount = getPageCount();
+//		if(mPageCount == -1) {
+//			// なにかがおかしいよ
+//			mPageCount = 0;
+//		}
 
 		mPosList = readPageLayout(mCurPage);
 
@@ -161,20 +175,21 @@ public class BookManager {
 
 	public void setCurPage(int curPage) {
 		mCurPage = curPage;
-		mCurLine = readCurLine();
-		if(mCurLine == -1) {
-			mCurLine = 0;
-		}
+//		mCurLine = readCurLine();
+//		if(mCurLine == -1) {
+//			mCurLine = 0;
+//		}
+		mCurLine = 0;
 		mPosList = readPageLayout(mCurPage);
 		saveCurPage();
 		if(mPosList != null) {
 			if (mPosList.get(0).getLeft() == -1 && mPosList.get(0).getRight() == -1) {
 				Fun.log("サイズが違うレイアウトデータが存在する場合");
 			}
-			if (mPosList.size() - 1 < mCurLine) {
-				mCurLine = 0;
-				// 本当はStateError
-			}
+//			if (mPosList.size() - 1 < mCurLine) {
+//				mCurLine = 0;
+//				// 本当はStateError
+//			}
 			mRecognized = true;
 		} else {
 			mRecognized = false;
@@ -297,7 +312,7 @@ public class BookManager {
 
 	public void recognize() {
 		Fun.log("recognize()");
-		Bitmap bmp = getBitmap(mCurPage);
+		final Bitmap bmp = getBitmap(mCurPage);
 		//			PointF size = mPDF.getSize(mCurPage);
 		//			size.x = size.x * 2;
 		//			size.y = size.y * 2;
@@ -311,13 +326,17 @@ public class BookManager {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				wordList = docomo.getWordList();
-				if(wordList == null) {
+				mPosList = docomo.getWordList();
+				if(mPosList == null) {
 					Fun.log("wordListはnull");
 				} else {
 					timer.cancel();
 					Fun.log("wordList取得!");
-					mPosList = wordList;
+					// ソートとか
+					Collections.sort(mPosList, new PointComparator());
+					PositionImprove.deleteLongcat(mPosList);
+					PositionImprove.deleteDuplicate(mPosList);
+//					PositionImprove.expand(bmp, mPosList);
 					mRecognized = true;
 					savePageLayout();
 					mRecognizeFinishedListener.onRecognizeFinished();

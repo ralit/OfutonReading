@@ -1,5 +1,7 @@
 package org.ralit.ofutonreading;
 
+import android.view.MotionEvent;
+
 public class StateNormal implements State{
 
 	private static StateNormal singleton = new StateNormal();
@@ -27,8 +29,8 @@ public class StateNormal implements State{
 	}
 
 	@Override
-	public void onMark(Con con) {
-		// TODO Auto-generated method stub
+	public void onMark(Con con, MotionEvent ev1, MotionEvent ev2) {
+		con.mark(ev1, ev2);
 		
 	}
 

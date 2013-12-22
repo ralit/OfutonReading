@@ -18,6 +18,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 public class ReadingActivity extends Activity implements LineEndListener, RecognizeFinishedListener, Con, TimerCallbackListener{
 
@@ -32,7 +33,6 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private boolean isWindowFocusChanged = false;
 	private Handler handler = new Handler();
 	private GestureDetector gesture;
-	private Timer timerForSetImageToTickerView;
 
 	protected State state;
 	private final int FlingSpeed = 100;
@@ -120,6 +120,11 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	public void onLineEnd() {
 		mPageView.scrollToCurrentLine();
 	}
+	
+	@Override
+	public void onPageEnd() {
+		state.onChangePage(ReadingActivity.this, mBook.getCurPage() + 1);
+	}
 
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev){
@@ -165,11 +170,17 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	@Override
 	public void changePage(int page) {
 		Fun.log("Con.changePage");
-		mBook.setCurPage(page);
-		mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-		mTickerView.destroy();
-		if(mBook.isRecognized()) {
-			mTickerView.setImage(mPageView.getImage());
+		if (page < 0) {
+			Toast.makeText(this, "最初のページです", Toast.LENGTH_SHORT).show();
+		} else if (mBook.getPageCount() < page) {
+			Toast.makeText(this, "最後のページです", Toast.LENGTH_SHORT).show();
+		} else {
+			mBook.setCurPage(page);
+			mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+			mTickerView.destroy();
+			if(mBook.isRecognized()) {
+				mTickerView.setImage(mPageView.getImage());
+			}
 		}
 	}
 
@@ -196,5 +207,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 			mTickerView.previousLine();
 		}
 	}
+
+
 
 }

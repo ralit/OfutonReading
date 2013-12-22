@@ -3,6 +3,7 @@ package org.ralit.ofutonreading;
 import java.util.LinkedList;
 
 import android.animation.Animator;
+import android.animation.TimeInterpolator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -25,6 +26,7 @@ import android.widget.ImageView;
 
 interface LineEndListener {
 	void onLineEnd();
+	void onPageEnd();
 }
 
 public class TickerView extends FrameLayout implements AnimatorListener {
@@ -41,6 +43,8 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	private Handler handler = new Handler();
 	private Bitmap bmp;
 	private LineEndListener lineEndListener;
+	private static final long durationBase = 530;
+	private static final float marginRatio = 0.4f;
 
 	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener, float w, float h) {
 		super(context);
@@ -89,10 +93,17 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		ImageView ticker = new ImageView(context);
 		mTickerList.add(ticker);
 
-		int mLineW = mBook.getPageLayout().get(mBook.getCurLine()).getRight() - mBook.getPageLayout().get(mBook.getCurLine()).getLeft();
-		int mLineH = mBook.getPageLayout().get(mBook.getCurLine()).getBottom() - mBook.getPageLayout().get(mBook.getCurLine()).getTop();
+		Word layout = mBook.getPageLayout().get(mBook.getCurLine());
+		int mLineW = layout.getRight() - layout.getLeft();
+		int mLineH = layout.getBottom() - layout.getTop();
+		
+		int margin = (int)((layout.getBottom() - layout.getTop()) * marginRatio);
+		Bitmap scaledBitmap = Bitmap.createBitmap(bmp, Math.max(layout.getLeft() - margin, 0), Math.max(layout.getTop() - margin, 0), Math.min(mLineW + 2*margin, bmp.getWidth() - 1), Math.min(mLineH + 2*margin, bmp.getHeight() - 1));
+		ticker.setImageBitmap(scaledBitmap);
+		
+		mLineW = scaledBitmap.getWidth();
+		mLineH = scaledBitmap.getHeight();
 		float mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
-		ticker.setImageBitmap(Bitmap.createBitmap(bmp, mBook.getPageLayout().get(mBook.getCurLine()).getLeft(), mBook.getPageLayout().get(mBook.getCurLine()).getTop(), mLineW, mLineH));
 		ticker.setScaleX(mTextZoom);
 		ticker.setScaleY(mTextZoom);
 		mTickerHeight = (int) (mRH / 2); // 修正
@@ -115,9 +126,9 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 
 	public void animation() {
-		mDuration = 530;
+		mDuration = durationBase;
 
-		ObjectAnimator move = ObjectAnimator.ofFloat(mTickerList.pollFirst(), "x", -mTickerWidth/2 + mRW/2);
+		ObjectAnimator move = ObjectAnimator.ofFloat(mTickerList.getFirst(), "x", -mTickerWidth/2 + mRW/2);
 		mAnimatorList.add(move);
 		if (mTickerWidth > mTickerHeight) { 
 			mDuration *= ((float)mTickerWidth / (float)mTickerHeight);
@@ -142,32 +153,19 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 	@Override
 	public void onAnimationEnd(Animator animation) {
+		Fun.log("onAnimationEnd");
 		mAnimatorList.pollFirst();
-		ObjectAnimator finish = ObjectAnimator.ofFloat(mTickerList.getFirst(), "x", -mTickerWidth - mRW/2);
-		finish.addListener(new AnimatorListener() {
-			
-			@Override
-			public void onAnimationStart(Animator animation) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onAnimationRepeat(Animator animation) {
-				// TODO Auto-generated method stub
-				
-			}
-			
-			@Override
-			public void onAnimationEnd(Animator animation) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		mBook.setCurLine(mBook.getCurLine() + 1);
-		setImage(null);
-		lineEndListener.onLineEnd();
-
+		ObjectAnimator finish = ObjectAnimator.ofFloat(mTickerList.pollFirst(), "x", -mTickerWidth/2 + mRW/2, -mTickerWidth/2 - mRW/2);
+		finish.setDuration((long)(durationBase * ((2 * mRW)/mRH)));
+//		finish.setInterpolator(new LinearInterpolator());
+		finish.start();
+		if (mBook.getPageLayout().size() - 1 < mBook.getCurLine() + 1) {
+			lineEndListener.onPageEnd();
+		} else {
+			mBook.setCurLine(mBook.getCurLine() + 1);
+			setImage(null);
+			lineEndListener.onLineEnd();
+		}
 	}
 
 	@Override
