@@ -20,7 +20,6 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="org.ralit.ofutonreading.MainActivity"
-            
             android:label="@string/ofuton_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -36,14 +35,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-        
-         <activity
+        <activity
             android:name="org.ralit.ofutonreading.MarkedListActivity"
-            android:label="@string/title_activity_markedlist"
-            android:parentActivityName="ReadingActivity" >
+            android:label="@string/title_activity_marked_list"
+            android:parentActivityName="org.ralit.ofutonreading.ReadingActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="ReadingActivity" />
+                android:value="org.ralit.ofutonreading.ReadingActivity" />
         </activity>
     </application>
 

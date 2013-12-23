@@ -6,9 +6,9 @@
     <string name="ofuton_open_file">ファイルを開く</string>
     <string name="ofuton_introduction">つかいかた</string>
     <string name="ofuton_markedlist">マーカー帖</string>
-    <string name="title_activity_markedlist">マーカー帖</string>
     <string name="title_activity_reading">ReadingActivity</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_marked_list">マーカー帖</string>
 
 </resources>
