@@ -1,15 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/ofuton_open_file"
+        android:id="@+id/ofuton_introduction"
         android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/ofuton_open_file"/>
-    
-    <item
-        android:id="@+id/ofuton_action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/ofuton_action_settings"/>
+        android:showAsAction="ifRoom"
+        android:title="@string/ofuton_introduction"/>
 
 </menu>

@@ -36,6 +36,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+        
+         <activity
+            android:name="org.ralit.ofutonreading.MarkedListActivity"
+            android:label="@string/title_activity_markedlist"
+            android:parentActivityName="ReadingActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ReadingActivity" />
+        </activity>
     </application>
 
 </manifest>

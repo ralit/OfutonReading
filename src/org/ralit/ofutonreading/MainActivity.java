@@ -54,9 +54,6 @@ public class MainActivity extends Activity implements FileClickListener {
 //		}
 		
 		
-		//		Configuration config = getResources().getConfiguration();
-		//		config.orientation = Configuration.ORIENTATION_LANDSCAPE;
-		
 		// Backキーのカウントダウン
 		keyEventTimer = new CountDownTimer(1000, 100) {
 			@Override
@@ -71,12 +68,6 @@ public class MainActivity extends Activity implements FileClickListener {
 		
 		isLaunch = false;
 	}
-
-	//	@Override
-	//	public void onWindowFocusChanged(boolean hasFocus) {
-	//		Fun.log("onWindowFocusChanged()");
-	//		super.onWindowFocusChanged(hasFocus);
-	//	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -111,11 +102,6 @@ public class MainActivity extends Activity implements FileClickListener {
 		intent.putExtra("fileName", file.getName());
 		intent.putExtra("filePath", file.getAbsolutePath());
 		startActivity(intent);
-//		BookManager manager = new BookManager(file.getName(), file.getAbsolutePath(), this);
-//		BookView bookView = new BookView(this, manager);
-//		frameLayout.addView(bookView);
-//		manager.setBookView(bookView);
-		
 	}
 
 	@Override

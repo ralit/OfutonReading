@@ -40,6 +40,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private static final int FlingMinDistance = 80;
 	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
 	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
+	private String fileName;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +51,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		Intent intent = getIntent();
 		if (intent != null) {
 			Fun.log("intent != null");
-			String fileName = intent.getStringExtra("fileName");
+			fileName = intent.getStringExtra("fileName");
 			String filePath = intent.getStringExtra("filePath");
 			mBook = new BookManager(fileName, filePath, this, this);
 			mLinearLayout = new LinearLayout(this);
@@ -90,6 +91,11 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 			// http://developer.android.com/design/patterns/navigation.html#up-vs-back
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
+		case R.id.ofuton_markedlist:
+			Intent intent = new Intent();
+			intent.setClass(getApplicationContext(), MarkedListActivity.class);
+			intent.putExtra("bookName", fileName);
+			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
 	}
