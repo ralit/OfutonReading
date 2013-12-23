@@ -1,20 +1,16 @@
 package org.ralit.ofutonreading;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -24,7 +20,7 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class ReadingActivity extends Activity implements LineEndListener, RecognizeFinishedListener, Con, TimerCallbackListener{
+public class ReadingActivity extends Activity implements LineEndListener, RecognizeFinishedListener, Con, TimerCallbackListener, AnimatorCallbackListener{
 
 	private BookManager mBook;
 	// レイアウトとビュー
@@ -39,9 +35,11 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private GestureDetector gesture;
 
 	protected State state;
-	private final int FlingSpeed = 100;
-	private final int FlingFromEdgePixels = 14;
-	private final int FlingMinDistance = 120;
+	private static final int FlingSpeed = 100;
+	private static final int FlingFromEdgePixels = 14;
+	private static final int FlingMinDistance = 80;
+	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
+	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +63,18 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 			}
 			gesture = new GestureDetector(this, gestureListener);
 		}
+		
+		keyEventTimer = new CountDownTimer(1000, 100) {
+			@Override
+			public void onTick(long millisUntilFinished) {
+				Fun.log("CountDown");
+			}
+			@Override
+			public void onFinish() {
+				pressed = false;
+			}
+		};
+		
 	}
 
 	@Override
@@ -178,11 +188,16 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		Fun.log("Con.changePage");
 		if (page < 0) {
 			Toast.makeText(this, "最初のページです", Toast.LENGTH_SHORT).show();
-		} else if (mBook.getPageCount() < page) {
+		} else if (mBook.getPageMax() < page) {
 			Toast.makeText(this, "最後のページです", Toast.LENGTH_SHORT).show();
 		} else {
+			int previousPage = mBook.getCurPage();			
 			mBook.setCurPage(page);
 			mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
+			
+			if(previousPage < page) { new SimpleAnimator(this).start("changePage", 500, mPageView, "x", mRW, 0); } 
+			else { new SimpleAnimator(this).start("changePage", 500, mPageView, "x", -mRW, 0); }
+			
 			mTickerView.destroy();
 			if(mBook.isRecognized()) {
 				mTickerView.setImage(mPageView.getImage());
@@ -224,6 +239,30 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		mPageView.mark(ev1, ev2, screen);
 	}
 
+	@Override
+	public void animatorCallBack(String message, SimpleAnimator animator) {
+		// TODO Auto-generated method stub
+		
+	}
 
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		// Backボタン検知
+		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+			if(!pressed) {
+				// Timerを開始
+				keyEventTimer.cancel(); // いらない？
+				keyEventTimer.start();
+				// 終了する場合, もう一度タップするようにメッセージを出力する
+				Toast.makeText(this, "終了する場合は、もう一度バックボタンを押してください", Toast.LENGTH_SHORT).show();
+				pressed = true;
+				return false;
+			}
+			// pressed=trueの時、通常のBackボタンで終了処理.
+			return super.dispatchKeyEvent(event);
+		}
+		// Backボタンに関わらないボタンが押された場合は、通常処理.
+		return super.dispatchKeyEvent(event);
+	}
 
 }

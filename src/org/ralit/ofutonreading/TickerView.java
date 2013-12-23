@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 /**
  * ViewGroupの作成は以下のページが参考になりました。
@@ -98,7 +99,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		int mLineH = layout.getBottom() - layout.getTop();
 		
 		int margin = (int)((layout.getBottom() - layout.getTop()) * marginRatio);
-		Bitmap scaledBitmap = Bitmap.createBitmap(bmp, Math.max(layout.getLeft() - margin, 0), Math.max(layout.getTop() - margin, 0), Math.min(mLineW + 2*margin, bmp.getWidth() - 1), Math.min(mLineH + 2*margin, bmp.getHeight() - 1));
+		Bitmap scaledBitmap = Bitmap.createBitmap(bmp, Math.max(layout.getLeft() - margin, 0), Math.max(layout.getTop() - margin, 0), Math.min(mLineW + 2*margin, bmp.getWidth() - Math.max(layout.getLeft() - margin, 0) - 1), Math.min(mLineH + 2*margin, bmp.getHeight() - Math.max(layout.getTop() - margin, 0) - 1));
 		ticker.setImageBitmap(scaledBitmap);
 		
 		mLineW = scaledBitmap.getWidth();
@@ -184,6 +185,10 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	}
 	
 	public void previousLine() {
+		if(mBook.getCurLine() == 0) {
+			Toast.makeText(context, "最初の行です", Toast.LENGTH_SHORT).show();
+			return;
+		}
 		mBook.setCurLine(mBook.getCurLine() - 2);
 		mAnimatorList.getFirst().end();
 	}

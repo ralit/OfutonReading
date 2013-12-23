@@ -169,6 +169,30 @@ public class Fun {
 		if(list.isEmpty()) { return null; }
 		return list;
 	}
+	
+	public static ArrayList<ArrayList<Integer>> matchGroupInt(String str, String regExp, boolean caseInsensitive) {
+		log("match()");
+		Pattern pattern;
+		if (caseInsensitive) { 
+			pattern = Pattern.compile(regExp, Pattern.CASE_INSENSITIVE);
+		} else {
+			pattern = Pattern.compile(regExp);
+		}
+		Matcher matcher = pattern.matcher(str);
+		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+		Fun.log(String.valueOf(matcher.groupCount()));
+		while(matcher.find()) {
+			Fun.log("find");
+			ArrayList<Integer> innerList = new ArrayList<Integer>();
+			for (int i = 1; i <= matcher.groupCount(); i++) {
+				innerList.add(Integer.parseInt(matcher.group(i)));
+			}
+			list.add(innerList);
+		}
+		//		Fun.log(list.toString());
+		if(list.isEmpty()) { return null; }
+		return list;
+	}
 
 	public static String getExternalStoragePath() {
 		String path = null;

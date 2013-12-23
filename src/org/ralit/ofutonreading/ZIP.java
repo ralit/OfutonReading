@@ -33,7 +33,8 @@ public class ZIP {
 	}
 
 	public int getCount() {
-		return zipFile.size();
+		Fun.log("ZIP.getcount->zipFile.size(): " + zipFile.size());
+		return zipFile.size() - 1;
 	}
 	
 	public PointF getSize() {
@@ -41,7 +42,7 @@ public class ZIP {
 		return point;
 	}
 
-	public Bitmap openZip(int page) {
+	public Bitmap openZip(int page, String bookName) {
 		try {
 			ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filePath));
 			for (int i = 0; i < page; i++) {
@@ -49,11 +50,12 @@ public class ZIP {
 			}
 
 			ZipEntry zipEntry = zipInputStream.getNextEntry();
+//			ZipEntry zipEntry = zipInputStream.();
 
-			File dir = new File(Fun.DIR + "tmp_zip");
+			File dir = new File(Fun.DIR + bookName + "/tmp_zip");
 			if (!dir.exists()) { dir.mkdir(); }
 
-			BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(Fun.DIR + "tmp_zip/" + zipEntry.getName()));
+			BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(dir.getAbsolutePath() + "/" + zipEntry.getName()));
 			byte[] buffer = new byte[1024 * 256];
 			int len;
 			while ((len = zipInputStream.read(buffer)) != -1) { outStream.write(buffer, 0, len); }
@@ -71,6 +73,12 @@ public class ZIP {
 			File tmpFile = new File(tmpFilePath);
 			FileInputStream fileInputStream = new FileInputStream(tmpFile);
 			bmp = BitmapFactory.decodeStream(fileInputStream);
+			
+			for(File file : fileList) {
+				file.delete();
+			}
+			dir.delete();
+			
 			return bmp;
 		} catch (Exception e) {
 			e.printStackTrace();

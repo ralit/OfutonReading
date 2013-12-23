@@ -2,17 +2,15 @@ package org.ralit.ofutonreading;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.Paint.Style;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,7 +26,7 @@ interface LayoutFinishedListener {
 	void onPageViewLayoutFinished();
 }
 
-public class PageView extends ScrollView{
+public class PageView extends ScrollView implements TimerCallbackListener{
 
 	private FrameLayout mFrameLayout;
 	private LinkedList<ImageView> mPageViewList = new LinkedList<ImageView>();
@@ -40,15 +38,11 @@ public class PageView extends ScrollView{
 	private BookManager mBook;
 	private float pageW;
 	private float pageH;
-	private Timer waitForRecognizeTimer;
 	private Handler handler = new Handler();
 	private Context context;
 	private Bitmap markerBitmap;
 	private Canvas markerCanvas;
 
-	public void layout() {
-		
-	}
 	
 	public PageView(Context context, BookManager bookManager, float w, float h, Bitmap _bmp) {
 		super(context);
@@ -58,79 +52,45 @@ public class PageView extends ScrollView{
 		mRH = h;
 		mPageBitmap = _bmp;
 
-		mFrameLayout = new FrameLayout(context);
-		ImageView pageView = new ImageView(context);
-		mPageViewList.add(pageView);
-		ImageView markerView = new ImageView(context);
-		mMarkerViewList.add(markerView);
+		layout();
+		layout2();
 
-		pageW = (float) mPageBitmap.getWidth();
-		pageH = (float) mPageBitmap.getHeight();
-		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
-		mPageViewList.getFirst().setImageBitmap(mScaledPageBitmap);
+		mFrameLayout = new FrameLayout(context);		
 		mFrameLayout.addView(mPageViewList.getFirst());
 		mFrameLayout.addView(mMarkerViewList.getFirst());
-		
-		markerBitmap = Bitmap.createBitmap((int)mRW, (int)(mRW * (pageH/pageW)), Bitmap.Config.ARGB_8888);
-		markerCanvas = new Canvas(markerBitmap);
-		
 		addView(mFrameLayout);
-
-		final int count = getChildCount();
-		Fun.log("PageView.getChildCount: " + count);
-		for (int i = 0; i < count; i++) {
-			View view = getChildAt(i);
-			android.view.ViewGroup.LayoutParams params = view.getLayoutParams();
-			params.width = (int)mRW;
-			params.height = (int)(mRW * (pageH/pageW));
-			view.setLayoutParams(params);
-		}
-
-//		gestureDetector = new GestureDetector(context, new YScrollDetector());
-		
-		if(!mBook.isRecognized()) {
-			Fun.log("mBook.isRecognized() == false");
-			waitForRecognizeTimer = new Timer();
-			waitForRecognizeTimer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					if(mBook.isRecognized()) { // 1ページ目はこれでいいかもしれないけど、…いや、ページが変わるときにmRecognizedをfalseにさせればいいのか…
-						waitForRecognizeTimer.cancel();
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								scrollToCurrentLine();
-							}
-						});
-					}
-				}
-			}, 0, 1000);
-		} else {
-			scrollToCurrentLine();
-		}
+		setMark();
+		waitForRecognize();
 	}
 
 	public void setImage(Bitmap bmp) {
-		ImageView pageView = new ImageView(context);
-		mPageViewList.add(pageView);
-		ImageView markerView = new ImageView(context);
-		mMarkerViewList.add(markerView);
-		
 		mPageBitmap = bmp;
-		
-		pageW = (float) mPageBitmap.getWidth();
-		pageH = (float) mPageBitmap.getHeight();
-		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
-		mPageViewList.getLast().setImageBitmap(mScaledPageBitmap);
-		
-		markerBitmap = Bitmap.createBitmap((int)mRW, (int)(mRW * (pageH/pageW)), Bitmap.Config.ARGB_8888);
-		markerCanvas = new Canvas(markerBitmap);
-
+		layout();
 		mFrameLayout.addView(mPageViewList.getLast());
 		mFrameLayout.addView(mMarkerViewList.getLast());
 		mFrameLayout.removeView(mPageViewList.pollFirst());
 		mFrameLayout.removeView(mMarkerViewList.pollFirst());
+		layout2();
+		setMark();
+		waitForRecognize();
+	}
 
+	private void layout() {
+		ImageView pageView = new ImageView(context);
+		mPageViewList.add(pageView);
+		ImageView markerView = new ImageView(context);
+		mMarkerViewList.add(markerView);
+
+		pageW = (float) mPageBitmap.getWidth();
+		pageH = (float) mPageBitmap.getHeight();
+		mScaledPageBitmap = Bitmap.createScaledBitmap(mPageBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), true);
+		mPageViewList.getLast().setImageBitmap(mScaledPageBitmap);
+
+		markerBitmap = Bitmap.createBitmap((int)mRW, (int)(mRW * (pageH/pageW)), Bitmap.Config.ARGB_8888);
+		markerCanvas = new Canvas(markerBitmap);
+	}
+
+	private void layout2() {
 		final int count = getChildCount();
 		Fun.log("PageView.getChildCount: " + count);
 		for (int i = 0; i < count; i++) {
@@ -140,24 +100,11 @@ public class PageView extends ScrollView{
 			params.height = (int)(mRW * (pageH/pageW));
 			view.setLayoutParams(params);
 		}
-		
+	}
+
+	private void waitForRecognize() { 
 		if(!mBook.isRecognized()) {
-			Fun.log("mBook.isRecognized() == false");
-			waitForRecognizeTimer = new Timer();
-			waitForRecognizeTimer.schedule(new TimerTask() {
-				@Override
-				public void run() {
-					if(mBook.isRecognized()) { // 1ページ目はこれでいいかもしれないけど、…いや、ページが変わるときにmRecognizedをfalseにさせればいいのか…
-						waitForRecognizeTimer.cancel();
-						handler.post(new Runnable() {
-							@Override
-							public void run() {
-								scrollToCurrentLine();
-							}
-						});
-					}
-				}
-			}, 0, 1000);
+			new SimpleTimer(context).start(1000, "scrollToCurrentLine");
 		} else {
 			scrollToCurrentLine();
 		}
@@ -166,22 +113,23 @@ public class PageView extends ScrollView{
 	public void scrollToCurrentLine() {
 		Word word = mBook.getPageLayout().get(mBook.getCurLine());
 		final int scroll = (int)(((word.getTop() + word.getBottom()) / 2) * (mRW/pageW) - (mRH / 4));
-		smoothScrollTo(0, scroll);
+		handler.post(new Runnable() {
+			@Override
+			public void run() {
+				smoothScrollTo(0, scroll);
+			}
+		});
 	}
 
 	public Bitmap getImage() {
 		return mPageBitmap;
 	}
-	
+
 	public void mark(MotionEvent ev1, MotionEvent ev2, Point screen) {
 		
-//		Word word = mBook.getPageLayout().get(mBook.getCurLine());
-//		float linemid = (word.getBottom() + word.getTop()) / 2;
 		float realx1 = ev1.getX() * (pageW / mRW);
-//		float realy1 = linemid + (pageW / mRW) * (ev1.getY() - (1f/2f) * mRH  - (screen.y - mRH));
 		float realy1 = (pageW / mRW) * (ev1.getY() - (mRH/2) - (screen.y - mRH) + getScrollY());
 		float realx2 = ev2.getX() * (pageW / mRW);
-//		float realy2 = linemid + (pageW / mRW) * (ev2.getY() - (1f/2f) * mRH  - (screen.y - mRH));
 		float realy2 = (pageW / mRW) * (ev2.getY() - (mRH/2) - (screen.y - mRH) + getScrollY());
 		Fun.log("(" + realx1 + ", " + realy1 + ") → (" + realx2 + ", " + realy2 + ")");
 		Paint marker = new Paint();
@@ -211,19 +159,39 @@ public class PageView extends ScrollView{
 				rect = new Rect((int)realx1, next.getTop(), (int)realx2, next.getBottom());
 			}
 		}
-		
+
 		if ( rect != null ) {
-			rect.set((int)(rect.left * (mRW/pageW)), (int)(rect.top * (mRW/pageW)), (int)(rect.right * (mRW/pageW)), (int)(rect.bottom * (mRW/pageW)));
-			
-			
-			markerCanvas.drawRect(rect, marker);
+			Rect scaledRect = new Rect((int)(rect.left * (mRW/pageW)), (int)(rect.top * (mRW/pageW)), (int)(rect.right * (mRW/pageW)), (int)(rect.bottom * (mRW/pageW)));
+//			rect.set((int)(rect.left * (mRW/pageW)), (int)(rect.top * (mRW/pageW)), (int)(rect.right * (mRW/pageW)), (int)(rect.bottom * (mRW/pageW)));
+			markerCanvas.drawRect(scaledRect, marker);
 			mMarkerViewList.getFirst().setImageBitmap(markerBitmap);
-//			Bitmap markerBitmap = Bitmap.createBitmap(mPageBitmap.getWidth(), mPageBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-//			Canvas markerCanvas = new Canvas(markerBitmap);
-//			markerCanvas.drawRect(rect, marker);
-//			Bitmap markedPage = Bitmap.createScaledBitmap(markerBitmap, (int)mRW, (int)(mRW * (pageH/pageW)), false);
-//			mMarkerViewList.getFirst().setImageBitmap(markedPage);
-//			saveMarkedImage(Bitmap.createBitmap(bmp, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top), "test", rect);
+			mBook.saveMarkedImage(rect);
+		}
+	}
+	
+	private void setMark() {
+		ArrayList<ArrayList<Integer>> pos = mBook.readMarkedPosition();
+		Paint marker = new Paint();
+		marker.setStyle(Style.FILL_AND_STROKE);
+		marker.setColor(Color.YELLOW);
+		marker.setStrokeWidth(1);
+		marker.setAlpha(64);
+		for (int index = 0; index < pos.size(); index++) {
+			if(pos.get(index).get(0) == mBook.getCurPage()) {
+				Rect scaledRect = new Rect((int)(pos.get(index).get(1) * (mRW/pageW)), (int)(pos.get(index).get(2) * (mRW/pageW)), (int)(pos.get(index).get(3) * (mRW/pageW)), (int)(pos.get(index).get(4) * (mRW/pageW)));
+				markerCanvas.drawRect(scaledRect, marker);
+			}
+		}
+		mMarkerViewList.getFirst().setImageBitmap(markerBitmap);
+	}
+
+	@Override
+	public void timerCallback(String message, SimpleTimer timer) {
+		if(message.equals("scrollToCurrentLine")) {
+			if(mBook.isRecognized()) {
+				timer.cancel();
+				scrollToCurrentLine();
+			}
 		}
 	}
 

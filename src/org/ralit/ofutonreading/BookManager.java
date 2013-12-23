@@ -1,6 +1,9 @@
 package org.ralit.ofutonreading;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +13,8 @@ import java.util.TimerTask;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.Bitmap.CompressFormat;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -44,6 +49,7 @@ public class BookManager {
 	private Timer timer;
 
 	private RecognizeFinishedListener mRecognizeFinishedListener;
+	private static final float marginRatio = 0.4f;
 	
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -65,7 +71,7 @@ public class BookManager {
 		}
 	}
 	
-	public int getPageCount() {
+	public int getPageMax() {
 		if (mType == FileType.pdf) {
 			return mPDF.getPageCount();
 		} else if (mType == FileType.zip) {
@@ -78,7 +84,7 @@ public class BookManager {
 		if (mType == FileType.pdf) { 
 			return mPDF.getSize(page);
 		} else if (mType == FileType.zip) {
-			zip.openZip(page);
+			zip.openZip(page, mBookName);
 			//			zip.openZipMoreFaster(page);
 			return zip.getSize();
 		}
@@ -89,7 +95,7 @@ public class BookManager {
 		if (mType == FileType.pdf) {
 			return mPDF.getBitmap(page);
 		} else if (mType == FileType.zip) {
-			return zip.openZip(page);
+			return zip.openZip(page, mBookName);
 			//			return zip.openZipMoreFaster(page);
 		}
 		return null;
@@ -111,7 +117,7 @@ public class BookManager {
 		if(mCurLine == -1) { mCurLine = 0; }
 
 		initializeBook();
-//		mPageCount = getPageCount();
+//		mPageCount = getPageMax();
 //		if(mPageCount == -1) {
 //			// なにかがおかしいよ
 //			mPageCount = 0;
@@ -344,5 +350,36 @@ public class BookManager {
 				}
 			}
 		}, 0, 1000);
+	}
+	
+	public void saveMarkedImage(final Rect rect) {
+		Thread thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				int margin = (int)((rect.bottom - rect.top) * marginRatio);
+				File dir = new File(Fun.DIR + mBookName + Fun.MARKER);
+				String attachName = dir.getAbsolutePath() + "/" + mCurPage + "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom + ".jpg";
+				try {
+					FileOutputStream out = new FileOutputStream(attachName);
+					Bitmap bmp = getBitmap(mCurPage);
+					Bitmap.createBitmap(bmp, Math.max(rect.left - margin, 0), Math.max(rect.top - margin, 0), Math.min(rect.right - rect.left + 2*margin, bmp.getWidth() - Math.max(rect.left - margin, 0) - 1), Math.min(rect.bottom - rect.top + 2*margin, bmp.getHeight() - Math.max(rect.top - margin, 0) - 1)).compress(CompressFormat.JPEG, 90, out);
+					out.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		thread.start();
+	}
+	
+	public ArrayList<ArrayList<Integer>> readMarkedPosition() {
+		File dir = new File(Fun.DIR + mBookName + Fun.MARKER);
+		File[] files = dir.listFiles();
+		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
+		for(File file : files) {
+			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+)_([0-9]+)_([0-9]+)_([0-9]+)_([0-9]+)\\.jpg", true);
+			result.add(match.get(0));
+		}
+		return result;
 	}
 }
