@@ -161,6 +161,7 @@ public class FileListView extends ViewGroup{
 		fileListView.setDividerHeight(0);
 		recentListView = new ListView(mContext);
 		recentListView.setDividerHeight(0);
+		recentListView.setBackgroundColor(Color.LTGRAY);
 		//		fileListView = new CardListView(mContext);
 		//		recentListView = new CardListView(mContext);
 		addView(layout);

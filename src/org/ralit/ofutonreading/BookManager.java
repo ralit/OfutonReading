@@ -19,9 +19,9 @@ import android.graphics.Bitmap.CompressFormat;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-interface RecognizeFinishedListener {
-	void onRecognizeFinished();
-}
+//public interface RecognizeFinishedListener {
+//	public abstract void onRecognizeFinished(int recognizingPage);
+//}
 
 public class BookManager {
 
@@ -50,6 +50,11 @@ public class BookManager {
 
 	private RecognizeFinishedListener mRecognizeFinishedListener;
 	private static final float marginRatio = 0.4f;
+	
+	
+	public int getCurPage() {
+		return mCurPage;
+	}
 	
 	private void initializeBook() {
 		if (mType == FileType.pdf) {
@@ -115,6 +120,8 @@ public class BookManager {
 
 		if(mCurPage == -1) { mCurPage = 0; }
 		if(mCurLine == -1) { mCurLine = 0; }
+		
+		Fun.log("mCurPage: " + mCurPage);
 
 		initializeBook();
 //		mPageCount = getPageMax();
@@ -139,7 +146,7 @@ public class BookManager {
 		if (!mRecognized) { 
 			recognize();
 		} else {
-			mRecognizeFinishedListener.onRecognizeFinished();
+			mRecognizeFinishedListener.onRecognizeFinished(mCurPage);
 		}
 	}
 
@@ -203,9 +210,7 @@ public class BookManager {
 		}
 	}
 
-	public int getCurPage() {
-		return mCurPage;
-	}
+
 
 	private void saveCurPage() {
 		Fun.save(String.valueOf(mCurPage), Fun.DIR + mBookName + "/currentPage.txt", mBookName);
@@ -332,6 +337,7 @@ public class BookManager {
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
+				int recognizingPage = mCurPage;
 				mPosList = docomo.getWordList();
 				if(mPosList == null) {
 					Fun.log("wordListはnull");
@@ -345,8 +351,8 @@ public class BookManager {
 //					PositionImprove.expand(bmp, mPosList);
 					mRecognized = true;
 					savePageLayout();
-					mRecognizeFinishedListener.onRecognizeFinished();
-					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
+					mRecognizeFinishedListener.onRecognizeFinished(recognizingPage);
+//					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
 				}
 			}
 		}, 0, 1000);

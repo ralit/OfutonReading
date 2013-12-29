@@ -8,18 +8,22 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class SplashView extends ViewGroup implements OnTouchListener{
 	
 	public SplashView(Context context) {
 		super(context);
-		TextView textView = new TextView(context);
-		textView.setText("おふとんリーディング");
-		textView.setTextSize(25);
-		textView.setGravity(Gravity.CENTER);
-		textView.setTypeface(Typeface.SANS_SERIF);
-		addView(textView);
+//		TextView textView = new TextView(context);
+//		textView.setText("( :з[]____]\nおふとんリーディング");
+//		textView.setTextSize(25);
+//		textView.setGravity(Gravity.CENTER);
+//		textView.setTypeface(Typeface.SANS_SERIF);
+//		addView(textView);
+		ImageView imageView = new ImageView(context);
+		imageView.setImageResource(R.drawable.splash);
+		addView(imageView);
 		setBackgroundColor(Color.WHITE);
 	}
 
@@ -65,5 +69,11 @@ public class SplashView extends ViewGroup implements OnTouchListener{
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		return true;
+	}
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev){
+		super.dispatchTouchEvent(ev);    
+		return true; 
 	}
 }

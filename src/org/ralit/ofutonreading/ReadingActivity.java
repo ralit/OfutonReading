@@ -1,7 +1,11 @@
 package org.ralit.ofutonreading;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -41,12 +45,15 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
 	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
 	private String fileName;
+	//	private HomeButtonReceiver mHomeButtonReceiver;
+	private boolean isPaused = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); // 寝落ちしたときのことも考えたい
+		//		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -63,8 +70,14 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 				mLinearLayout.setLayoutParams(params);
 			}
 			gesture = new GestureDetector(this, gestureListener);
+			changeState(StateNormal.getInstance()); // 後で消す。
+
+			//			mHomeButtonReceiver = new HomeButtonReceiver();
+			//			IntentFilter filter = new IntentFilter();
+			//			filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+			//			registerReceiver(mHomeButtonReceiver, filter);
 		}
-		
+
 		keyEventTimer = new CountDownTimer(1000, 100) {
 			@Override
 			public void onTick(long millisUntilFinished) {
@@ -75,7 +88,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 				pressed = false;
 			}
 		};
-		
+
 	}
 
 	@Override
@@ -183,27 +196,20 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	};
 
 	@Override
-	public void onRecognizeFinished() {
-		Fun.log("onRecognizeFinished");
-		changeState(StateNormal.getInstance());
-		new SimpleTimer(this).start(100, "onRecognizeFinished");
-	}
-
-	@Override
 	public void changePage(int page) {
 		Fun.log("Con.changePage");
 		if (page < 0) {
-			Toast.makeText(this, "最初のページです", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.ofuton_first_page), Toast.LENGTH_SHORT).show();
 		} else if (mBook.getPageMax() < page) {
-			Toast.makeText(this, "最後のページです", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, getString(R.string.ofuton_last_page), Toast.LENGTH_SHORT).show();
 		} else {
 			int previousPage = mBook.getCurPage();			
 			mBook.setCurPage(page);
 			mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
-			
+
 			if(previousPage < page) { new SimpleAnimator(this).start("changePage", 500, mPageView, "x", mRW, 0); } 
 			else { new SimpleAnimator(this).start("changePage", 500, mPageView, "x", -mRW, 0); }
-			
+
 			mTickerView.destroy();
 			if(mBook.isRecognized()) {
 				mTickerView.setImage(mPageView.getImage());
@@ -239,7 +245,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	public void mark(MotionEvent ev1, MotionEvent ev2) {
 		Fun.log("mark");
 		Point screen = new Point();
-//		getWindowManager().getDefaultDisplay().getSize(screen);
+		//		getWindowManager().getDefaultDisplay().getSize(screen);
 		screen = Fun.getDisplaySize(ReadingActivity.this);
 		Fun.log("screen: " + screen.toString());
 		mPageView.mark(ev1, ev2, screen);
@@ -248,27 +254,89 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	@Override
 	public void animatorCallBack(String message, SimpleAnimator animator) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
+		Fun.log("dispatchKeyEvent");
 		// Backボタン検知
 		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-			if(!pressed) {
-				// Timerを開始
-				keyEventTimer.cancel(); // いらない？
-				keyEventTimer.start();
-				// 終了する場合, もう一度タップするようにメッセージを出力する
-				Toast.makeText(this, "終了する場合は、もう一度バックボタンを押してください", Toast.LENGTH_SHORT).show();
-				pressed = true;
-				return false;
+			if(event.getAction() == KeyEvent.ACTION_DOWN) {
+				if(!pressed) {
+					Fun.log("!pressed");
+					// Timerを開始
+					keyEventTimer.cancel(); // いらない？
+					keyEventTimer.start();
+					// 終了する場合, もう一度タップするようにメッセージを出力する
+					Toast.makeText(this, getString(R.string.ofuton_back_key), Toast.LENGTH_SHORT).show();
+					pressed = true;
+					return false;
+				} else {
+					Fun.log("else");
+					// pressed=trueの時、通常のBackボタンで終了処理.
+					mTickerView.destroy();
+					return super.dispatchKeyEvent(event);
+				}
 			}
-			// pressed=trueの時、通常のBackボタンで終了処理.
-			return super.dispatchKeyEvent(event);
 		}
 		// Backボタンに関わらないボタンが押された場合は、通常処理.
 		return super.dispatchKeyEvent(event);
 	}
 
+	@Override
+	protected void onUserLeaveHint() {
+		super.onUserLeaveHint();
+		Fun.log("onUserLeaveHint");
+		mTickerView.destroy();
+		isPaused = true;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Fun.log("onResume");
+		if(isPaused) {
+			if(mBook.mRecognized) {
+				mTickerView.setImage(null);
+			}
+			isPaused = false;
+		}
+
+	}
+
+	@Override
+	public void onRecognizeFinished(int recognizingPage) {
+		Fun.log("onRecognizeFinished");
+		changeState(StateNormal.getInstance());
+//		なぜかmBook.getCurPage()がNullPointerExceptionになる
+//		Fun.log(mBook.getCurPage());
+//		if(recognizingPage == mBook.getCurPage()) {
+			new SimpleTimer(this).start(100, "onRecognizeFinished");
+//		}
+	}
+
+
+
+	/*
+	 * http://wada811.blogspot.com/2013/08/home-button-pressing-detection-in-android.html
+	 */
+	//	private class HomeButtonReceiver extends BroadcastReceiver {
+	//		@Override
+	//		public void onReceive(Context context, Intent intent){
+	//			Toast.makeText(getApplicationContext(), "ホームボタンが押されました", Toast.LENGTH_LONG).show();
+	//			mTickerView.destroy();
+	//			finish();
+	//		}
+	//	}
+	//
+	//	@Override
+	//	public void onPause(){
+	//		super.onPause();
+	//		unregisterReceiver(mHomeButtonReceiver);
+	//	}
+
+
 }
+
+

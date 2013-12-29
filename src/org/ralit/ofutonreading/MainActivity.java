@@ -2,6 +2,10 @@ package org.ralit.ofutonreading;
 
 import java.io.File;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +15,18 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements FileClickListener {
+public class MainActivity extends Activity implements FileClickListener, AnimatorListener {
 
 	private boolean isLaunch = true;
 	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
 	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
 	private FrameLayout frameLayout;
+	private SplashView splashView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,15 +48,16 @@ public class MainActivity extends Activity implements FileClickListener {
 	    Log.d("test", "yDpi=" + metrics.ydpi);  
 
 //		if(isLaunch) {
-//			SplashView splashView = new SplashView(this);
+//			splashView = new SplashView(this);
 //			frameLayout.addView(splashView);
 //
 //			AnimatorSet set = new AnimatorSet();
 //			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
 //			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
-//			animator.setDuration(1500);
+//			animator.setDuration(2000);
 //			animator2.setDuration(500);
 //			set.playSequentially(animator, animator2);
+//			set.addListener(this);
 //			set.start();
 //		}
 		
@@ -113,7 +121,7 @@ public class MainActivity extends Activity implements FileClickListener {
 				keyEventTimer.cancel(); // いらない？
 				keyEventTimer.start();
 				// 終了する場合, もう一度タップするようにメッセージを出力する
-				Toast.makeText(this, "終了する場合は、もう一度バックボタンを押してください", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, getString(R.string.ofuton_back_key), Toast.LENGTH_SHORT).show();
 				pressed = true;
 				return false;
 			}
@@ -122,5 +130,29 @@ public class MainActivity extends Activity implements FileClickListener {
 		}
 		// Backボタンに関わらないボタンが押された場合は、通常処理.
 		return super.dispatchKeyEvent(event);
+	}
+
+	@Override
+	public void onAnimationCancel(Animator animation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAnimationEnd(Animator animation) {
+		ViewGroup parent = (ViewGroup)splashView.getParent();
+		parent.removeView(splashView);
+	}
+
+	@Override
+	public void onAnimationRepeat(Animator animation) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onAnimationStart(Animator animation) {
+		// TODO Auto-generated method stub
+		
 	}
 }
