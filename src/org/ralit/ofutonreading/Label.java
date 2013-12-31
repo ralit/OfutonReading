@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Time;
+import java.util.ArrayList;
 import java.util.Random;
 
 import android.graphics.Bitmap;
@@ -39,14 +41,23 @@ public class Label extends Thread {
 	@Override
 	public void run() {
 		super.run();
+		Fun.log("Labeling start.");
+		Fun.log("scan");
 		scan();
+		Fun.log("deleteDuplicate");
+		deleteDuplicate();
+		Fun.log("pack");
+		int count = pack();
+		Fun.log("saveLabeledImage");
+		saveLabeledImage(count);
+		Fun.log("Labeling finished.");
 	}
 
 	public void runOnMainThread() {
 		scan();
 	}
 
-	private void scan() {
+	private int scan() {
 		int count = 0; 
 		for (int y = 0; y < h; y++) {
 			for (int x = 0; x < w; x++) {
@@ -66,26 +77,19 @@ public class Label extends Thread {
 				}
 			}
 		}
-		
-//		StringBuffer tmp = new StringBuffer();
-//		for (int y = 0; y < h; y++) {
-//			for (int x = 0; x < w; x++) {
-//				tmp.append(label[x + y*w]);
-//			}
-//			tmp.append("\n");
-//		}
-////		Fun.log(tmp);
-//		Fun.save(tmp.toString(), Fun.DIR + "test/label.txt", "test");
-//		
+		return count;
+	}
+
+	private void saveLabeledImage(int count) {
 		int[] colorMap = new int[count + 1];
 		Random r = new Random();
 		colorMap[0] = Color.argb(255, 255, 255, 255);
-		for(int i = 1; i < count + 1; i++) {
+		for (int i = 1; i < count + 1; i++) {
 			colorMap[i] = Color.argb(255, r.nextInt(256), r.nextInt(256), r.nextInt(256));
 		}
 		int testPixels[] = new int[w*h];
-		for(int y = 0; y < h; y++) {
-			for(int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
 				testPixels[x + y*w] = colorMap[label[x + y*w]];
 			}
 		}
@@ -99,7 +103,19 @@ public class Label extends Thread {
 			e.printStackTrace();
 		}
 	}
-
+	
+	private void saveLabelAsText() {
+		StringBuffer tmp = new StringBuffer();
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				tmp.append(label[x + y*w]);
+			}
+			tmp.append("\n");
+		}
+//		Fun.log(tmp);
+		Fun.save(tmp.toString(), Fun.DIR + "test/label.txt", "test");
+	}
+	
 	private int getMax4Neighbors(int x, int y) {
 		int max = 0;
 		if (y != 0 && label[x + w*(y-1)] > max) { max = label[x + w*(y-1)]; }	// 上
@@ -122,8 +138,41 @@ public class Label extends Thread {
 		return max;
 	}
 	
+	private void modifyLabel(int labelBefore, int labelAfter) {
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				if (label[x + y*w] == labelBefore) {
+					label[x + y*w] = labelAfter;
+				}
+			}
+		}
+	}
+	
 	private void deleteDuplicate() {
-		
+//		ArrayList<Integer> doneList = new ArrayList<Integer>();
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				if (label[x + y*w] != 0/* && !doneList.contains(label[x + y*w])*/) {
+					int maxLabel = 0;
+					if ((maxLabel = getMax8Neighbors(x, y)) > label[x + y*w]) {
+//						doneList.add(label[x + y*w]);
+						modifyLabel(maxLabel, label[x + y*w]);
+					}
+				}
+			}
+		}
+	}
+	
+	private int pack() {
+		int new_count = 0;
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				if (label[x + y*w] > new_count) {
+					new_count++;
+				}
+			}
+		}
+		return new_count;
 	}
 
 }
