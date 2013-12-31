@@ -8,6 +8,9 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.DisplayMetrics;
@@ -46,6 +49,17 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	    Log.d("test", "heightPixels=" + metrics.heightPixels);  
 	    Log.d("test", "xDpi=" + metrics.xdpi);  
 	    Log.d("test", "yDpi=" + metrics.ydpi);  
+	    
+	    
+	    new Label(BitmapFactory.decodeResource(getResources(), R.drawable.splash), new Foreground() {
+			@Override
+			public boolean evaluate(int pixel) {
+				if(Color.red(pixel) == 255 && Color.green(pixel) == 255 && Color.blue(pixel) == 255) {
+					return false;
+				}
+				return true;
+			}
+		}).start();
 
 //		if(isLaunch) {
 //			splashView = new SplashView(this);
