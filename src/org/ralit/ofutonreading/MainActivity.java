@@ -61,16 +61,16 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 //			}
 //		}).start();
 		
-		new Line(BitmapFactory.decodeResource(getResources(), R.drawable.reportjpeg), new Foreground() { // この書き方だと勝手にスケールされる
-			@Override
-			public boolean evaluate(int pixel) {
-//				if(Color.red(pixel) > 200 && Color.green(pixel) > 200 && (pixel&0xff) > 200) {
-				if((pixel&0xff) > 200) {
-					return false;
-				}
-				return true;
-			}
-		});
+//		new Line(BitmapFactory.decodeResource(getResources(), R.drawable.reportjpeg), new Foreground() { // この書き方だと勝手にスケールされる
+//			@Override
+//			public boolean evaluate(int pixel) {
+////				if(Color.red(pixel) > 200 && Color.green(pixel) > 200 && (pixel&0xff) > 200) {
+//				if((pixel&0xff) > 200) {
+//					return false;
+//				}
+//				return true;
+//			}
+//		}).start();
 
 		//		if(isLaunch) {
 		//			splashView = new SplashView(this);

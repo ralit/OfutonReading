@@ -42,7 +42,8 @@ public class BookManager {
 	boolean mRecognized = false;
 
 	//	private Docomo docomo;
-	private DocomoOld docomo;
+//	private DocomoOld docomo;
+	private Line line;
 	
 	boolean done = false;
 	private ZIP zip;
@@ -321,33 +322,71 @@ public class BookManager {
 		return mRecognized;
 	}
 
+//	public void recognize() {
+//		Fun.log("recognize()");
+//		final Bitmap bmp = getBitmap(mCurPage);
+//		//			PointF size = mPDF.getSize(mCurPage);
+//		//			size.x = size.x * 2;
+//		//			size.y = size.y * 2;
+//		//			Fun.log(String.valueOf(size.x));
+//		//			Fun.log(String.valueOf(size.y));
+//		//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
+//		//			docomo = new Docomo(bmp, mBookName);
+//		docomo = new DocomoOld(bmp);
+//		docomo.start();
+//		timer = new Timer();
+//		timer.schedule(new TimerTask() {
+//			@Override
+//			public void run() {
+//				int recognizingPage = mCurPage;
+//				mPosList = docomo.getWordList();
+//				if(mPosList == null) {
+//					Fun.log("wordListはnull");
+//				} else {
+//					timer.cancel();
+//					Fun.log("wordList取得!");
+//					// ソートとか
+//					Collections.sort(mPosList, new PointComparator());
+//					PositionImprove.deleteLongcat(mPosList);
+//					PositionImprove.deleteDuplicate(mPosList);
+////					PositionImprove.expand(bmp, mPosList);
+//					mRecognized = true;
+//					savePageLayout();
+//					mRecognizeFinishedListener.onRecognizeFinished(recognizingPage);
+////					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
+//				}
+//			}
+//		}, 0, 1000);
+//	}
+	
 	public void recognize() {
 		Fun.log("recognize()");
 		final Bitmap bmp = getBitmap(mCurPage);
-		//			PointF size = mPDF.getSize(mCurPage);
-		//			size.x = size.x * 2;
-		//			size.y = size.y * 2;
-		//			Fun.log(String.valueOf(size.x));
-		//			Fun.log(String.valueOf(size.y));
-		//			Bitmap bmp = mPDF.getBitmap(mCurPage, size);
-		//			docomo = new Docomo(bmp, mBookName);
-		docomo = new DocomoOld(bmp);
-		docomo.start();
+		line = new Line(bmp, new Foreground() { // この書き方だと勝手にスケールされる
+			@Override
+			public boolean evaluate(int pixel) {
+				if((pixel&0xff) > 200) {
+					return false;
+				}
+				return true;
+			}
+		});
+		line.start();
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				int recognizingPage = mCurPage;
-				mPosList = docomo.getWordList();
+				mPosList = line.getRectList();
 				if(mPosList == null) {
 					Fun.log("wordListはnull");
 				} else {
 					timer.cancel();
 					Fun.log("wordList取得!");
 					// ソートとか
-					Collections.sort(mPosList, new PointComparator());
-					PositionImprove.deleteLongcat(mPosList);
-					PositionImprove.deleteDuplicate(mPosList);
+//					Collections.sort(mPosList, new PointComparator());
+//					PositionImprove.deleteLongcat(mPosList);
+//					PositionImprove.deleteDuplicate(mPosList);
 //					PositionImprove.expand(bmp, mPosList);
 					mRecognized = true;
 					savePageLayout();

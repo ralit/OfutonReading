@@ -7,9 +7,8 @@ import java.util.ArrayList;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Color;
-import android.graphics.Rect;
 
-public class Line {
+public class Line extends Thread{
 
 	private int[] pixels;
 	private int w;
@@ -17,14 +16,23 @@ public class Line {
 	private Foreground isLine;
 	private int[] numLine;
 	ArrayList<Word> rectList = new ArrayList<Word>();
+	private Bitmap bmp;
+	private boolean isEnded = false;
 	
-	public Line(Bitmap bmp, Foreground _isLine) {
+	public Line(Bitmap _bmp, Foreground _isLine) {
+		bmp = _bmp;
 		isLine = _isLine;
 		w = bmp.getWidth();
 		h = bmp.getHeight();
 		pixels = new int[w*h];
 		bmp.getPixels(pixels, 0, w, 0, 0, w, h);
-		
+	}
+
+	
+	
+	@Override
+	public void run() {
+		super.run();
 		countBlackInLine();
 		
 //		rgbHistogram();
@@ -33,9 +41,19 @@ public class Line {
 		
 		createRect1();
 		
+		cutWhiteInLine();
+		
+		isEnded = true;
 	}
 
-	
+	public ArrayList<Word> getRectList() {
+		if (isEnded) {
+			return rectList;
+		} else {
+			return null;
+		}
+	}
+
 	private void countBlackInLine() {
 		numLine = new int[h];
 		for (int y = 0; y < h; y++) {
@@ -70,15 +88,17 @@ public class Line {
 		for(Word rect : rectList) {
 			Fun.log(rect.getTop() + "〜" + rect.getBottom());
 		}
+		
+//		Fun.paintPosition(bmp, rectList, "test", 0);
 	}
 	
 	private void cutWhiteInLine() {
 		for(Word rect : rectList) {
-			int left = 0;
+			int left = w-1;
 			for (int y = rect.getTop(); y < rect.getBottom(); y++) {
 				for (int x = 0; x < w; x++) {
 					if (isLine.evaluate(pixels[x + y*w])) {
-						if (left < x) {
+						if (x < left) {
 							left = x;
 						}
 						break;
@@ -89,11 +109,11 @@ public class Line {
 		}
 		
 		for(Word rect : rectList) {
-			int right = w-1;
+			int right = 0;
 			for (int y = rect.getTop(); y < rect.getBottom(); y++) {
 				for (int x = w-1; 0 < x; x--) {
 					if (isLine.evaluate(pixels[x + y*w])) {
-						if (x < right) {
+						if (right < x) {
 							right = x;
 						}
 						break;
@@ -103,6 +123,7 @@ public class Line {
 			rect.setRight(right);
 		}
 		
+		Fun.paintPosition(bmp, rectList, "test", 0);
 		
 	}
 	
