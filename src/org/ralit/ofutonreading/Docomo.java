@@ -39,33 +39,33 @@ class Docomo extends Thread {
 		bookName = _bookName;
 	}
 
-	private HttpResponse requestJobID() {
-		try {
-			// HTTPClientはどっちかを使う
-			// 1. org.apache.http.impl.client.DefaultHttpClient
-			// 2. android.net.http.AndroidHttpClient
-			DefaultHttpClient client = new DefaultHttpClient(); // (1) こっちも動きました
-			//			AndroidHttpClient client = AndroidHttpClient.newInstance("Android UserAgent"); // (2)
-			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene?APIKEY=" + ApiKey.getApiKey());
-			// これを知らなかった。MultipartのPOSTをするときはこのクラスを使おう。
-			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			//			FileBody fileBody = new FileBody(new File(filePath), "image/jpeg");
-			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-			bmp.compress(CompressFormat.JPEG, 80, outStream);
-			ByteArrayBody byteArrayBody = new ByteArrayBody(outStream.toByteArray(), "OfutonReading.jpg");
-			//			multipartEntity.addPart("image", fileBody);
-			multipartEntity.addPart("image", byteArrayBody);
-			post.setEntity(multipartEntity);
-			// 通信開始
-			HttpResponse response = client.execute(post);
-			return response;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
+//	private HttpResponse requestJobID() {
+//		try {
+//			// HTTPClientはどっちかを使う
+//			// 1. org.apache.http.impl.client.DefaultHttpClient
+//			// 2. android.net.http.AndroidHttpClient
+//			DefaultHttpClient client = new DefaultHttpClient(); // (1) こっちも動きました
+//			//			AndroidHttpClient client = AndroidHttpClient.newInstance("Android UserAgent"); // (2)
+//			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene?APIKEY=" + ApiKey.getApiKey());
+//			// これを知らなかった。MultipartのPOSTをするときはこのクラスを使おう。
+//			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+//			//			FileBody fileBody = new FileBody(new File(filePath), "image/jpeg");
+//			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+//			bmp.compress(CompressFormat.JPEG, 80, outStream);
+//			ByteArrayBody byteArrayBody = new ByteArrayBody(outStream.toByteArray(), "OfutonReading.jpg");
+//			//			multipartEntity.addPart("image", fileBody);
+//			multipartEntity.addPart("image", byteArrayBody);
+//			post.setEntity(multipartEntity);
+//			// 通信開始
+//			HttpResponse response = client.execute(post);
+//			return response;
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
 
-	private HttpResponse requestJobID2() {
+	private HttpResponse requestJobID() {
 		try {
 			// HTTPClientはどっちかを使う
 			// 1. org.apache.http.impl.client.DefaultHttpClient
@@ -155,7 +155,7 @@ class Docomo extends Thread {
 	public void run() {
 		try {
 			// 画像を送ってjobIDをもらう
-			HttpResponse response = requestJobID2();
+			HttpResponse response = requestJobID();
 			// JSONパース(jobIDの取得)
 			String jobID = parseJobID(response);
 			// 認識結果取得待ち

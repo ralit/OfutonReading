@@ -29,7 +29,6 @@ class DocomoLine extends Thread {
 	private Bitmap bmp;
 	private String bookName;
 	private ArrayList<Word> mWordList;
-	private CountDownTimer keyEventTimer; // BackボタンPress時の有効タイマー
 
 	private JsonNode jsonNode;
 	private String jobID;
@@ -39,49 +38,14 @@ class DocomoLine extends Thread {
 		bookName = _bookName;
 	}
 
-	private HttpResponse requestJobID() {
-		try {
-			// HTTPClientはどっちかを使う
-			// 1. org.apache.http.impl.client.DefaultHttpClient
-			// 2. android.net.http.AndroidHttpClient
-			DefaultHttpClient client = new DefaultHttpClient(); // (1) こっちも動きました
-			//			AndroidHttpClient client = AndroidHttpClient.newInstance("Android UserAgent"); // (2)
-			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene?APIKEY=" + ApiKey.getApiKey());
-			// これを知らなかった。MultipartのPOSTをするときはこのクラスを使おう。
-			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			//			FileBody fileBody = new FileBody(new File(filePath), "image/jpeg");
-			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-			bmp.compress(CompressFormat.JPEG, 80, outStream);
-			ByteArrayBody byteArrayBody = new ByteArrayBody(outStream.toByteArray(), "OfutonReading.jpg");
-			//			multipartEntity.addPart("image", fileBody);
-			multipartEntity.addPart("image", byteArrayBody);
-			post.setEntity(multipartEntity);
-			// 通信開始
-			HttpResponse response = client.execute(post);
-			return response;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 	private HttpResponse requestJobID2() {
 		try {
-			// HTTPClientはどっちかを使う
-			// 1. org.apache.http.impl.client.DefaultHttpClient
-			// 2. android.net.http.AndroidHttpClient
-			DefaultHttpClient client = new DefaultHttpClient(); // (1) こっちも動きました
-			//			AndroidHttpClient client = AndroidHttpClient.newInstance("Android UserAgent"); // (2)
-			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene?APIKEY=" + ApiKey.getApiKey());
-			// これを知らなかった。MultipartのPOSTをするときはこのクラスを使おう。
+			DefaultHttpClient client = new DefaultHttpClient();
+			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/line?APIKEY=" + ApiKey.getApiKey());
 			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
 			Fun.cacheImageForDocomo(bmp, 80, bookName);
 			FileBody fileBody = new FileBody(new File(Fun.DIR + bookName + "/tmpImageForDocomo.jpg"), "image/jpeg");
-			//			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-			//			bmp.compress(CompressFormat.JPEG, 80, outStream);
-			//			ByteArrayBody byteArrayBody = new ByteArrayBody(outStream.toByteArray(), "OfutonReading");
 			multipartEntity.addPart("image", fileBody);
-			//			multipartEntity.addPart("OfutonReading", byteArrayBody);
 			post.setEntity(multipartEntity);
 			// 通信開始
 			HttpResponse response = client.execute(post);
