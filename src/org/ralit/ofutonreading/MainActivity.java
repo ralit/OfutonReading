@@ -30,7 +30,7 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	private boolean pressed = false; // 一度目のBackボタンが押されたかどうかを判定するフラグ
 	private FrameLayout frameLayout;
 	private SplashView splashView;
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		Fun.log("onCreate()");
@@ -39,43 +39,54 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 		setContentView(frameLayout);
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
+
+		DisplayMetrics metrics = new DisplayMetrics();  
+		getWindowManager().getDefaultDisplay().getMetrics(metrics);  
+		Log.d("test", "density=" + metrics.density);  
+		Log.d("test", "densityDpi=" + metrics.densityDpi);  
+		Log.d("test", "scaledDensity=" + metrics.scaledDensity);  
+		Log.d("test", "widthPixels=" + metrics.widthPixels);  
+		Log.d("test", "heightPixels=" + metrics.heightPixels);  
+		Log.d("test", "xDpi=" + metrics.xdpi);  
+		Log.d("test", "yDpi=" + metrics.ydpi);  
+
+
+//		new Label(BitmapFactory.decodeResource(getResources(), R.drawable.splash), new Foreground() {
+//			@Override
+//			public boolean evaluate(int pixel) {
+//				if(Color.red(pixel) == 255 && Color.green(pixel) == 255 && Color.blue(pixel) == 255) {
+//					return false;
+//				}
+//				return true;
+//			}
+//		}).start();
 		
-	    DisplayMetrics metrics = new DisplayMetrics();  
-	    getWindowManager().getDefaultDisplay().getMetrics(metrics);  
-	    Log.d("test", "density=" + metrics.density);  
-	    Log.d("test", "densityDpi=" + metrics.densityDpi);  
-	    Log.d("test", "scaledDensity=" + metrics.scaledDensity);  
-	    Log.d("test", "widthPixels=" + metrics.widthPixels);  
-	    Log.d("test", "heightPixels=" + metrics.heightPixels);  
-	    Log.d("test", "xDpi=" + metrics.xdpi);  
-	    Log.d("test", "yDpi=" + metrics.ydpi);  
-	    
-	    
-	    new Label(BitmapFactory.decodeResource(getResources(), R.drawable.splash), new Foreground() {
+		new Line(BitmapFactory.decodeResource(getResources(), R.drawable.reportjpeg), new Foreground() { // この書き方だと勝手にスケールされる
 			@Override
 			public boolean evaluate(int pixel) {
-				if(Color.red(pixel) == 255 && Color.green(pixel) == 255 && Color.blue(pixel) == 255) {
+//				if(Color.red(pixel) > 200 && Color.green(pixel) > 200 && (pixel&0xff) > 200) {
+				if((pixel&0xff) > 200) {
 					return false;
 				}
 				return true;
 			}
-		}).start();
+		});
 
-//		if(isLaunch) {
-//			splashView = new SplashView(this);
-//			frameLayout.addView(splashView);
-//
-//			AnimatorSet set = new AnimatorSet();
-//			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
-//			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
-//			animator.setDuration(2000);
-//			animator2.setDuration(500);
-//			set.playSequentially(animator, animator2);
-//			set.addListener(this);
-//			set.start();
-//		}
-		
-		
+		//		if(isLaunch) {
+		//			splashView = new SplashView(this);
+		//			frameLayout.addView(splashView);
+		//
+		//			AnimatorSet set = new AnimatorSet();
+		//			ObjectAnimator animator = ObjectAnimator.ofFloat(splashView, "alpha", 1f);
+		//			ObjectAnimator animator2 = ObjectAnimator.ofFloat(splashView, "alpha", 0f);
+		//			animator.setDuration(2000);
+		//			animator2.setDuration(500);
+		//			set.playSequentially(animator, animator2);
+		//			set.addListener(this);
+		//			set.start();
+		//		}
+
+
 		// Backキーのカウントダウン
 		keyEventTimer = new CountDownTimer(1000, 100) {
 			@Override
@@ -87,7 +98,7 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 				pressed = false;
 			}
 		};
-		
+
 		isLaunch = false;
 	}
 
@@ -149,7 +160,7 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	@Override
 	public void onAnimationCancel(Animator animation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -161,12 +172,12 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	@Override
 	public void onAnimationRepeat(Animator animation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onAnimationStart(Animator animation) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

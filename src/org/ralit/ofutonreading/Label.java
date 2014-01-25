@@ -1,16 +1,14 @@
 package org.ralit.ofutonreading;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Random;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Color;
+import android.graphics.Rect;
 
 abstract class Foreground {
 	public abstract boolean evaluate(int pixel);
@@ -24,6 +22,8 @@ public class Label extends Thread {
 	private int h;
 	private boolean done = false;
 	private Foreground isForeground;
+//	private ArrayList<Rect> rect = new ArrayList<Rect>();
+	private Rect[] rect;
 
 	public Label(Bitmap bmp, Foreground _isForeground) {
 		isForeground = _isForeground;
@@ -34,6 +34,24 @@ public class Label extends Thread {
 		bmp.getPixels(pixels, 0, w, 0, 0, w, h);
 	}
 
+	private void createRect(int count) {
+		rect = new Rect[count + 1];
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				int labelNum = label[x + y*w];
+				if (rect[labelNum] == null) {
+					Rect item = new Rect(x, y, x, y);
+					rect[labelNum] = item;
+				} else {
+					if (x < rect[labelNum].left   ) { rect[labelNum].left   = x; }
+					if (y < rect[labelNum].top    ) { rect[labelNum].top    = y; }
+					if (rect[labelNum].right  < x ) { rect[labelNum].right  = x; }
+					if (rect[labelNum].bottom < y ) { rect[labelNum].bottom = y; }
+				}
+			}
+		}
+	}
+	
 	public boolean isDone() {
 		return done;
 	}
@@ -48,8 +66,15 @@ public class Label extends Thread {
 		deleteDuplicate();
 		Fun.log("pack");
 		int count = pack();
+		Fun.log(count);
 		Fun.log("saveLabeledImage");
 		saveLabeledImage(count);
+		Fun.log("createRect");
+		createRect(count);
+		Fun.log(rect.toString());
+		for (int i = 0; i < count + 1; i++) {
+			Fun.log(rect[i]);
+		}
 		Fun.log("Labeling finished.");
 	}
 
