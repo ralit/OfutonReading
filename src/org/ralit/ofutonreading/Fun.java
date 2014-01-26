@@ -25,6 +25,7 @@ import android.graphics.Point;
 import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
+import android.widget.Toast;
 
 public class Fun {
 
@@ -39,7 +40,7 @@ public class Fun {
 			Log.i("ralit", "☆null☆");
 		}
 	}
-	
+
 	public static void log(Object object) {
 		if (object != null) {
 			Log.i("ralit", String.valueOf(object));
@@ -89,7 +90,7 @@ public class Fun {
 			return null;
 		}
 	}
-	
+
 	public static ArrayList<String> readLines(String filePath) {	
 		log("read()");
 		try {
@@ -169,7 +170,7 @@ public class Fun {
 		if(list.isEmpty()) { return null; }
 		return list;
 	}
-	
+
 	public static ArrayList<ArrayList<Integer>> matchGroupInt(String str, String regExp, boolean caseInsensitive) {
 		log("match()");
 		Pattern pattern;
@@ -230,7 +231,7 @@ public class Fun {
 			return size;
 		}
 	}
-	
+
 	public static void cacheImageForDocomo(Bitmap bmp, int compress, String bookName) {
 		File file = new File(DIR + bookName + "/tmpImageForDocomo.jpg");
 		try {
@@ -243,12 +244,12 @@ public class Fun {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void paintPosition(Bitmap bmp, ArrayList<Word> word, String bookName, int curPage) {
-//		Paint frame = new Paint();
-//		frame.setStyle(Style.STROKE);
-//		frame.setColor(Color.RED);
-//		frame.setStrokeWidth(4);
+		//		Paint frame = new Paint();
+		//		frame.setStyle(Style.STROKE);
+		//		frame.setColor(Color.RED);
+		//		frame.setStrokeWidth(4);
 		Paint number = new Paint();
 		number.setStyle(Style.FILL_AND_STROKE);
 		number.setColor(Color.RED);
@@ -267,7 +268,7 @@ public class Fun {
 			canvas.drawRect(rect, marker);
 			canvas.drawText(Integer.toString(i), word.get(i).getLeft(), word.get(i).getTop(), number);
 		}
-		
+
 		File file = new File(DIR + bookName + "/layout/" + curPage + ".jpg");
 		try {
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
@@ -279,4 +280,5 @@ public class Fun {
 			e.printStackTrace();
 		}
 	}
+
 }

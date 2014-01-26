@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.R.array;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.PointF;
@@ -48,9 +49,12 @@ public class BookManager {
 	boolean done = false;
 	private ZIP zip;
 	private Timer timer;
+	private Timer timer2;
 
 	private RecognizeFinishedListener mRecognizeFinishedListener;
 	private static final float marginRatio = 0.4f;
+	
+	DocomoLine docomoLine;
 	
 	
 	public int getCurPage() {
@@ -403,12 +407,45 @@ public class BookManager {
 			public void run() {
 				int margin = (int)((rect.bottom - rect.top) * marginRatio);
 				File dir = new File(Fun.DIR + mBookName + Fun.MARKER);
-				String attachName = dir.getAbsolutePath() + "/" + mCurPage + "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom + ".jpg";
+				final String attachName = dir.getAbsolutePath() + "/" + mCurPage + "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom + ".jpg";
 				try {
 					FileOutputStream out = new FileOutputStream(attachName);
 					Bitmap bmp = getBitmap(mCurPage);
-					Bitmap.createBitmap(bmp, Math.max(rect.left - margin, 0), Math.max(rect.top - margin, 0), Math.min(rect.right - rect.left + 2*margin, bmp.getWidth() - Math.max(rect.left - margin, 0) - 1), Math.min(rect.bottom - rect.top + 2*margin, bmp.getHeight() - Math.max(rect.top - margin, 0) - 1)).compress(CompressFormat.JPEG, 90, out);
+					Bitmap cutBitmap = Bitmap.createBitmap(bmp, Math.max(rect.left - margin, 0), Math.max(rect.top - margin, 0), Math.min(rect.right - rect.left + 2*margin, bmp.getWidth() - Math.max(rect.left - margin, 0) - 1), Math.min(rect.bottom - rect.top + 2*margin, bmp.getHeight() - Math.max(rect.top - margin, 0) - 1));
+					cutBitmap.compress(CompressFormat.JPEG, 90, out);
 					out.close();
+					
+					// 行認識
+					docomoLine = new DocomoLine(cutBitmap, "test");
+					docomoLine.start();
+					timer2 = new Timer(); // タイマーが複数呼ばれる問題あり
+					timer2.schedule(new TimerTask() {
+						@Override
+						public void run() {
+							ArrayList<Word> mojiList = docomoLine.getWordList();
+							if(mojiList == null) {
+								Fun.log("docomoLineはnull");
+							} else {
+								timer2.cancel();
+								Fun.log("docomoLine取得!");
+								File file = new File(attachName);
+								StringBuilder builder = new StringBuilder();
+//								for (Word word : mojiList) {
+//									builder.append(word.getText());
+//								}
+								for (int i = 0; i < mojiList.size(); i++) {
+									builder.append(mojiList.get(i).getText());
+									if (i != mojiList.size() - 1) {
+										builder.append(" ");
+									}
+								}
+								ArrayList<ArrayList<String>> exceptJPEG = Fun.matchGroup(file.getAbsolutePath(), "(.+)\\.jpg", false);
+								File fileForRename = new File(exceptJPEG.get(0).get(0) + "_" + builder.toString() + ".jpg");
+								file.renameTo(fileForRename);
+								
+							}
+						}
+					}, 0, 1000);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -422,7 +459,7 @@ public class BookManager {
 		File[] files = dir.listFiles();
 		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
 		for(File file : files) {
-			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+)_([0-9]+)_([0-9]+)_([0-9]+)_([0-9]+)\\.jpg", true);
+			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_.*\\.jpg", true);
 			result.add(match.get(0));
 		}
 		return result;

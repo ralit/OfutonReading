@@ -179,6 +179,7 @@ public class PageView extends ScrollView implements TimerCallbackListener{
 		for (int index = 0; index < pos.size(); index++) {
 			if(pos.get(index).get(0) == mBook.getCurPage()) {
 				Rect scaledRect = new Rect((int)(pos.get(index).get(1) * (mRW/pageW)), (int)(pos.get(index).get(2) * (mRW/pageW)), (int)(pos.get(index).get(3) * (mRW/pageW)), (int)(pos.get(index).get(4) * (mRW/pageW)));
+				Fun.log(scaledRect.toString());
 				markerCanvas.drawRect(scaledRect, marker);
 			}
 		}

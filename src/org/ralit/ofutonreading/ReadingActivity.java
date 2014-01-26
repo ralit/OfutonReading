@@ -280,6 +280,14 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 				}
 			}
 		}
+		if(event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_DOWN) {
+			state.onChangeLine(ReadingActivity.this, 0);
+			return false;
+		}
+		if(event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP) {
+			state.onChangeLine(ReadingActivity.this, 1);
+			return false;
+		}
 		// Backボタンに関わらないボタンが押された場合は、通常処理.
 		return super.dispatchKeyEvent(event);
 	}

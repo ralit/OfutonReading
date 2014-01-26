@@ -14,5 +14,6 @@
     <string name="ofuton_first_line">最初の行です</string>
     <string name="ofuton_first_page">最初のページです</string>
     <string name="ofuton_last_page">最後のページです</string>
+    <string name="ofuton_search">検索</string>
 
 </resources>

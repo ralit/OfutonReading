@@ -10,3 +10,12 @@ public class PointComparator implements Comparator<Word> {
 	}
 
 }
+
+class PointComparatorHorizontal implements Comparator<Word> {
+
+	@Override
+	public int compare(Word lhs, Word rhs) {
+		return lhs.getLeft() - rhs.getLeft();
+	}
+
+}

@@ -30,15 +30,12 @@ class DocomoLine extends Thread {
 	private String bookName;
 	private ArrayList<Word> mWordList;
 
-	private JsonNode jsonNode;
-	private String jobID;
-
 	public DocomoLine(Bitmap _bmp, String _bookName) {
 		bmp = _bmp;
 		bookName = _bookName;
 	}
 
-	private HttpResponse requestJobID2() {
+	private JsonNode requestJobID() {
 		try {
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/line?APIKEY=" + ApiKey.getApiKey());
@@ -49,37 +46,7 @@ class DocomoLine extends Thread {
 			post.setEntity(multipartEntity);
 			// 通信開始
 			HttpResponse response = client.execute(post);
-			return response;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
 
-	private String parseJobID(HttpResponse response) {
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-			StringBuilder builder = new StringBuilder();
-			String line = null;
-			while ((line = reader.readLine()) != null) {
-				builder.append(line + "\n");
-			}
-			JsonNode jsonNode = new ObjectMapper().readTree(builder.toString());
-			String jobID = jsonNode.path("job").path("@id").asText();
-			return jobID;
-		} catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private JsonNode requestResult(String jobID) {
-		try { 
-			//			AndroidHttpClient client = AndroidHttpClient.newInstance("Android UserAgent");
-			DefaultHttpClient client = new DefaultHttpClient();
-			HttpGet get = new HttpGet("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene/" + jobID + "?APIKEY=" + ApiKey.getApiKey());
-			get.setHeader("Content-Type", "application/json");
-			HttpResponse response = client.execute(get);
 			// HttpResponseのEntityデータをStringへ変換
 			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 			StringBuilder builder = new StringBuilder();
@@ -89,11 +56,29 @@ class DocomoLine extends Thread {
 			}
 			JsonNode jsonNode = new ObjectMapper().readTree(builder.toString());
 			return jsonNode;
+//			return response;
 		} catch(Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
+
+//	private String parseJobID(HttpResponse response) {
+//		try {
+//			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+//			StringBuilder builder = new StringBuilder();
+//			String line = null;
+//			while ((line = reader.readLine()) != null) {
+//				builder.append(line + "\n");
+//			}
+//			JsonNode jsonNode = new ObjectMapper().readTree(builder.toString());
+//			String jobID = jsonNode.path("job").path("@id").asText();
+//			return jobID;
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//	}
 
 	private ArrayList<Word> parseMoji(JsonNode jsonNode) {
 		JsonNode wordNode = null;
@@ -118,26 +103,30 @@ class DocomoLine extends Thread {
 
 	public void run() {
 		try {
+			JsonNode jsonNode = null;
 			// 画像を送ってjobIDをもらう
-			HttpResponse response = requestJobID2();
+			jsonNode = requestJobID();
 			// JSONパース(jobIDの取得)
-			String jobID = parseJobID(response);
+//			String jobID = parseJobID(response);
 			// 認識結果取得待ち
 			int waitingTime = 0;
-			JsonNode jsonNode = null;
+			
 			while(true) {
-				Thread.sleep(1000);
 				// 認識結果をリクエスト
-				jsonNode = requestResult(jobID);
+				//				jsonNode = requestResult(jobID);
 				String status = jsonNode.path("job").path("@status").asText();
 				if (!status.equals("process") && !status.equals("queue")) { break; }
+				Thread.sleep(1000);
 				Fun.log("status: " + status + " (" + ++waitingTime + " sec)");
 			}
 			// 認識結果が返ってきた
 			// JSONパース(文字情報)
 			ArrayList<Word> wordList = parseMoji(jsonNode);
-			Collections.sort(wordList, new PointComparator());
+			Collections.sort(wordList, new PointComparatorHorizontal());
 			mWordList = wordList;
+			for(Word word : mWordList) {
+				Fun.log(word.getText());
+			}
 		} catch (Exception e) {
 			e.getStackTrace();
 		}

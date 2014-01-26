@@ -14,5 +14,6 @@
     <string name="ofuton_first_line">first line</string>
     <string name="ofuton_first_page">first page</string>
     <string name="ofuton_last_page">last page</string>
+    <string name="ofuton_search">search</string>
 
 </resources>
