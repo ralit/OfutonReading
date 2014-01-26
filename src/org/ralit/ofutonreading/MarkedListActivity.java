@@ -27,6 +27,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Filter;
@@ -76,6 +77,7 @@ public class MarkedListActivity extends Activity implements MarkerEndListener{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		Fun.log("onCreate");
 
 		Intent intent = getIntent();
 		if (intent != null) {
@@ -168,6 +170,21 @@ public class MarkedListActivity extends Activity implements MarkerEndListener{
 					Bitmap bmp = BitmapFactory.decodeStream(fis);
 					markerTickerView.destroy();
 					markerTickerView.setImage(bmp);
+				}
+			});
+			
+			listview.setOnItemLongClickListener(new OnItemLongClickListener() {
+				@Override
+				public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+					LinearLayout item = (LinearLayout)view;
+					TextView textView = (TextView)(item.getChildAt(1));
+					ArrayList<ArrayList<Integer>> pageList =  Fun.matchGroupInt(textView.getText().toString(), "([0-9]+?)_", false);
+					int page = pageList.get(0).get(0);
+					Intent intent = new Intent();
+					intent.putExtra("page", page);
+					setResult(RESULT_OK, intent);
+					finish();
+					return false;
 				}
 			});
 		}
@@ -334,6 +351,7 @@ public class MarkedListActivity extends Activity implements MarkerEndListener{
 	//		return false;
 	//	}
 
+	// 音声認識用
 	public final void toast(String msg) {
 		Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 	}
@@ -366,18 +384,6 @@ public class MarkedListActivity extends Activity implements MarkerEndListener{
 				Filter filter = adapter.getFilter();
 				filter.filter(speakmessage);
 				toast(speakmessage);
-				//                if ( speakmessage.indexOf("ありがとう") == -1 ) {
-				//                	// ありがとう　なし
-				//                	Log.d("debug", "ありがとう　なし");
-				//                	mOverlayView.setDebugmsg("ありがとう　なし");
-				//            		Tweet tweet = new Tweet(twitter, speakmessage, sp, getApplicationContext());
-				//                } else {
-				//                	// ありがとう　あり
-				//                	Log.d("debug", "ありがとう　あり");
-				//                	mOverlayView.setDebugmsg("ありがとう　あり");
-				//                	Tweet tweet = new Tweet(twitter, speakmessage, sp, getApplicationContext());
-				//                }
-
 				// <<< 
 				buttonStart_.setEnabled(true);
 

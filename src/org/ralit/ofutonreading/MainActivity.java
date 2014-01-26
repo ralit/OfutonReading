@@ -4,22 +4,18 @@ import java.io.File;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -50,27 +46,52 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 		Log.d("test", "xDpi=" + metrics.xdpi);  
 		Log.d("test", "yDpi=" + metrics.ydpi);  
 
+		Log.d("build","BOARD:" + Build.BOARD);
+		Log.d("build","BOOTLOADER:" + Build.BOOTLOADER);    //Android 1.6未対応
+		Log.d("build","BRAND:" + Build.BRAND);
+		Log.d("build","CPU_ABI:" + Build.CPU_ABI);
+		Log.d("build","CPU_ABI2:" + Build.CPU_ABI2);        //Android 1.6未対応
+		Log.d("build","DEVICE:" + Build.DEVICE);
+		Log.d("build","DISPLAY:" + Build.DISPLAY);
+		Log.d("build","FINGERPRINT:" + Build.FINGERPRINT);
+		Log.d("build","HARDWARE:" + Build.HARDWARE);        //Android 1.6未対応
+		Log.d("build","HOST:" + Build.HOST);
+		Log.d("build","ID:" + Build.ID);
+		Log.d("build","MANUFACTURER:" + Build.MANUFACTURER);
+		Log.d("build","MODEL:" + Build.MODEL);
+		Log.d("build","PRODUCT:" + Build.PRODUCT);
+		Log.d("build","RADIO:" + Build.RADIO);              //Android 1.6未対応
+		Log.d("build","TAGS:" + Build.TAGS);
+		Log.d("build","TIME:" + Build.TIME);
+		Log.d("build","TYPE:" + Build.TYPE);
+		Log.d("build","UNKNOWN:" + Build.UNKNOWN);          //Android 1.6未対応
+		Log.d("build","USER:" + Build.USER);
+		Log.d("build","VERSION.CODENAME:" + Build.VERSION.CODENAME);
+		Log.d("build","VERSION.INCREMENTAL:" + Build.VERSION.INCREMENTAL);
+		Log.d("build","VERSION.RELEASE:" + Build.VERSION.RELEASE);
+		Log.d("build","VERSION.SDK:" + Build.VERSION.SDK);
+		Log.d("build","VERSION.SDK_INT:" + Build.VERSION.SDK_INT);
 
-//		new Label(BitmapFactory.decodeResource(getResources(), R.drawable.splash), new Foreground() {
-//			@Override
-//			public boolean evaluate(int pixel) {
-//				if(Color.red(pixel) == 255 && Color.green(pixel) == 255 && Color.blue(pixel) == 255) {
-//					return false;
-//				}
-//				return true;
-//			}
-//		}).start();
-		
-//		new Line(BitmapFactory.decodeResource(getResources(), R.drawable.reportjpeg), new Foreground() { // この書き方だと勝手にスケールされる
-//			@Override
-//			public boolean evaluate(int pixel) {
-////				if(Color.red(pixel) > 200 && Color.green(pixel) > 200 && (pixel&0xff) > 200) {
-//				if((pixel&0xff) > 200) {
-//					return false;
-//				}
-//				return true;
-//			}
-//		}).start();
+		//		new Label(BitmapFactory.decodeResource(getResources(), R.drawable.splash), new Foreground() {
+		//			@Override
+		//			public boolean evaluate(int pixel) {
+		//				if(Color.red(pixel) == 255 && Color.green(pixel) == 255 && Color.blue(pixel) == 255) {
+		//					return false;
+		//				}
+		//				return true;
+		//			}
+		//		}).start();
+
+		//		new Line(BitmapFactory.decodeResource(getResources(), R.drawable.reportjpeg), new Foreground() { // この書き方だと勝手にスケールされる
+		//			@Override
+		//			public boolean evaluate(int pixel) {
+		////				if(Color.red(pixel) > 200 && Color.green(pixel) > 200 && (pixel&0xff) > 200) {
+		//				if((pixel&0xff) > 200) {
+		//					return false;
+		//				}
+		//				return true;
+		//			}
+		//		}).start();
 
 		//		if(isLaunch) {
 		//			splashView = new SplashView(this);
@@ -141,6 +162,13 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		// Backボタン検知
 		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+			if(event.getAction() == KeyEvent.ACTION_DOWN) {
+				if(Build.MODEL.equals("M100")) {
+					File file = new File(Environment.getExternalStorageDirectory() + "/finalreport.pdf");
+					Fun.log(file.getAbsolutePath());
+					onFileClicked(file);
+				}
+			}
 			if(!pressed) {
 				// Timerを開始
 				keyEventTimer.cancel(); // いらない？

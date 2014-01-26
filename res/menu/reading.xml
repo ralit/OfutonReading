@@ -6,4 +6,9 @@
         android:showAsAction="never"
         android:title="@string/ofuton_markedlist"/>
 
+    <item
+        android:id="@+id/ofuton_command"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/ofuton_command"/>
 </menu>

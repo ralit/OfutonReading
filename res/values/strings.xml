@@ -15,5 +15,7 @@
     <string name="ofuton_first_page">first page</string>
     <string name="ofuton_last_page">last page</string>
     <string name="ofuton_search">search</string>
+    <string name="ofuton_command">voice command</string>
+    <string name="ofuton_exceeds_maxpage">exceeds max page</string>
 
 </resources>

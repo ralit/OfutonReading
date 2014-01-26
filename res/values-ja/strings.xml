@@ -15,5 +15,7 @@
     <string name="ofuton_first_page">最初のページです</string>
     <string name="ofuton_last_page">最後のページです</string>
     <string name="ofuton_search">検索</string>
+    <string name="ofuton_command">音声コマンド</string>
+    <string name="ofuton_exceeds_maxpage">ページ数を超えています</string>
 
 </resources>
