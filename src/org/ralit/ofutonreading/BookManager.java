@@ -45,6 +45,7 @@ public class BookManager {
 	//	private Docomo docomo;
 //	private DocomoOld docomo;
 	private Line line;
+	private LineOnPhoto lineOnPhoto;
 	
 	boolean done = false;
 	private ZIP zip;
@@ -373,8 +374,15 @@ public class BookManager {
 		scanOrPhoto = null;
 		// 白ピクセルの割合を取得(スキャンか写真かを判断するため)
 		
-		
-		
+		if (whiteRate > 0.1) {
+			recognizeOnScan(bmp);
+		} else {
+			// 写真の場合
+			recognizeOnPhoto(bmp);
+		}
+	}
+	
+	private void recognizeOnScan(Bitmap bmp) {
 		line = new Line(bmp, new Foreground() { // この書き方だと勝手にスケールされる
 			@Override
 			public boolean evaluate(int pixel) {
@@ -391,6 +399,34 @@ public class BookManager {
 			public void run() {
 				int recognizingPage = mCurPage;
 				mPosList = line.getRectList();
+				if(mPosList == null) {
+					Fun.log("wordListはnull");
+				} else {
+					timer.cancel();
+					Fun.log("wordList取得!");
+					// ソートとか
+//					Collections.sort(mPosList, new PointComparator());
+//					PositionImprove.deleteLongcat(mPosList);
+//					PositionImprove.deleteDuplicate(mPosList);
+//					PositionImprove.expand(bmp, mPosList);
+					mRecognized = true;
+					savePageLayout();
+					mRecognizeFinishedListener.onRecognizeFinished(recognizingPage);
+//					Fun.paintPosition(getBitmap(mCurPage), mPosList, mBookName, mCurPage);
+				}
+			}
+		}, 0, 1000);
+	}
+	
+	private void recognizeOnPhoto(Bitmap bmp) {
+		lineOnPhoto = new LineOnPhoto(bmp);
+		lineOnPhoto.start();
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				int recognizingPage = mCurPage;
+				mPosList = lineOnPhoto.getRectList();
 				if(mPosList == null) {
 					Fun.log("wordListはnull");
 				} else {
