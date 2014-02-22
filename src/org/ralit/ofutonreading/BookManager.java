@@ -374,10 +374,12 @@ public class BookManager {
 		scanOrPhoto = null;
 		// 白ピクセルの割合を取得(スキャンか写真かを判断するため)
 		
+		Fun.log("whiteRate: " + whiteRate);
 		if (whiteRate > 0.1) {
 			recognizeOnScan(bmp);
 		} else {
 			// 写真の場合
+			Fun.log("写真の場合");
 			recognizeOnPhoto(bmp);
 		}
 	}

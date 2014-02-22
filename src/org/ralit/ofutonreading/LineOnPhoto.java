@@ -24,7 +24,11 @@ public class LineOnPhoto extends Thread {
 	}
 	
 	public ArrayList<Word> getRectList() {
-		return null;
+		if (isEnded) {
+			return rectList;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -35,7 +39,10 @@ public class LineOnPhoto extends Thread {
 			int[][] binary = edge.getEdgedBinaryBitmap();
 			edge = null;
 			
+			LineDetection lineDetection = new LineDetection(w, h, bitmap, binary);
+			rectList = lineDetection.getWordList();
 			
+			isEnded = true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
