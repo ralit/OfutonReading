@@ -66,7 +66,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	//			view.setLayoutParams(params);
 	//		}
 	//	}
-	
+
 	public void destroy() {
 		if( mAnimatorList.size() > 0 ) {
 			for (ObjectAnimator anim : mAnimatorList) {
@@ -92,11 +92,16 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		Word layout = mBook.getPageLayout().get(mBook.getCurLine());
 		int mLineW = layout.getRight() - layout.getLeft();
 		int mLineH = layout.getBottom() - layout.getTop();
-		
+
 		int margin = (int)((layout.getBottom() - layout.getTop()) * marginRatio);
-		Bitmap scaledBitmap = Bitmap.createBitmap(bmp, Math.max(layout.getLeft() - margin, 0), Math.max(layout.getTop() - margin, 0), Math.min(mLineW + 2*margin, bmp.getWidth() - Math.max(layout.getLeft() - margin, 0) - 1), Math.min(mLineH + 2*margin, bmp.getHeight() - Math.max(layout.getTop() - margin, 0) - 1));
+		Bitmap scaledBitmap = Bitmap.createBitmap(
+				bmp,
+				Math.max(layout.getLeft() - margin, 0),
+				Math.max(layout.getTop() - margin, 0),
+				Math.min(mLineW + 2*margin, bmp.getWidth() - Math.max(layout.getLeft() - margin, 0) - 1),
+				Math.min(mLineH + 2*margin, bmp.getHeight() - Math.max(layout.getTop() - margin, 0) - 1));
 		ticker.setImageBitmap(scaledBitmap);
-		
+
 		mLineW = scaledBitmap.getWidth();
 		mLineH = scaledBitmap.getHeight();
 		float mTextZoom = ((float)mRH / 2f) / ((float)mLineH * ((float)mRW / (float)mLineW));
@@ -110,7 +115,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		if ( parent != null ) {
 			parent.removeView(mTickerList.getFirst());
 		}
-		
+
 		handler.post(new Runnable() {
 			@Override
 			public void run() {
@@ -138,7 +143,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		move.setInterpolator(new LinearInterpolator());
 		mBook.setCurLine(mBook.getCurLine());
 		mAnimatorList.getFirst().start();
-		
+
 	}
 
 	@Override
@@ -153,7 +158,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		mAnimatorList.pollFirst();
 		ObjectAnimator finish = ObjectAnimator.ofFloat(mTickerList.pollFirst(), "x", -mTickerWidth/2 + mRW/2, -mTickerWidth/2 - mRW/2);
 		finish.setDuration((long)(durationBase * ((2 * mRW)/mRH)));
-//		finish.setInterpolator(new LinearInterpolator());
+		//		finish.setInterpolator(new LinearInterpolator());
 		finish.start();
 		if (mBook.getPageLayout().size() - 1 < mBook.getCurLine() + 1) {
 			lineEndListener.onPageEnd();
@@ -172,13 +177,13 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 	@Override
 	public void onAnimationStart(Animator animation) {
-		
+
 	}
-	
+
 	public void nextLine() {
 		mAnimatorList.getFirst().end();
 	}
-	
+
 	public void previousLine() {
 		if(mBook.getCurLine() == 0) {
 			Toast.makeText(context, context.getString(R.string.ofuton_first_line), Toast.LENGTH_SHORT).show();

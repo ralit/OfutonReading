@@ -366,6 +366,15 @@ public class BookManager {
 	public void recognize() {
 		Fun.log("recognize()");
 		final Bitmap bmp = getBitmap(mCurPage);
+
+		// 白ピクセルの割合を取得(スキャンか写真かを判断するため)
+		ScanOrPhoto scanOrPhoto = new ScanOrPhoto(bmp);
+		double whiteRate = scanOrPhoto.getWhiteRate();
+		scanOrPhoto = null;
+		// 白ピクセルの割合を取得(スキャンか写真かを判断するため)
+		
+		
+		
 		line = new Line(bmp, new Foreground() { // この書き方だと勝手にスケールされる
 			@Override
 			public boolean evaluate(int pixel) {

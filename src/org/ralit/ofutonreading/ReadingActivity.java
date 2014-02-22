@@ -291,7 +291,9 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 			handler.post(new Runnable() {
 				@Override
 				public void run() {
-					state.onChangePage(ReadingActivity.this, Integer.valueOf(message));
+					if (Fun.match(message, "[0-9]+", false)) {
+						state.onChangePage(ReadingActivity.this, Integer.valueOf(message));
+					}
 				}
 			});
 		}
