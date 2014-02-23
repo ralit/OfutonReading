@@ -246,6 +246,7 @@ public class Fun {
 	}
 
 	public static void paintPosition(Bitmap bmp, ArrayList<Word> word, String bookName, int curPage) {
+		log("paintPosition");
 		//		Paint frame = new Paint();
 		//		frame.setStyle(Style.STROKE);
 		//		frame.setColor(Color.RED);
@@ -270,7 +271,11 @@ public class Fun {
 		}
 
 		File file = new File(DIR + bookName + "/layout/" + curPage + ".jpg");
+		File dir = new File(DIR + bookName + "/layout/");
 		try {
+			if (!dir.exists()) {
+				dir.mkdirs();
+			}
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
 			mutableBitmap.compress(CompressFormat.JPEG, 90, out);
 			out.close();

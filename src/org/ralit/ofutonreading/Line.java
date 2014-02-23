@@ -3,6 +3,7 @@ package org.ralit.ofutonreading;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -42,6 +43,10 @@ public class Line extends Thread{
 		createRect1();
 		
 		cutWhiteInLine();
+		
+		cutZeroRects();
+		
+		sortWordList(rectList);
 		
 		isEnded = true;
 	}
@@ -125,6 +130,21 @@ public class Line extends Thread{
 		
 		Fun.paintPosition(bmp, rectList, "test", 0);
 		
+	}
+	
+	private void cutZeroRects() {
+		for (int i = 0; i < rectList.size(); i++) {
+			Word rect = rectList.get(i);
+			if (rect.getRight() - rect.getLeft() == 0 || rect.getBottom() - rect.getTop() == 0) {
+				rectList.remove(i);
+				i--;
+			}
+		}
+	}
+	
+	private void sortWordList(ArrayList<Word> wordList) {
+		Collections.sort(wordList, new PointComparator());
+		Collections.sort(wordList, new PointComparatorHorizontal());
 	}
 	
 	private void rgbHistogram() {

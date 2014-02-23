@@ -2,6 +2,7 @@ package org.ralit.ofutonreading;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import android.R.string;
@@ -233,6 +234,7 @@ public class FileListView extends ViewGroup{
 	//fileList
 	private void updateFileList(String dirPath) {
 		File[] fileList = new File(dirPath).listFiles();
+		sortFileList(fileList); // 追加
 		ArrayList<String> fileNameList = new ArrayList<String>();
 		if(Fun.match(dirPath, "/.+/", false)) {
 			fileNameList.add("↑");
@@ -250,6 +252,11 @@ public class FileListView extends ViewGroup{
 		}
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext, android.R.layout.simple_list_item_1, fileNameList);
 		fileListView.setAdapter(adapter);
+	}
+	
+	// ファイルのソート
+	private void sortFileList(File[] fileList) {
+		Arrays.sort(fileList, new FileSort());
 	}
 
 	//recentList

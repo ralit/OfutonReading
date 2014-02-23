@@ -1,9 +1,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <item
+<!--     <item
         android:id="@+id/ofuton_introduction"
         android:orderInCategory="100"
         android:showAsAction="ifRoom"
-        android:title="@string/ofuton_introduction"/>
+        android:title="@string/ofuton_introduction"/> -->
 
 </menu>

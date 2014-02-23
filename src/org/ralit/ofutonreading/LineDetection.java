@@ -1,7 +1,10 @@
 package org.ralit.ofutonreading;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.ralit.ofutonreading.Rect;
 
@@ -27,13 +30,20 @@ class LineDetection {
 			final int minLineLength = 4;
 //			return deleteShortPlot(deleteOutlier(plot(deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4))), 4);
 			ArrayList<ArrayList<Rect>> list =  deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4);
-			return getWordList(list);
+			ArrayList<Word> wordList = getWordList(list);
+			sortWordList(wordList);
+			return wordList;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
+	private void sortWordList(ArrayList<Word> wordList) {
+		Collections.sort(wordList, new PointComparator());
+		Collections.sort(wordList, new PointComparatorHorizontal());
+	}
+	
 	private ArrayList<Word> getWordList(ArrayList<ArrayList<Rect>> list) {
 		ArrayList<Word> wordList = new ArrayList<Word>();
 		for (ArrayList<Rect> rects : list) {
