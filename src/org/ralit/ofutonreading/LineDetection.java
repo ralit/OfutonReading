@@ -54,8 +54,8 @@ class LineDetection {
 	}
 	
 	private void sortWordList(ArrayList<Word> wordList) {
-		Collections.sort(wordList, new PointComparator());
 		Collections.sort(wordList, new PointComparatorHorizontal());
+		Collections.sort(wordList, new PointComparator());
 		Fun.paintPosition(bmp, wordList, "test", 0);
 	}
 	

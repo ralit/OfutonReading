@@ -143,8 +143,9 @@ public class Line extends Thread{
 	}
 	
 	private void sortWordList(ArrayList<Word> wordList) {
-		Collections.sort(wordList, new PointComparator());
 		Collections.sort(wordList, new PointComparatorHorizontal());
+		Collections.sort(wordList, new PointComparator());
+	
 	}
 	
 	private void rgbHistogram() {
