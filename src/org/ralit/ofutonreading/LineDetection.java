@@ -8,6 +8,7 @@ import java.util.Collections;
 
 import org.ralit.ofutonreading.Rect;
 
+import android.graphics.Bitmap;
 import android.graphics.Point;
 
 class LineDetection {
@@ -16,12 +17,14 @@ class LineDetection {
 	private int h;
 	private int[][] gray;
 	private int[][] edged; // 2値(0xffと0x00)を想定する
+	private Bitmap bmp;
 
-	public LineDetection(int w, int h, int[][] gray, int[][] edged) {
+	public LineDetection(int w, int h, int[][] gray, int[][] edged, Bitmap bmp) {
 		this.w = w;
 		this.h = h;
 		this.gray = gray;
 		this.edged = edged;
+		this.bmp = bmp;
 	}
 
 	public ArrayList<Word> getWordList() {
@@ -31,6 +34,7 @@ class LineDetection {
 //			return deleteShortPlot(deleteOutlier(plot(deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4))), 4);
 			ArrayList<ArrayList<Rect>> list =  deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4);
 			ArrayList<Word> wordList = getWordList(list);
+			cutZeroRects(wordList);
 			sortWordList(wordList);
 			return wordList;
 		} catch (Exception e) {
@@ -39,9 +43,20 @@ class LineDetection {
 		return null;
 	}
 
+	private void cutZeroRects(ArrayList<Word> rectList) {
+		for (int i = 0; i < rectList.size(); i++) {
+			Word rect = rectList.get(i);
+			if (rect.getRight() - rect.getLeft() == 0 || rect.getBottom() - rect.getTop() == 0) {
+				rectList.remove(i);
+				i--;
+			}
+		}
+	}
+	
 	private void sortWordList(ArrayList<Word> wordList) {
 		Collections.sort(wordList, new PointComparator());
 		Collections.sort(wordList, new PointComparatorHorizontal());
+		Fun.paintPosition(bmp, wordList, "test", 0);
 	}
 	
 	private ArrayList<Word> getWordList(ArrayList<ArrayList<Rect>> list) {
@@ -51,6 +66,8 @@ class LineDetection {
 			int top = h;
 			int bottom = 0;
 			int right = 0;
+			int mojiHeightSum = 0;
+			int count = 0;
 			for (int i = 0; i < rects.size(); i++) {
 				Rect rect = rects.get(i);
 				if (i == 0) {
@@ -65,9 +82,14 @@ class LineDetection {
 				if (rect.y + rect.h > bottom) {
 					bottom = rect.y + rect.h;
 				}
+				mojiHeightSum += rect.h;
+				count++;
 			}
+			double mojiHeight = (double)mojiHeightSum / count;
+			double mojiHeightRatio = (double)(bottom - top) / mojiHeight;
 			Word word = new Word();
 			word.setPoint(left, top, right, bottom);
+			word.setHeightRatio(mojiHeightRatio);
 			wordList.add(word);
 		}
 		return wordList;

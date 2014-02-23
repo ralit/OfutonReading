@@ -55,7 +55,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private Handler handler = new Handler();
 	private GestureDetector gesture;
 
-	protected State state;
+	public State state;
 	private static final int FlingSpeed = 100;
 	private static final int FlingFromEdgePixels = 14;
 	private static final int FlingMinDistance = 80;
@@ -96,7 +96,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 				mLinearLayout.setLayoutParams(params);
 			}
 			gesture = new GestureDetector(this, gestureListener);
-			changeState(StateNormal.getInstance()); // 後で消す。
+			changeState(StateRecognize.getInstance());
 
 			//			mHomeButtonReceiver = new HomeButtonReceiver();
 			//			IntentFilter filter = new IntentFilter();
@@ -231,6 +231,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 	private final SimpleOnGestureListener gestureListener = new SimpleOnGestureListener() {
 		@Override
 		public boolean onFling(MotionEvent ev1, MotionEvent ev2, float vx, float vy) {
+			Fun.log("onRecognizeFinished(state): " + state);
 			DisplayMetrics metrics = new DisplayMetrics();  
 			getWindowManager().getDefaultDisplay().getMetrics(metrics);
 			if (ev1.getY() < mRH / 2) {
@@ -260,6 +261,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		} else if (mBook.getPageMax() < page) {
 			Toast.makeText(this, getString(R.string.ofuton_last_page), Toast.LENGTH_SHORT).show();
 		} else {
+			changeState(StateRecognize.getInstance());
+			
 			int previousPage = mBook.getCurPage();			
 			mBook.setCurPage(page);
 			mPageView.setImage(mBook.getBitmap(mBook.getCurPage()));
@@ -269,7 +272,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 
 			mTickerView.destroy();
 			if(mBook.isRecognized()) {
-				mTickerView.setImage(mPageView.getImage());
+				mTickerView.setImage(mPageView.getImage(), mBook.getMarginRatio());
 			}
 		}
 	}
@@ -284,7 +287,8 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		if (message.equals("onRecognizeFinished")) {
 			if(isWindowFocusChanged) {
 				timer.cancel();
-				mTickerView.setImage(mPageView.getImage());			
+				mTickerView.setImage(mPageView.getImage(), mBook.getMarginRatio());
+				changeState(StateNormal.getInstance());
 			}
 		} else { // もっときれいに
 			timer.cancel();
@@ -390,7 +394,7 @@ public class ReadingActivity extends Activity implements LineEndListener, Recogn
 		Fun.log("onResume");
 		if(isPaused) {
 			if(mBook.mRecognized) {
-				mTickerView.setImage(null);
+				mTickerView.setImage(null, mBook.getMarginRatio());
 			}
 			isPaused = false;
 		}

@@ -39,8 +39,11 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 	private Handler handler = new Handler();
 	private Bitmap bmp;
 	private LineEndListener lineEndListener;
-	private static final long durationBase = 530;
-	private static final float marginRatio = 0.4f;
+//	private static final long durationBase = 530;
+	private static final long durationBase = 550;
+//	private long durationMultiplied = 530;
+	private long durationMultiplied = 550;
+//	private float marginRatio = 0.4f;
 
 	public TickerView(Context context, BookManager bookManager, LineEndListener _lineEndListener, float w, float h) {
 		super(context);
@@ -81,7 +84,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		mAnimatorList = new LinkedList<ObjectAnimator>();
 	}
 
-	public void setImage(Bitmap _bmp) {
+	public void setImage(Bitmap _bmp, float marginRatio) {
 		if (_bmp != null) {
 			bmp = _bmp;
 		}
@@ -90,6 +93,13 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		mTickerList.add(ticker);
 
 		Word layout = mBook.getPageLayout().get(mBook.getCurLine());
+		// 速度調節
+		if (layout.getHeightRatio() > 0) {
+			durationMultiplied = (long)(durationBase * layout.getHeightRatio());
+		} else {
+			durationMultiplied = (long)(durationBase * 1.4);
+		}
+		// 速度調節
 		int mLineW = layout.getRight() - layout.getLeft();
 		int mLineH = layout.getBottom() - layout.getTop();
 
@@ -127,7 +137,7 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 
 
 	public void animation() {
-		mDuration = durationBase;
+		mDuration = durationMultiplied;
 
 		ObjectAnimator move = ObjectAnimator.ofFloat(mTickerList.getFirst(), "x", -mTickerWidth/2 + mRW/2);
 		mAnimatorList.add(move);
@@ -157,14 +167,14 @@ public class TickerView extends FrameLayout implements AnimatorListener {
 		Fun.log("onAnimationEnd");
 		mAnimatorList.pollFirst();
 		ObjectAnimator finish = ObjectAnimator.ofFloat(mTickerList.pollFirst(), "x", -mTickerWidth/2 + mRW/2, -mTickerWidth/2 - mRW/2);
-		finish.setDuration((long)(durationBase * ((2 * mRW)/mRH)));
+		finish.setDuration((long)(durationMultiplied * ((2 * mRW)/mRH)));
 		//		finish.setInterpolator(new LinearInterpolator());
 		finish.start();
 		if (mBook.getPageLayout().size() - 1 < mBook.getCurLine() + 1) {
 			lineEndListener.onPageEnd();
 		} else {
 			mBook.setCurLine(mBook.getCurLine() + 1);
-			setImage(null);
+			setImage(null, mBook.getMarginRatio());
 			lineEndListener.onLineEnd();
 		}
 	}

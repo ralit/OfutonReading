@@ -1,6 +1,7 @@
 package org.ralit.ofutonreading;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import android.content.Context;
@@ -131,7 +132,8 @@ public class PageView extends ScrollView implements TimerCallbackListener{
 		float realy1 = (pageW / mRW) * (ev1.getY() - (mRH/2) - (screen.y - mRH) + getScrollY());
 		float realx2 = ev2.getX() * (pageW / mRW);
 		float realy2 = (pageW / mRW) * (ev2.getY() - (mRH/2) - (screen.y - mRH) + getScrollY());
-		Fun.log("(" + realx1 + ", " + realy1 + ") → (" + realx2 + ", " + realy2 + ")");
+		Fun.log("mark(disp): (" + ev1.getX() + ", " + ev1.getY() + ") → (" + ev2.getX() + ", " + ev2.getY() + ")");
+		Fun.log("mark(real): (" + realx1 + ", " + realy1 + ") → (" + realx2 + ", " + realy2 + ")");
 		Paint marker = new Paint();
 		marker.setStyle(Style.FILL_AND_STROKE);
 		marker.setColor(Color.YELLOW);
@@ -139,8 +141,10 @@ public class PageView extends ScrollView implements TimerCallbackListener{
 		marker.setAlpha(64);
 
 		ArrayList<Word> layout = mBook.getPageLayout();
+		Collections.sort(layout, new PointComparator());
 		Rect rect = null;
 		for (int i = 1; i < layout.size() - 1; i++) {
+			Fun.log("mark: " + layout.get(i).getTop());
 			Word prev = layout.get(i-1);
 			Word now = layout.get(i);
 			Word next = layout.get(i+1);
@@ -149,14 +153,20 @@ public class PageView extends ScrollView implements TimerCallbackListener{
 			int nextMid = (next.getBottom() + next.getTop()) / 2;
 			int mid1 = (nowMid + prevMid) / 2;
 			int mid2 = (nextMid + nowMid) / 2;
-			if(realy1 <= mid1) {
-				rect = new Rect((int)realx1, prev.getTop(), (int)realx2, prev.getBottom());
-				break;
-			} else if(realy1 <= mid2) {
-				rect = new Rect((int)realx1, now.getTop(), (int)realx2, now.getBottom());
-				break;
-			} else {
-				rect = new Rect((int)realx1, next.getTop(), (int)realx2, next.getBottom());
+			if(prevMid <= realy1 && realy1 <= nextMid) {
+				if(realy1 <= mid1) {
+					rect = new Rect((int)realx1, prev.getTop(), (int)realx2, prev.getBottom());
+					Fun.log("mark1");
+					break;
+				} else if(realy1 <= mid2) {
+					rect = new Rect((int)realx1, now.getTop(), (int)realx2, now.getBottom());
+					Fun.log("mark2");
+					break;
+				} else {
+					rect = new Rect((int)realx1, next.getTop(), (int)realx2, next.getBottom());
+					Fun.log("mark3");
+					break;
+				}
 			}
 		}
 
@@ -178,8 +188,9 @@ public class PageView extends ScrollView implements TimerCallbackListener{
 		marker.setAlpha(64);
 		for (int index = 0; index < pos.size(); index++) {
 			if(pos.get(index).get(0) == mBook.getCurPage()) {
+				Fun.log("setmark: " + pos.get(index).get(1) + ", " + pos.get(index).get(2) + ", " + pos.get(index).get(3) + ", " + pos.get(index).get(4));
 				Rect scaledRect = new Rect((int)(pos.get(index).get(1) * (mRW/pageW)), (int)(pos.get(index).get(2) * (mRW/pageW)), (int)(pos.get(index).get(3) * (mRW/pageW)), (int)(pos.get(index).get(4) * (mRW/pageW)));
-				Fun.log(scaledRect.toString());
+				Fun.log("setmark: " + scaledRect.toString());
 				markerCanvas.drawRect(scaledRect, marker);
 			}
 		}

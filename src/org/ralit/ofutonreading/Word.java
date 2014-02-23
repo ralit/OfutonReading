@@ -8,6 +8,11 @@ class Word {
 	private int bottom;
 	private String text;
 	private int score;
+	private double heightRatio = -1;
+	
+	public void setHeightRatio(double heightRatio) {
+		this.heightRatio = heightRatio;
+	}
 	
 	public void setPoint(int left, int top, int right, int bottom) {
 		this.left = left;
@@ -30,6 +35,10 @@ class Word {
 	
 	public void setBottom(int bottom) {
 		this.bottom = bottom;
+	}
+	
+	public double getHeightRatio() {
+		return heightRatio;
 	}
 	
 	public int getLeft() {

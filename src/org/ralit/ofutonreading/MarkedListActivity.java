@@ -562,7 +562,7 @@ class ImageItem {
 	}
 	@Override
 	public String toString() {
-		return Fun.matchGroup(fileName_, "[0-9]+?_[0-9]+?_[0-9]+?_[0-9]+?_[0-9]+?_(.+)\\.jpg", true).get(0).get(0);
+		return Fun.matchGroup(fileName_, "[0-9]+?_[0-9]+?_[0-9]+?_[0-9]+?_[0-9]+?_?(.+)?\\.jpg", true).get(0).get(0);
 	}
 
 }

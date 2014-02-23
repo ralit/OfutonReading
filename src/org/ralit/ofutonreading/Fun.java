@@ -232,8 +232,12 @@ public class Fun {
 		}
 	}
 
-	public static void cacheImageForDocomo(Bitmap bmp, int compress, String bookName) {
-		File file = new File(DIR + bookName + "/tmpImageForDocomo.jpg");
+	public static void cacheImageForDocomo(Bitmap bmp, int compress, String bookName, String attachName) {
+		File file = new File(DIR + bookName + "/" + attachName);
+		File dir = new File(DIR + bookName + "/");
+		if (!dir.exists()) {
+			dir.mkdir();
+		}
 		try {
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
 			bmp.compress(CompressFormat.JPEG, compress, out);

@@ -29,10 +29,13 @@ class DocomoLine extends Thread {
 	private Bitmap bmp;
 	private String bookName;
 	private ArrayList<Word> mWordList;
+	private String attachName;
+	private File tmpFile;
 
-	public DocomoLine(Bitmap _bmp, String _bookName) {
+	public DocomoLine(Bitmap _bmp, String _bookName, String _attachName) {
 		bmp = _bmp;
 		bookName = _bookName;
+		attachName = _attachName;
 	}
 
 	private JsonNode requestJobID() {
@@ -40,8 +43,9 @@ class DocomoLine extends Thread {
 			DefaultHttpClient client = new DefaultHttpClient();
 			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/line?APIKEY=" + ApiKey.getApiKey());
 			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			Fun.cacheImageForDocomo(bmp, 80, bookName);
-			FileBody fileBody = new FileBody(new File(Fun.DIR + bookName + "/tmpImageForDocomo.jpg"), "image/jpeg");
+			Fun.cacheImageForDocomo(bmp, 80, bookName, attachName);
+			tmpFile = new File(Fun.DIR + bookName + "/" + attachName);
+			FileBody fileBody = new FileBody(tmpFile, "image/jpeg");
 			multipartEntity.addPart("image", fileBody);
 			post.setEntity(multipartEntity);
 			// 通信開始
@@ -127,6 +131,7 @@ class DocomoLine extends Thread {
 			for(Word word : mWordList) {
 				Fun.log(word.getText());
 			}
+			tmpFile.delete();
 		} catch (Exception e) {
 			e.getStackTrace();
 		}

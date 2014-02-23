@@ -76,4 +76,11 @@ public class StateNormal implements State{
 		
 	}
 
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "StateNormal";
+	}
+
+	
 }

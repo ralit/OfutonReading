@@ -53,10 +53,13 @@ public class BookManager {
 	private Timer timer2;
 
 	private RecognizeFinishedListener mRecognizeFinishedListener;
-	private static final float marginRatio = 0.4f;
+	private float marginRatio = 0.4f;
 	
 	DocomoLine docomoLine;
 	
+	public float getMarginRatio() {
+		return marginRatio;
+	}
 	
 	public int getCurPage() {
 		return mCurPage;
@@ -377,10 +380,12 @@ public class BookManager {
 		Fun.log("whiteRate: " + whiteRate);
 		if (whiteRate > 0.1) {
 			recognizeOnScan(bmp);
+			marginRatio = 0.4f;
 		} else {
 			// 写真の場合
 			Fun.log("写真の場合");
 			recognizeOnPhoto(bmp);
+			marginRatio = 0.1f;
 		}
 	}
 	
@@ -463,7 +468,7 @@ public class BookManager {
 					out.close();
 					
 					// 行認識
-					docomoLine = new DocomoLine(cutBitmap, "test");
+					docomoLine = new DocomoLine(cutBitmap, "tmp", mCurPage + "_" + rect.left + "_" + rect.top + "_" + rect.right + "_" + rect.bottom + ".jpg");
 					docomoLine.start();
 					timer2 = new Timer(); // タイマーが複数呼ばれる問題あり
 					timer2.schedule(new TimerTask() {
@@ -506,7 +511,8 @@ public class BookManager {
 		File[] files = dir.listFiles();
 		ArrayList<ArrayList<Integer>> result = new ArrayList<ArrayList<Integer>>();
 		for(File file : files) {
-			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_.*\\.jpg", true);
+//			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_?.*\\.jpg", true);
+			ArrayList<ArrayList<Integer>> match = Fun.matchGroupInt(file.getName(), "([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_([0-9]+?)_?[^0-9]*\\.jpg", true);
 			result.add(match.get(0));
 		}
 		return result;

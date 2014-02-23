@@ -33,10 +33,13 @@ class Docomo extends Thread {
 
 	private JsonNode jsonNode;
 	private String jobID;
+	private String attachName;
+	private File tmpFile;
 
-	public Docomo(Bitmap _bmp, String _bookName) {
+	public Docomo(Bitmap _bmp, String _bookName, String _attachName) {
 		bmp = _bmp;
 		bookName = _bookName;
+		attachName = _attachName;
 	}
 
 //	private HttpResponse requestJobID() {
@@ -75,8 +78,9 @@ class Docomo extends Thread {
 			HttpPost post = new HttpPost("https://api.apigw.smt.docomo.ne.jp/characterRecognition/v1/scene?APIKEY=" + ApiKey.getApiKey());
 			// これを知らなかった。MultipartのPOSTをするときはこのクラスを使おう。
 			MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			Fun.cacheImageForDocomo(bmp, 80, bookName);
-			FileBody fileBody = new FileBody(new File(Fun.DIR + bookName + "/tmpImageForDocomo.jpg"), "image/jpeg");
+			Fun.cacheImageForDocomo(bmp, 80, bookName, attachName);
+			tmpFile = new File(Fun.DIR + bookName + "/" + attachName);
+			FileBody fileBody = new FileBody(tmpFile, "image/jpeg");
 			//			ByteArrayOutputStream outStream = new ByteArrayOutputStream();
 			//			bmp.compress(CompressFormat.JPEG, 80, outStream);
 			//			ByteArrayBody byteArrayBody = new ByteArrayBody(outStream.toByteArray(), "OfutonReading");
@@ -85,6 +89,7 @@ class Docomo extends Thread {
 			post.setEntity(multipartEntity);
 			// 通信開始
 			HttpResponse response = client.execute(post);
+			tmpFile.delete();
 			return response;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -174,6 +179,7 @@ class Docomo extends Thread {
 			ArrayList<Word> wordList = parseMoji(jsonNode);
 			Collections.sort(wordList, new PointComparator());
 			mWordList = wordList;
+			tmpFile.delete();
 		} catch (Exception e) {
 			e.getStackTrace();
 		}
