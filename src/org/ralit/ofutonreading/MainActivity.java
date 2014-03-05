@@ -31,6 +31,7 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 	protected void onCreate(Bundle savedInstanceState) {
 		Fun.log("onCreate()");
 		super.onCreate(savedInstanceState);
+		Fun.log("getRequestedOrientation: " + getRequestedOrientation());
 		frameLayout = new FrameLayout(this);
 		setContentView(frameLayout);
 		FileListView fileListView = new FileListView(this, this);

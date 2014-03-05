@@ -380,6 +380,7 @@ public class BookManager {
 		Fun.log("whiteRate: " + whiteRate);
 		if (whiteRate > 0.1) {
 			recognizeOnScan(bmp);
+//			recognizeOnPhoto(bmp);
 			marginRatio = 0.4f;
 		} else {
 			// 写真の場合
