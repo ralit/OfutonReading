@@ -38,13 +38,13 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
 
-		try {
-			ZIP.addZip(Fun.getExternalStoragePath() + "/ESFTP/RaspberryPi.zip", Fun.getExternalStoragePath() + "/ESFTP/speech.png");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			Fun.log("addZipError");
-			e.printStackTrace();
-		}
+//		try {
+//			ZIP.addZip(Fun.getExternalStoragePath() + "/ESFTP/RaspberryPi.zip", Fun.getExternalStoragePath() + "/ESFTP/speech.png");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			Fun.log("addZipError");
+//			e.printStackTrace();
+//		}
 		
 		DisplayMetrics metrics = new DisplayMetrics();  
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);  

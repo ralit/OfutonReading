@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.ralit.ofutonreading"
-    android:versionCode="4"
-    android:versionName="alpha-2.1" >
+    android:versionCode="5"
+    android:versionName="alpha-2.2" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -48,3 +48,12 @@
     </application>
 
 </manifest>
+
+<!-- 
+alpha-1.0(1): 初回リリース 
+alpha-1.1(2): かんたんなレイアウト認識や音声認識を追加
+alpha-2.0(3): カメラ画像のレイアウト認識
+alpha-2.1(4): バグフィックス
+alpha-2.2(5): UTF-8以外のZIPが開けない問題を一部修正
+--> 
+
