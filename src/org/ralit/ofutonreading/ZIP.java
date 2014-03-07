@@ -14,6 +14,7 @@ import java.util.Enumeration;
 
 import org.apache.tools.zip.ZipFile;
 import org.apache.tools.zip.ZipEntry;
+import org.apache.tools.zip.ZipOutputStream;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -172,5 +173,25 @@ public class ZIP {
 			e.printStackTrace();
 			return null;
 		}
+		
+	}
+	
+	
+	
+	public static void addZip(String zipFilePath, String addFilePath) throws IOException {
+		ZipFile zipFile = new ZipFile(new File(zipFilePath), "SHIFT-JIS");
+		
+		ZipOutputStream zos = new ZipOutputStream(new File(zipFilePath));
+		BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(addFilePath)));
+		String entryName = new File(addFilePath).getName();
+		zos.putNextEntry(new ZipEntry(entryName));
+		byte[] buffer = new byte[1024 * 256];
+		int len;
+		while ((len = bis.read(buffer)) != -1) { zos.write(buffer, 0, len); }
+		bis.close();
+		bis = null;
+		buffer = null;
+		zos.closeEntry();
+		zos.close();
 	}
 }

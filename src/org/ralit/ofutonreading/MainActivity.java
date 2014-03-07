@@ -1,6 +1,7 @@
 package org.ralit.ofutonreading;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -37,6 +38,14 @@ public class MainActivity extends Activity implements FileClickListener, Animato
 		FileListView fileListView = new FileListView(this, this);
 		frameLayout.addView(fileListView);
 
+		try {
+			ZIP.addZip(Fun.getExternalStoragePath() + "/ESFTP/RaspberryPi.zip", Fun.getExternalStoragePath() + "/ESFTP/speech.png");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			Fun.log("addZipError");
+			e.printStackTrace();
+		}
+		
 		DisplayMetrics metrics = new DisplayMetrics();  
 		getWindowManager().getDefaultDisplay().getMetrics(metrics);  
 		Log.d("test", "density=" + metrics.density);  
