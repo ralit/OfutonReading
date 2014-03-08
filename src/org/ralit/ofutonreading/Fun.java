@@ -32,6 +32,8 @@ public class Fun {
 	public static final String DIR = getExternalStoragePath() + "/OfutonReading/";
 	public static final String LAYOUT = "/layout/";
 	public static final String MARKER = "/marker/";
+	public static final boolean DEBUG = false;
+	public static final boolean MEMORY = true;
 
 	public static void log(String log) {
 		if (log != null) {
@@ -242,6 +244,7 @@ public class Fun {
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
 			bmp.compress(CompressFormat.JPEG, compress, out);
 			out.close();
+			if (MEMORY) { out = null; }
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -283,6 +286,9 @@ public class Fun {
 			FileOutputStream out = new FileOutputStream(file.getAbsolutePath());
 			mutableBitmap.compress(CompressFormat.JPEG, 90, out);
 			out.close();
+			if (MEMORY) { out = null; }
+			if (MEMORY) { mutableBitmap = null; }
+			if (MEMORY) { canvas = null; }
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

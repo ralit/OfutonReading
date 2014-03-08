@@ -17,6 +17,7 @@ class LineDetection {
 	private int h;
 	private int[][] gray;
 	private int[][] edged; // 2値(0xffと0x00)を想定する
+	private boolean[][] edgedBoolean;
 	private Bitmap bmp;
 
 	public LineDetection(int w, int h, int[][] gray, int[][] edged, Bitmap bmp) {
@@ -26,13 +27,22 @@ class LineDetection {
 		this.edged = edged;
 		this.bmp = bmp;
 	}
+	
+	public LineDetection(int w, int h, int[][] gray, boolean[][] edgedBoolean, Bitmap bmp) {
+		this.w = w;
+		this.h = h;
+		this.gray = gray;
+		this.edgedBoolean = edgedBoolean;
+		this.bmp = bmp;
+	}
 
 	public ArrayList<Word> getWordList() {
 		try {
 			final int DIV = 40;
 			final int minLineLength = 4;
 //			return deleteShortPlot(deleteOutlier(plot(deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4))), 4);
-			ArrayList<ArrayList<Rect>> list =  deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4);
+//			ArrayList<ArrayList<Rect>> list =  deleteShortLine(getLine(deleteLongCats(getColBlock(DIV))), 4);
+			ArrayList<ArrayList<Rect>> list =  deleteShortLine(getLine(deleteLongCats(getColBlockBoolean(DIV))), 4);
 			ArrayList<Word> wordList = getWordList(list);
 			cutZeroRects(wordList);
 			sortWordList(wordList);
@@ -56,7 +66,7 @@ class LineDetection {
 	private void sortWordList(ArrayList<Word> wordList) {
 		Collections.sort(wordList, new PointComparatorHorizontal());
 		Collections.sort(wordList, new PointComparator());
-		Fun.paintPosition(bmp, wordList, "test", 0);
+		if (Fun.DEBUG) { Fun.paintPosition(bmp, wordList, "test", 0); }
 	}
 	
 	private ArrayList<Word> getWordList(ArrayList<ArrayList<Rect>> list) {
@@ -106,6 +116,41 @@ class LineDetection {
 				boolean exist = false;
 				for(int x = i*block; x < (i+1)*block; x++){
 					if (edged[y][x] > 0) {
+						exist = true;
+						break;
+					}
+				}
+
+				if(exist) {
+					if(rect == null) {
+						rect = new Rect(i*block, y, block, 0);
+					} else {
+						rect.h = rect.h + 1;
+					}
+				} else {
+					if(rect != null) {
+						rects.add(rect);
+						rect = null;
+					}
+				}
+			}
+			cols.add(rects);
+		}
+//		writeRects(bmp, cols, testDir + "getColBlocks.jpg");
+		return cols;
+	}
+	
+	private ArrayList<ArrayList<Rect>> getColBlockBoolean(int DIV) throws IOException {
+		int block = w / DIV;
+
+		ArrayList<ArrayList<Rect>> cols = new ArrayList<ArrayList<Rect>>();
+		for(int i = 0; i < DIV; i++) {
+			ArrayList<Rect> rects = new ArrayList<Rect>();
+			Rect rect = null;
+			for(int y = 0; y < h; y++){
+				boolean exist = false;
+				for(int x = i*block; x < (i+1)*block; x++){
+					if (edgedBoolean[y][x]) {
 						exist = true;
 						break;
 					}

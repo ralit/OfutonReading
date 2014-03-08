@@ -40,7 +40,8 @@ public class LineOnPhoto extends Thread {
 			pixels = null;
 			
 			Edge edge = new Edge(w, h, bitmap);
-			int[][] binary = edge.getEdgedBinaryBitmap();
+//			int[][] binary = edge.getEdgedBinaryBitmap();
+			boolean[][] binary = edge.getEdgedBinaryBitmapBoolean();
 			edge = null;
 			
 			LineDetection lineDetection = new LineDetection(w, h, bitmap, binary, bmp);

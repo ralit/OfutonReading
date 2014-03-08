@@ -128,7 +128,7 @@ public class Line extends Thread{
 			rect.setRight(right);
 		}
 		
-		Fun.paintPosition(bmp, rectList, "test", 0);
+		if(Fun.DEBUG){Fun.paintPosition(bmp, rectList, "test", 0);}
 		
 	}
 	

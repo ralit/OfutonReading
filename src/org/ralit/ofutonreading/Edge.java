@@ -35,6 +35,24 @@ class Edge {
 		}
 	}
 	
+	public boolean[][] getEdgedBinaryBitmapBoolean() {
+		try {
+			edgeSobel();
+			final int threshold = ohtsu(getHistogram());
+			System.out.println(threshold + "threshold");
+			return thresholdBoolean(new Threshold() {
+				@Override
+				public boolean evaluate(int Y) {
+					if (threshold < Y) { return true; }
+					else { return false; }
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	// Sobelオペレータによるエッジ検出
 	private void edgeSobel() throws IOException {
 		int[][] sobelx = {
@@ -137,6 +155,23 @@ class Edge {
 		}
 		return binary;
 	}
+	
+	// 任意の評価関数を渡して2値化する(boolean)
+		private boolean[][] thresholdBoolean(Threshold threshold) throws IOException {
+			boolean[][] binary = new boolean[h][w];
+			for(int y = 0; y < h; y++){
+				for(int x = 0; x < w; x++){
+					boolean newGray;
+					if(threshold.evaluate(edged[y][x])) {
+						newGray = true;
+					} else {
+						newGray = false;
+					}
+					binary[y][x] = newGray;
+				}
+			}
+			return binary;
+		}
 }
 
 
